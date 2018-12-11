@@ -1,0 +1,4 @@
+fixtures/**
+.vscode/**
+.vscode-test/**
+.git/**

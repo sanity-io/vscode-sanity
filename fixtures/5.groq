@@ -1,0 +1,3 @@
+*[_type == $type && title in ['a', "b", 'c']] | order(_createdAt desc) [0...10] {
+  ...,
+}

@@ -1,0 +1,13 @@
+*[_type == "book" && defined(author)] [0...10] {
+  title,
+  coverImage {
+    asset->{url, mimeType},
+    crop
+  },
+
+  // Expand the author reference 
+  author->,
+
+  // Just need the title for the publisher
+  "publisher": publisher->title,
+}

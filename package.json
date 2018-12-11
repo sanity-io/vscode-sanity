@@ -1,0 +1,76 @@
+{
+  "name": "vscode-sanity",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Sanity.io",
+  "description": "Syntax highlighting for Sanity.io's GROQ query language",
+  "author": "Sanity.io <hello@sanity.io>",
+  "publisher": "sanity-io",
+  "engines": {
+    "vscode": "^1.29.0"
+  },
+  "keywords": [
+    "vscode",
+    "visual studio code",
+    "sanity",
+    "groq"
+  ],
+  "categories": [
+    "Programming Languages"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sanity-io/vscode-sanity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sanity-io/vscode-sanity/issues"
+  },
+  "homepage": "https://github.com/sanity-io/vscode-sanity/blob/master/README.md",
+  "icon": "images/icon.png",
+  "contributes": {
+    "languages": [
+      {
+        "id": "groq",
+        "aliases": [
+          "GROQ",
+          "groq"
+        ],
+        "extensions": [
+          ".groq"
+        ],
+        "configuration": "./language/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "groq",
+        "scopeName": "source.groq",
+        "path": "./grammars/groq.json"
+      },
+      {
+        "injectTo": [
+          "source.js",
+          "source.ts",
+          "source.js.jsx",
+          "source.tsx",
+          "source.vue"
+        ],
+        "scopeName": "inline.groq",
+        "path": "./grammars/groq.js.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.groq": "groq"
+        }
+      },
+      {
+        "scopeName": "markdown.groq.codeblock",
+        "path": "./grammars/groq.md.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.groq": "javascript"
+        }
+      }
+    ]
+  }
+}

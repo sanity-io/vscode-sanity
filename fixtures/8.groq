@@ -1,0 +1,22 @@
+*[_type == $type && title in ['a', "b", 'c']] | order(_createdAt desc) [0...10] {
+  ...,
+
+  author->,
+  "tags": tags[]->,
+
+  "even": index % 2 == 0,
+  'odd': index % 2 != 0,
+
+  // Only fetch news for recent movies
+  ...select(releaseDate >= $recentThreshold => {
+    "news":     *[_type == 'news' && movie._ref == ^._id],
+  }),
+
+  ...select(popularity > 20 && field == !false && rating >= 7.0 => {
+    "awards":   *[_type == 'award' && movie._ref == @._id],
+    "related":  *[_type == 'movie' && references(^._id)].title,
+    "cast":     castMembers[characterName in ['Ripley', 'Lambert']].person->{_id, name},
+    "featured": true,
+    "count":    count(*[_type == 'movie' && rating == 'R'])
+  })
+}

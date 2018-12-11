@@ -1,0 +1,28 @@
+{
+  "scopeName": "markdown.groq.codeblock",
+	"fileTypes": [],
+	"injectionSelector": "L:markup.fenced_code.block.markdown",
+	"patterns": [
+		{
+			"include": "#groq-code-block"
+		}
+	],
+	"repository": {
+		"groq-code-block": {
+			"begin": "(?<=[`~])groq(\\s+[^`~]*)?$",
+			"end": "(^|\\G)(?=\\s*[`~]{3,}\\s*$)",
+			"patterns": [
+				{
+					"begin": "(^|\\G)(\\s*)(.*)",  
+					"while": "(^|\\G)(?!\\s*([`~]{3,})\\s*$)",
+					"contentName": "meta.embedded.block.groq",
+					"patterns": [
+						{
+							"include": "source.groq"
+						}
+					]
+				}
+			]
+		}
+	}
+}
