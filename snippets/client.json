@@ -1,0 +1,16 @@
+{
+  "Client": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity client",
+    "body": [
+      "const sanityClient = require('@sanity/client')",
+      "const client = sanityClient({",
+      "projectId: '${1:your-project-id}',",
+      "dataset: '${2:production}',",
+      "token: 'sanity-auth-token', // or leave blank to be anonymous user",
+      "useCdn: true // `false` if you want to ensure fresh data",
+      "})",
+      "$0"
+    ]
+  }
+}

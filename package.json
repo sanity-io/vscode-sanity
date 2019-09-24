@@ -71,6 +71,20 @@
           "meta.embedded.block.groq": "javascript"
         }
       }
+    ],
+    "snippets": [
+      {
+        "language": "javascript",
+        "path": "./snippets/schema.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/studio.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/client.json"
+      }
     ]
   }
 }

@@ -1,0 +1,268 @@
+{
+  "Geopoint": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity geopoint",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/geopoint-type",
+      "{",
+      "  title: '${1:title}',",
+      "  name: '${2:location}',",
+      "  type: 'geopoint',",
+      "  hidden: false,",
+      "  readOnly: false,",
+      "  description: '${3:Short description to editors how the field is to be used.}',",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity geopoint schema type"
+  },
+  "Block text": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity block text",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/block-type",
+      "{",
+      "  title: '${1:title}',",
+      "  name: '${2:text}',",
+      "  type: 'array',",
+      "  of: [{type: 'block'}]",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity portable text schema type"
+  },
+  "Reference": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity reference",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/reference-type",
+      "{",
+      "  title: '${1:title}',",
+      "  name: '${2:name}',",
+      "  type: 'reference',",
+      "  weak: false,",
+      "  to: [",
+      "    {type: '${3:type}'},",
+      "  ],",
+      "  description: '${4:Which movie are we screening}'",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity reference schema type"
+  },
+  "Array": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity array",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/array-type",
+      "{",
+      "  title: '${1:title}',",
+      "  name: '${2:name}',",
+      "  type: 'array',",
+      "  of: [",
+      "    {type: '${3:type}'},",
+      "  ],",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity array schema type"
+  },
+  "Document": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity document",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/document-type",
+      "{",
+      "  title: '${1:title}',",
+      "  name: '${2:name}',",
+      "  type: 'document',",
+      "  fields: [",
+      "    ${3:// Add schema types here}",
+      "  ],",
+      "  liveEdit: false",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity document schema type"
+  },
+  "Boolean": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity boolean",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/boolean-type",
+      "{",
+      "  title: '${1:Has the movie been released?}',",
+      "  name: '${2:released}',",
+      "  type: 'boolean',",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity string schema type"
+  },
+  "String": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity string",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/string-type",
+      "{",
+      "  title: '${1:title}',",
+      "  name: '${2:name}',",
+      "  type: 'string',",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity string schema type"
+  },
+  "Text": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity text",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/text-type",
+      "{",
+      "  title: '${1:Description}',",
+      "  name: '${2:description}',",
+      "  type: 'text',",
+      "  rows: ${3:10},",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity text schema type"
+  },
+  "Number": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity number",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/number-type",
+      "{",
+      "  title: '${1:Current popularity}',",
+      "  name: '${2:popularity}',",
+      "  type: 'number',",
+      "},",
+      "$0"
+    ],
+    "description": "Sanity number schema type"
+  },
+  "Image": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity image",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/image-type",
+      "{",
+      "  title: '${1:Image}',",
+      "  name: '${2:image}',",
+      "  type: 'image',",
+      "  options: {",
+      "    hotspot: true // <-- Defaults to false",
+      "  },",
+      "  fields: [",
+      "    {",
+      "      name: '${3:caption}',",
+      "      type: 'string',",
+      "      title: '${4:Caption}',",
+      "      options: {",
+      "        isHighlighted: true // <-- make this field easily accessible",
+      "      }",
+      "    },",
+      "    {",
+      "      // Editing this field will be hidden behind an \"Edit\"-button",
+      "      name: '${4:attribution}',",
+      "      type: 'string',",
+      "      title: '${5:Attribution}',",
+      "    }",
+      "  ]",
+      "},",
+      "$0"
+    ]
+  },
+  "File": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity file",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/file-type",
+      "{",
+      "  title: '${1:Audio}',",
+      "  name: '${2:audioFile}',",
+      "  type: 'file',",
+      "  fields: [",
+      "    {",
+      "      name: '${3:description}',",
+      "      type: 'string',",
+      "      title: '${4:Description of file}'",
+      "    },",
+      "  ]",
+      "},",
+      "$0"
+    ]
+  },
+  "URL": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity url",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/url-type",
+      "{",
+      "  title: '${1:Homepage URL}',",
+      "  name: '${2:homepageURL}',",
+      "  type: 'url',",
+      "},",
+      "$0"
+    ]
+  },
+  "Datetime": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity datetime",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/datetime-type",
+      "{",
+      "  title: '${1:Event starts at}',",
+      "  name: '${2:eventStart}',",
+      "  type: 'datetime',",
+      "  options: {",
+      "    dateFormat: '${3:YYYY-MM-DD}',",
+      "    timeFormat: '${4:HH:mm}',",
+      "    timeStep: '${5:15}',",
+      "    calendarTodayLabel: '${6:today}',",
+      "  },",
+      "},",
+      "$0"
+    ]
+  },
+  "Date": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity date",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/date-type",
+      "{",
+      "  title: '${1:Birth date}',",
+      "  name: '${2:birthDate}',",
+      "  type: 'date',",
+      "  options: {",
+      "    dateFormat: '${3:YYYY-MM-DD}',",
+      "    calendarTodayLabel: '${4:today}',",
+      "  },",
+      "},",
+      "$0"
+    ]
+  },
+  "Slug": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity slug",
+    "body": [
+      "// https://www.sanity.io/docs/schema-types/slug-type",
+      "{",
+      "  title: '${1:Slug}',",
+      "  name: '${2:slug}',",
+      "  type: 'slug',",
+      "  options: {",
+      "    source: '${3:title}',",
+      "    maxLength: ${4:200}, // // will be ignored if slugify is set",
+      "    slugify: input => input",
+      "                        .toLowerCase()",
+      "                        .replace(/\\s+/g, '-')",
+      "                        .slice(0, 200),",
+      "    isUnique: proposedSlug => true,",
+      "  },",
+      "},",
+      "$0"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "Current User part": {
+    "scope": "javascript,typescript",
+    "prefix": "sanity part user",
+    "body": [
+      "import userStore from 'part:@sanity/base/user'",
+      "const userSubscription = userStore.currentUser.subscribe({",
+      "  next: evt => console.log('Current user changed'),",
+      "  error: error => console.error('Failed to get current user')",
+      "})"
+    ]
+  }
+}
