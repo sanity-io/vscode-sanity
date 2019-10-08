@@ -1,11 +1,16 @@
 {
-  "fileTypes": ["js", "jsx", "ts", "tsx", "vue"],
+  "fileTypes": [
+    "js",
+    "jsx",
+    "ts",
+    "tsx",
+    "vue"
+  ],
   "injectionSelector": "L:source -string -comment",
   "patterns": [
     {
       "contentName": "meta.embedded.block.groq",
-      "begin":
-        "\\s*+(groq|(/\\* groq \\*/))\\s*(`)",
+      "begin": "\\s*+(groq|(/\\* groq \\*/))\\s*(`)",
       "beginCaptures": {
         "1": {
           "name": "entity.name.function.tagged-template.js"
@@ -23,7 +28,11 @@
           "name": "punctuation.definition.string.template.end.js"
         }
       },
-      "patterns": [{ "include": "source.groq" }]
+      "patterns": [
+        {
+          "include": "source.groq"
+        }
+      ]
     },
     {
       "name": "taggedTemplates",
@@ -43,7 +52,11 @@
           "name": "punctuation.definition.string.template.end.js"
         }
       },
-      "patterns": [{ "include": "source.groq" }]
+      "patterns": [
+        {
+          "include": "source.groq"
+        }
+      ]
     }
   ],
   "scopeName": "inline.groq"
