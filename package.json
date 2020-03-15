@@ -53,7 +53,9 @@
           "source.ts",
           "source.js.jsx",
           "source.tsx",
-          "source.vue"
+          "source.vue",
+          "source.svelte",
+          "source.php"
         ],
         "scopeName": "inline.groq",
         "path": "./grammars/groq.js.json",
