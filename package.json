@@ -74,5 +74,21 @@
         }
       }
     ]
+  },
+  "dependencies": {
+    "typescript": "^4.0.3",
+    "vsce": "^1.81.1",
+    "vscode": "^1.1.37"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "vsce:package": "vsce package",
+    "env:source": "export $(cat .envrc | xargs)",
+    "vsce:publish": "sh publish.sh",
+    "upgrade-interactive": "npx npm-check -u"
   }
 }
