@@ -27,7 +27,17 @@
   },
   "homepage": "https://github.com/sanity-io/vscode-sanity/blob/master/README.md",
   "icon": "images/icon.png",
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "extension.executeGroq",
+        "title": "Execute GROQ query"
+      }
+    ],
     "languages": [
       {
         "id": "groq",
