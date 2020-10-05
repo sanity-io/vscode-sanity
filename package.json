@@ -86,6 +86,7 @@
     ]
   },
   "dependencies": {
+    "@sanity/client": "^1.150.7",
     "typescript": "^4.0.3",
     "vsce": "^1.81.1",
     "vscode": "^1.1.37"
