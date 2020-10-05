@@ -80,6 +80,9 @@
     "vsce": "^1.81.1",
     "vscode": "^1.1.37"
   },
+  "devDependencies": {
+    "prettier": "^2.1.2"
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
