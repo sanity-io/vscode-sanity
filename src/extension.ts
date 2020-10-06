@@ -1,6 +1,6 @@
-import fs from 'fs'
 import * as path from 'path'
 import * as vscode from 'vscode'
+import {promises as fs} from 'fs'
 import {loadConfig} from './config/findConfig'
 import {executeGroq} from './query'
 
@@ -13,12 +13,12 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage('Could not resolve sanity.json configuration file')
       return
     }
-    const file = fs.readFileSync(activeFile, 'utf8')
-    const result = await executeGroq(config.projectId, config.dataset, file)
     vscode.window.showInformationMessage(
       `Using projectId "${config.projectId}" and dataset "${config.dataset}"`
     )
-    openInUntitled(result, 'json')
+    const file = await fs.readFile(activeFile, 'utf8')
+    const result = await executeGroq(config.projectId, config.dataset, file)
+    openInUntitled(JSON.stringify(result, null, 2), 'json')
   })
 
   context.subscriptions.push(disposable)

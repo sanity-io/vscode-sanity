@@ -4,7 +4,7 @@ export async function executeGroq(projectId: string, dataset: string, groq: stri
   const client = sanityClient({
     projectId: projectId,
     dataset: dataset,
-    useCdn: true,
+    useCdn: false,
   })
   return await client.fetch(groq)
 }
