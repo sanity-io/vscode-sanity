@@ -3,14 +3,6 @@ import * as vscode from 'vscode'
 import {SourceHelper, ExtractedTemplateLiteral} from './source-helper'
 
 export class GROQCodeLensProvider implements vscode.CodeLensProvider {
-  outputChannel: vscode.OutputChannel
-  sourceHelper: SourceHelper
-
-  constructor(outputChannel: vscode.OutputChannel) {
-    this.outputChannel = outputChannel
-    this.sourceHelper = new SourceHelper(this.outputChannel)
-  }
-
   public provideCodeLenses(
     document: vscode.TextDocument,
     _token: vscode.CancellationToken
@@ -27,7 +19,7 @@ export class GROQCodeLensProvider implements vscode.CodeLensProvider {
         ),
         {
           title: `Execute Query`,
-          command: 'vscode-graphql.contentProvider',
+          command: 'extension.executeGroq',
           arguments: [literal],
         }
       )
