@@ -1,16 +1,15 @@
 import * as vscode from 'vscode'
 
-import {SourceHelper, ExtractedTemplateLiteral} from './source-helper'
+import {ExtractedTemplateLiteral, extractAllTemplateLiterals} from './source-helper'
 
 export class GROQCodeLensProvider implements vscode.CodeLensProvider {
+  constructor() {}
+
   public provideCodeLenses(
     document: vscode.TextDocument,
     _token: vscode.CancellationToken
   ): vscode.CodeLens[] {
-    const literals: ExtractedTemplateLiteral[] = this.sourceHelper.extractAllTemplateLiterals(
-      document,
-      ['groq']
-    )
+    const literals: ExtractedTemplateLiteral[] = extractAllTemplateLiterals(document, ['groq'])
     return literals.map((literal) => {
       return new vscode.CodeLens(
         new vscode.Range(

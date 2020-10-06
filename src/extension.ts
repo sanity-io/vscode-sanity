@@ -7,23 +7,27 @@ import {GroqContentProvider} from './content-provider'
 import {GROQCodeLensProvider} from './config/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
-  let outputChannel: vscode.OutputChannel = window.createOutputChannel('GROQ Language Server')
   const settings = vscode.workspace.getConfiguration('vscode-sanity')
 
   const registerCodeLens = () => {
     context.subscriptions.push(
       vscode.languages.registerCodeLensProvider(
         ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-        new GROQCodeLensProvider(outputChannel)
+        new GROQCodeLensProvider()
       )
     )
   }
 
-  if (settings.showExecCodelens) {
+  if (true || settings.showExecCodelens) {
     registerCodeLens()
   }
 
   let disposable = vscode.commands.registerCommand('extension.executeGroq', async () => {
+    const activeTextEditor = vscode.window.activeTextEditor
+    if (!activeTextEditor) {
+      vscode.window.showErrorMessage('Nothing to execute')
+      return
+    }
     const activeFile = vscode.window.activeTextEditor?.document.fileName || ''
     const activeDir = path.dirname(activeFile)
     const config = await loadConfig(activeDir)
