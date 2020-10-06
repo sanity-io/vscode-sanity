@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import {promises as fs} from 'fs'
 import {loadConfig} from './config/findConfig'
 import {executeGroq} from './query'
+import {GroqContentProvider} from './content-provider'
 
 export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand('extension.executeGroq', async () => {
@@ -18,16 +19,31 @@ export function activate(context: vscode.ExtensionContext) {
     )
     const file = await fs.readFile(activeFile, 'utf8')
     const result = await executeGroq(config.projectId, config.dataset, file)
-    openInUntitled(JSON.stringify(result, null, 2), 'json')
+    const panel = vscode.window.createWebviewPanel(
+      'executionResultsWebView',
+      'GROQ Execution Result',
+      vscode.ViewColumn.Two,
+      {}
+    )
+    const contentProvider = new GroqContentProvider(result)
+    const registration = vscode.workspace.registerTextDocumentContentProvider(
+      'groq',
+      contentProvider
+    )
+    context.subscriptions.push(registration)
+
+    const html = await contentProvider.getCurrentHTML()
+    panel.webview.html = html
+    // openInUntitled(JSON.stringify(result, null, 2), 'json')
   })
 
   context.subscriptions.push(disposable)
 }
 
-async function openInUntitled(content: string, language?: string) {
-  const document = await vscode.workspace.openTextDocument({
-    language,
-    content,
-  })
-  vscode.window.showTextDocument(document)
-}
+// async function openInUntitled(content: string, language?: string) {
+//   const document = await vscode.workspace.openTextDocument({
+//     language,
+//     content,
+//   })
+//   vscode.window.showTextDocument(document)
+// }
