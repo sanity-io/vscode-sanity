@@ -1,6 +1,5 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
-import {promises as fs} from 'fs'
 import {loadConfig} from './config/findConfig'
 import {executeGroq} from './query'
 import {GroqContentProvider} from './content-provider'
