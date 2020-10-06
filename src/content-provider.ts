@@ -30,11 +30,11 @@ export class GroqContentProvider implements vscode.TextDocumentContentProvider {
   private html: string = ''
   // pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
   private css: string = `
-.string { color: green; }
-.number { color: darkorange; }
-.boolean { color: blue; }
-.null { color: magenta; }
-.key { color: red; }
+.string { color: #16ae3c; }
+.number { color: #fc736a; }
+.boolean { color: #145eda; }
+.null { color: #a935f0; }
+.key { color: #bb5d0a; }
 `
 
   constructor(data: any) {
