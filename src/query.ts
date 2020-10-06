@@ -6,5 +6,5 @@ export async function executeGroq(projectId: string, dataset: string, groq: stri
     dataset: dataset,
     useCdn: false,
   })
-  return await client.fetch(groq)
+  return await client.fetch(groq, {}, {filterResponse: false})
 }
