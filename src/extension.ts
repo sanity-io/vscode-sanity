@@ -4,8 +4,23 @@ import {promises as fs} from 'fs'
 import {loadConfig} from './config/findConfig'
 import {executeGroq} from './query'
 import {GroqContentProvider} from './content-provider'
+import {GROQCodeLensProvider} from './config/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
+  const settings = vscode.workspace.getConfiguration('vscode-graphql')
+
+  const registerCodeLens = () => {
+    context.subscriptions.push(
+      vscode.languages.registerCodeLensProvider(
+        ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
+        new GROQCodeLensProvider(outputChannel)
+      )
+    )
+  }
+
+  if (settings.showExecCodelens) {
+    registerCodeLens()
+  }
   let disposable = vscode.commands.registerCommand('extension.executeGroq', async () => {
     const activeFile = vscode.window.activeTextEditor?.document.fileName || ''
     const activeDir = path.dirname(activeFile)
