@@ -33,10 +33,6 @@ export function activate(context: vscode.ExtensionContext) {
       return
     }
 
-    vscode.window.showInformationMessage(
-      `Using projectId "${files.config.projectId}" and dataset "${files.config.dataset}"`
-    )
-
     // FIXME: Throw error object in webview?
     let queryResult
     try {
@@ -76,10 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage(err.message)
       return
     }
-
-    vscode.window.showInformationMessage(
-      `Using projectId "${files.config.projectId}" and dataset "${files.config.dataset}"`
-    )
 
     // FIXME: Throw error object in webview?
     let result
