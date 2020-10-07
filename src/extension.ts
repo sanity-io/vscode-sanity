@@ -8,7 +8,6 @@ import {GROQCodeLensProvider} from './config/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
   const settings = vscode.workspace.getConfiguration('vscode-sanity')
-  console.log(JSON.stringify(settings, null, 2))
 
   const registerCodeLens = () => {
     context.subscriptions.push(
@@ -64,7 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable)
 
   disposable = vscode.commands.registerCommand('sanity.executeGroqWithParams', async (args) => {
-    console.log(args)
     let files
     try {
       files = await readRequiredFiles(true)
