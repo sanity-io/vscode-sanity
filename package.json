@@ -32,6 +32,16 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "vscode-sanity",
+      "properties": {
+        "vscode-sanity.codelens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable GROQ codelens."
+        }
+      }
+    },
     "commands": [
       {
         "command": "sanity.executeGroq",

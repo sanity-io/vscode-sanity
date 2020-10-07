@@ -8,6 +8,7 @@ import {GROQCodeLensProvider} from './config/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
   const settings = vscode.workspace.getConfiguration('vscode-sanity')
+  console.log(JSON.stringify(settings, null, 2))
 
   const registerCodeLens = () => {
     context.subscriptions.push(
@@ -18,12 +19,12 @@ export function activate(context: vscode.ExtensionContext) {
     )
   }
 
-  if (true || settings.showExecCodelens) {
+  if (settings.codelens) {
     registerCodeLens()
   }
 
   let resultPanel
-  let disposable = vscode.commands.registerCommand('sanity.executeGroq', async () => {
+  let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
     let files
     try {
       files = await readRequiredFiles(false)
@@ -42,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
       const {ms, result} = await executeGroq(
         files.config.projectId,
         files.config.dataset,
-        files.groq
+        groqQuery || files.groq
       )
       queryResult = result
       vscode.window.setStatusBarMessage(`Query took ${ms}ms`, 10000)
@@ -66,7 +67,8 @@ export function activate(context: vscode.ExtensionContext) {
   })
   context.subscriptions.push(disposable)
 
-  disposable = vscode.commands.registerCommand('sanity.executeGroqWithParams', async () => {
+  disposable = vscode.commands.registerCommand('sanity.executeGroqWithParams', async (args) => {
+    console.log(args)
     let files
     try {
       files = await readRequiredFiles(true)

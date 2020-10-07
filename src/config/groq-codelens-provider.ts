@@ -1,33 +1,25 @@
 import {CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Position} from 'vscode'
-import lineNumber from 'line-number'
+
+import {ExtractedTemplateLiteral, extractAllTemplateLiterals} from './source-helper'
 
 export class GROQCodeLensProvider implements CodeLensProvider {
   constructor() {}
 
   public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
     // find all lines where "groq" exists
-    const documentText = document.getText()
-    let lines = lineNumber(documentText, /groq/g)
-    lines.shift() // remove the first one because its the import groq from 'groq'
-
-    // find content here
-    // TODO: handle multiple groqs. this only does the first one
-    // const regexGroq = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
-
-    // let result
-    // let contents
-    // if ((result = regexGroq.exec(documentText)) !== null) {
-    //   contents = result[1]
-    // }
+    const literals: ExtractedTemplateLiteral[] = extractAllTemplateLiterals(document)
 
     // add a button above each line that has groq
-    return lines.map((line) => {
+    return literals.map((literal) => {
       return new CodeLens(
-        new Range(new Position(line.number - 1, 0), new Position(line.number - 1, 0)),
+        new Range(
+          new Position(literal.position.line + 1, 0),
+          new Position(literal.position.line + 1, 0)
+        ),
         {
-          title: 'Execute Query',
+          title: `Execute Query`,
           command: 'sanity.executeGroq',
-          arguments: [],
+          arguments: [literal.content],
         }
       )
     })
