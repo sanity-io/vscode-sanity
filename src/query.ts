@@ -1,18 +1,25 @@
 import sanityClient from '@sanity/client'
 
-function getClient(projectId: string, dataset: string, useCDN: boolean) {
+function getClient(projectId: string, dataset: string, useCdn: boolean) {
   return sanityClient({
     projectId: projectId,
     dataset: dataset,
-    useCdn: false,
+    useCdn,
   })
 }
 
-export async function executeGroq(projectId: string, dataset: string, groq: string): Promise<any> {
-  return await getClient(projectId, dataset, false).fetch(groq, {}, {filterResponse: false})
+export async function executeGroq(projectId: string, dataset: string, groq: string) {
+  return getClient(projectId, dataset, false).fetch(groq, {}, {filterResponse: false})
 }
 
-export async function executeGroqWithParams(projectId: string, dataset: string, groq: string, params: string): Promise<any> {
+export async function executeGroqWithParams(
+  projectId: string,
+  dataset: string,
+  groq: string,
+  params: string
+) {
   const parsedParams = JSON.parse(params)
-  return await getClient(projectId, dataset, false).fetch(groq, parsedParams, {filterResponse: false})
+  return getClient(projectId, dataset, false).fetch(groq, parsedParams, {
+    filterResponse: false,
+  })
 }
