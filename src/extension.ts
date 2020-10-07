@@ -8,18 +8,19 @@ import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
+  const settings = vscode.workspace.getConfiguration('vscode-sanity')
+
+  if (settings.codelens) {
+    context.subscriptions.push(
+      vscode.languages.registerCodeLensProvider(
+        ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
+        new GROQCodeLensProvider()
+      )
+    )
+  }
+
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    const settings = vscode.workspace.getConfiguration('vscode-sanity')
-
-    if (settings.codelens) {
-      context.subscriptions.push(
-        vscode.languages.registerCodeLensProvider(
-          ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-          new GROQCodeLensProvider()
-        )
-      )
-    }
     let openJSONFile = settings.get('openJSONFile')
     let config: config
     let query: string = groqQuery
