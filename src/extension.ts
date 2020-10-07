@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
     let openJSONFile = settings.get('openJSONFile')
     let config: Config
     let query: string = groqQuery
-    let params: string = '{}'
+    let params = {}
     try {
       config = await loadSanityJson()
       if (!query) {
@@ -38,14 +38,13 @@ export function activate(context: vscode.ExtensionContext) {
       // FIXME: Throw error object in webview?
       let useCDN = settings.get('useCDN', true)
 
-      const {ms, result} = await executeGroq(
-        config.projectId,
-        config.dataset,
+      const {ms, result} = await executeGroq({
+        ...config,
         query,
         params,
-        config.token ? false : useCDN,
-        config.token
-      )
+        useCdn: config.token ? false : useCDN,
+      })
+
       vscode.window.setStatusBarMessage(
         `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
         10000
@@ -149,7 +148,7 @@ function findVariables(node: any, found: string[]): string[] {
   return Object.keys(node).reduce((acc, key) => findVariables(node[key], acc), found)
 }
 
-async function readParamsFile(): Promise<string> {
+async function readParamsFile(): Promise<Record<string, unknown>> {
   let defaultParamFile
   const activeFile = getActiveFileName()
   if (activeFile && activeFile !== '') {
@@ -163,7 +162,8 @@ async function readParamsFile(): Promise<string> {
     throw new Error('Invalid param file received')
   }
   const activeDir = getRootPath()
-  return fs.readFile(activeDir + '/' + paramsFile, 'utf8')
+  const content = await fs.readFile(path.join(activeDir, paramsFile), 'utf8')
+  return JSON.parse(content)
 }
 
 async function openInUntitled(content: string, language?: string) {
