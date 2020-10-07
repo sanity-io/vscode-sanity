@@ -1,3 +1,4 @@
+import * as vscode from 'vscode'
 import * as path from 'path'
 import os from 'os'
 import {promises as fs} from 'fs'
@@ -15,10 +16,15 @@ export async function loadConfig(basePath: string): Promise<Config | false> {
   while (!(await hasConfig(dir))) {
     const parent = path.dirname(dir)
     if (!dir || parent === dir) {
-      return false
+      // last ditch effort, check if we are in a studio monorepo
+      const folders = vscode?.workspace?.workspaceFolders || []
+      dir = (folders.length && folders[0].uri.fsPath + '/studio') || '/'
+      if (!(await hasConfig(dir))) {
+        return false
+      }
+    } else {
+      dir = parent
     }
-
-    dir = parent
   }
 
   const configContent = await fs.readFile(path.join(dir, 'sanity.json'), 'utf8')
