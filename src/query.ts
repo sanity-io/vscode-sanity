@@ -8,18 +8,19 @@ function getClient(projectId: string, dataset: string, useCdn: boolean) {
   })
 }
 
-export async function executeGroq(projectId: string, dataset: string, groq: string) {
-  return getClient(projectId, dataset, false).fetch(groq, {}, {filterResponse: false})
+export async function executeGroq(projectId: string, dataset: string, groq: string, useCdn: boolean) {
+  return getClient(projectId, dataset, useCdn).fetch(groq, {}, {filterResponse: false})
 }
 
 export async function executeGroqWithParams(
   projectId: string,
   dataset: string,
   groq: string,
-  params: string
+  params: string,
+  useCdn: boolean
 ) {
   const parsedParams = JSON.parse(params)
-  return getClient(projectId, dataset, false).fetch(groq, parsedParams, {
+  return getClient(projectId, dataset, useCdn).fetch(groq, parsedParams, {
     filterResponse: false,
   })
 }

@@ -39,7 +39,12 @@
           "type": "boolean",
           "default": true,
           "description": "Enable GROQ codelens."
-        }
+		},
+		"vscode-sanity.useCDN": {
+			"type": "boolean",
+			"default": true,
+			"description": "Use APICDN for GROQ queries."
+		}
       }
     },
     "commands": [

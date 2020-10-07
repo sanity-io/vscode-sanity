@@ -35,13 +35,15 @@ export function activate(context: vscode.ExtensionContext) {
     // FIXME: Throw error object in webview?
     let queryResult
     try {
+	  let useCDN = vscode.workspace.getConfiguration("vscode-sanity").get("useCDN", true)
       const {ms, result} = await executeGroq(
         files.config.projectId,
         files.config.dataset,
-        groqQuery || files.groq
+        groqQuery || files.groq,
+		useCDN
       )
       queryResult = result
-      vscode.window.setStatusBarMessage(`Query took ${ms}ms`, 10000)
+      vscode.window.setStatusBarMessage(`Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'), 10000)
     } catch (err) {
       vscode.window.showErrorMessage(err)
       return
@@ -72,14 +74,18 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     // FIXME: Throw error object in webview?
-    let result
+    let queryResult
     try {
-      result = await executeGroqWithParams(
+	  let useCDN = vscode.workspace.getConfiguration("vscode-sanity").get("useCDN", true)
+      const {ms, result} = await executeGroqWithParams(
         files.config.projectId,
         files.config.dataset,
         files.groq,
-        files.params
+        files.params,
+		useCDN
       )
+	  queryResult = result
+	  vscode.window.setStatusBarMessage(`Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'), 10000)
     } catch (err) {
       vscode.window.showErrorMessage(err)
       return
@@ -94,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
       )
     }
 
-    const contentProvider = await registerContentProvider(context, result)
+    const contentProvider = await registerContentProvider(context, queryResult || [])
     const html = await contentProvider.getCurrentHTML()
     resultPanel.webview.html = html
   })
