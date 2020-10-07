@@ -11,14 +11,17 @@ function extractAllTemplateLiterals(document: TextDocument): ExtractedTemplateLi
   const text = document.getText()
   const regExpGQL = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
 
+  let prevIndex = 0
   let result
   while ((result = regExpGQL.exec(text)) !== null) {
     const content = result[1]
+    const queryPosition = text.indexOf(content, prevIndex)
     documents.push({
       content: content,
       uri: document.uri.path,
-      position: document.positionAt(text.indexOf(content)),
+      position: document.positionAt(queryPosition),
     })
+    prevIndex = queryPosition + 1
   }
   return documents
 }
