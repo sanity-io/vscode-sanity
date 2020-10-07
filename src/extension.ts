@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
     registerCodeLens()
   }
 
-  let resultPanel
+  let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
     let files
     try {
@@ -56,6 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.ViewColumn.Beside,
         {}
       )
+
+      resultPanel.onDidDispose(() => {
+        resultPanel = undefined
+      })
     }
 
     const contentProvider = await registerContentProvider(context, queryResult || [])
@@ -98,6 +102,10 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.ViewColumn.Beside,
         {}
       )
+
+      resultPanel.onDidDispose(() => {
+        resultPanel = undefined
+      })
     }
 
     const contentProvider = await registerContentProvider(context, queryResult || [])
