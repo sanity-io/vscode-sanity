@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
-import {loadConfig} from './config/findConfig'
 import {promises as fs} from 'fs'
+import {loadConfig} from './config/findConfig'
 import {executeGroq, executeGroqWithParams} from './query'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
