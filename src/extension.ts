@@ -152,7 +152,8 @@ async function readParamsFile(): Promise<Record<string, unknown>> {
   let defaultParamFile, absoluteParamFile
   const activeFile = getActiveFileName()
   if (activeFile && activeFile !== '') {
-    absoluteParamFile = activeFile.replace('.groq', '.json')
+    var pos = activeFile.lastIndexOf('.')
+    absoluteParamFile = activeFile.substr(0, pos < 0 ? activeFile.length : pos) + '.json'
     if (await checkFileExists(absoluteParamFile)) {
       defaultParamFile = path.basename(absoluteParamFile)
     }

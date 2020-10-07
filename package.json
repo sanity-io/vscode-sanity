@@ -111,6 +111,14 @@
           "meta.embedded.block.groq": "javascript"
         }
       }
+    ],
+    "keybindings": [
+      {
+        "command": "sanity.executeGroq",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "editorTextFocus"
+      }
     ]
   },
   "dependencies": {
