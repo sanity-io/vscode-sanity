@@ -35,15 +35,18 @@ export function activate(context: vscode.ExtensionContext) {
     // FIXME: Throw error object in webview?
     let queryResult
     try {
-	  let useCDN = vscode.workspace.getConfiguration("vscode-sanity").get("useCDN", true)
+      let useCDN = vscode.workspace.getConfiguration('vscode-sanity').get('useCDN', true)
       const {ms, result} = await executeGroq(
         files.config.projectId,
         files.config.dataset,
         groqQuery || files.groq,
-		useCDN
+        useCDN
       )
       queryResult = result
-      vscode.window.setStatusBarMessage(`Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'), 10000)
+      vscode.window.setStatusBarMessage(
+        `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
+        10000
+      )
     } catch (err) {
       vscode.window.showErrorMessage(err)
       return
@@ -80,16 +83,19 @@ export function activate(context: vscode.ExtensionContext) {
     // FIXME: Throw error object in webview?
     let queryResult
     try {
-	  let useCDN = vscode.workspace.getConfiguration("vscode-sanity").get("useCDN", true)
+      let useCDN = vscode.workspace.getConfiguration('vscode-sanity').get('useCDN', true)
       const {ms, result} = await executeGroqWithParams(
         files.config.projectId,
         files.config.dataset,
         files.groq,
         files.params,
-		useCDN
+        useCDN
       )
-	  queryResult = result
-	  vscode.window.setStatusBarMessage(`Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'), 10000)
+      queryResult = result
+      vscode.window.setStatusBarMessage(
+        `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
+        10000
+      )
     } catch (err) {
       vscode.window.showErrorMessage(err)
       return
