@@ -20,6 +20,8 @@ When GROQ-queries are detected, the extension will allow you to run the query an
 
 The project ID and dataset used is determined by looking at `sanity.json`.
 
+If groq file has any variables, then extension asks for a relative file name of a json file which has all variables key-values. It autofills param file name which uses same name as groq file but with `.json` extension, if it exists.
+
 ## Usage
 
 Install the [VSCode Sanity.io Extension](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity). This extension adds syntax highlighting for GROQ-files and `groq` tags.
