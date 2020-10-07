@@ -215,7 +215,7 @@ function findVariables(node: any, found: string[]): string[] {
   }
 
   if (Array.isArray(node)) {
-    return node.reduce((acc, child) => findVariables(node, acc), found)
+    return node.reduce((acc, child) => findVariables(child, acc), found)
   }
 
   if (typeof node !== 'object') {
