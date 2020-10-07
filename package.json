@@ -39,12 +39,12 @@
           "type": "boolean",
           "default": true,
           "description": "Enable GROQ codelens."
-		},
-		"vscode-sanity.useCDN": {
-			"type": "boolean",
-			"default": true,
-			"description": "Use APICDN for GROQ queries."
-		}
+        },
+        "vscode-sanity.useCDN": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use APICDN for GROQ queries."
+        }
       }
     },
     "commands": [
@@ -114,6 +114,7 @@
   },
   "dependencies": {
     "@sanity/client": "^1.150.7",
+    "groq-js": "^0.1.8",
     "line-number": "^0.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

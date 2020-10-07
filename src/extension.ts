@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'fs'
+import {parse} from 'groq-js'
 import {loadConfig} from './config/findConfig'
 import {executeGroq, executeGroqWithParams} from './query'
 import {GroqContentProvider} from './providers/content-provider'
@@ -32,6 +33,13 @@ export function activate(context: vscode.ExtensionContext) {
       return
     }
 
+    const query = groqQuery || files.groq
+    const variables = findVariablesInQuery(query)
+    if (variables.length > 0) {
+      console.log('variables found:', variables)
+      // @todo fire up the other command?
+    }
+
     // FIXME: Throw error object in webview?
     let queryResult
     try {
@@ -39,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
       const {ms, result} = await executeGroq(
         files.config.projectId,
         files.config.dataset,
-        groqQuery || files.groq,
+        query,
         useCDN
       )
       queryResult = result
@@ -148,15 +156,15 @@ async function readRequiredFiles(askParamsFile: boolean): Promise<RequiredFiles>
 
   files.groq = activeTextEditor.document.getText()
   if (askParamsFile) {
-	let defaultParamFile
-	const activeFile = getActiveFileName()
-	if (activeFile && activeFile !== '') {
-		let f = activeFile.replace(".groq", ".json")
-		if (await checkFileExists(f)) {
-			defaultParamFile = path.basename(f)
-		}
-	}
-    const paramsFile = await vscode.window.showInputBox({ value: defaultParamFile })
+    let defaultParamFile
+    const activeFile = getActiveFileName()
+    if (activeFile && activeFile !== '') {
+      let f = activeFile.replace('.groq', '.json')
+      if (await checkFileExists(f)) {
+        defaultParamFile = path.basename(f)
+      }
+    }
+    const paramsFile = await vscode.window.showInputBox({value: defaultParamFile})
     if (!paramsFile) {
       throw new Error('Invalid param file received')
     }
@@ -187,11 +195,32 @@ function getRootPath(): string {
 }
 
 function getActiveFileName(): string {
-	return vscode.window.activeTextEditor?.document.fileName || ''
+  return vscode.window.activeTextEditor?.document.fileName || ''
 }
 
 async function checkFileExists(file) {
-  return fs.access(file, fsconstants.F_OK)
-           .then(() => true)
-           .catch(() => false)
+  return fs
+    .access(file, fsconstants.F_OK)
+    .then(() => true)
+    .catch(() => false)
+}
+
+function findVariablesInQuery(query: string): string[] {
+  return findVariables(parse(query), [])
+}
+
+function findVariables(node: any, found: string[]): string[] {
+  if (node && node.type === 'Parameter' && typeof node.name === 'string') {
+    return found.concat(node.name)
+  }
+
+  if (Array.isArray(node)) {
+    return node.reduce((acc, child) => findVariables(node, acc), found)
+  }
+
+  if (typeof node !== 'object') {
+    return found
+  }
+
+  return Object.keys(node).reduce((acc, key) => findVariables(node[key], acc), found)
 }
