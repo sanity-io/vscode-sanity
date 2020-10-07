@@ -24,7 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   let resultPanel
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async () => {
-    console.log(vscode.workspace.workspaceFolders)
     let files
     try {
       files = await readRequiredFiles(false)
