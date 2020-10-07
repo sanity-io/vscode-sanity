@@ -87,6 +87,7 @@
   },
   "dependencies": {
     "@sanity/client": "^1.150.7",
+    "line-number": "^0.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-jason": "^1.1.2",

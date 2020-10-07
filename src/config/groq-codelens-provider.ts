@@ -1,25 +1,33 @@
-import * as vscode from 'vscode'
+import {CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Position} from 'vscode'
+import lineNumber from 'line-number'
 
-import {ExtractedTemplateLiteral, extractAllTemplateLiterals} from './source-helper'
-
-export class GROQCodeLensProvider implements vscode.CodeLensProvider {
+export class GROQCodeLensProvider implements CodeLensProvider {
   constructor() {}
 
-  public provideCodeLenses(
-    document: vscode.TextDocument,
-    _token: vscode.CancellationToken
-  ): vscode.CodeLens[] {
-    const literals: ExtractedTemplateLiteral[] = extractAllTemplateLiterals(document, ['groq'])
-    return literals.map((literal) => {
-      return new vscode.CodeLens(
-        new vscode.Range(
-          new vscode.Position(literal.position.line + 1, 0),
-          new vscode.Position(literal.position.line + 1, 0)
-        ),
+  public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
+    // find all lines where "groq" exists
+    const documentText = document.getText()
+    let lines = lineNumber(documentText, /groq/g)
+    lines.shift() // remove the first one because its the import groq from 'groq'
+
+    // find content here
+    // TODO: handle multiple groqs. this only does the first one
+    // const regexGroq = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
+
+    // let result
+    // let contents
+    // if ((result = regexGroq.exec(documentText)) !== null) {
+    //   contents = result[1]
+    // }
+
+    // add a button above each line that has groq
+    return lines.map((line) => {
+      return new CodeLens(
+        new Range(new Position(line.number - 1, 0), new Position(line.number - 1, 0)),
         {
           title: `Execute Query`,
           command: 'extension.executeGroq',
-          arguments: [literal],
+          arguments: [],
         }
       )
     })
