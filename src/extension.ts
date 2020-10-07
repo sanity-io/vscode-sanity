@@ -3,7 +3,7 @@ import * as vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'fs'
 import {parse} from 'groq-js'
 import {loadConfig} from './config/findConfig'
-import {executeGroq, executeGroqWithParams} from './query'
+import {executeGroq} from './query'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 
@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
     let files
     try {
-      files = await readRequiredFiles(false)
+      files = await readRequiredFiles()
     } catch (err) {
       vscode.window.showErrorMessage(err.message)
       return
@@ -35,9 +35,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     const query = groqQuery || files.groq
     const variables = findVariablesInQuery(query)
+    let params
     if (variables.length > 0) {
       console.log('variables found:', variables)
-      // @todo fire up the other command?
+      try {
+        params = await readParamsFile()
+      } catch (err) {
+        vscode.window.showErrorMessage(err.message)
+        return
+      }
     }
 
     // FIXME: Throw error object in webview?
@@ -48,55 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
         files.config.projectId,
         files.config.dataset,
         query,
-        useCDN
-      )
-      queryResult = result
-      vscode.window.setStatusBarMessage(
-        `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10000
-      )
-    } catch (err) {
-      vscode.window.showErrorMessage(err)
-      return
-    }
-
-    if (!resultPanel) {
-      resultPanel = vscode.window.createWebviewPanel(
-        'executionResultsWebView',
-        'GROQ Execution Result',
-        vscode.ViewColumn.Beside,
-        {}
-      )
-
-      resultPanel.onDidDispose(() => {
-        resultPanel = undefined
-      })
-    }
-
-    const contentProvider = await registerContentProvider(context, queryResult || [])
-    const html = await contentProvider.getCurrentHTML()
-    resultPanel.webview.html = html
-  })
-  context.subscriptions.push(disposable)
-
-  disposable = vscode.commands.registerCommand('sanity.executeGroqWithParams', async (args) => {
-    let files
-    try {
-      files = await readRequiredFiles(true)
-    } catch (err) {
-      vscode.window.showErrorMessage(err.message)
-      return
-    }
-
-    // FIXME: Throw error object in webview?
-    let queryResult
-    try {
-      let useCDN = vscode.workspace.getConfiguration('vscode-sanity').get('useCDN', true)
-      const {ms, result} = await executeGroqWithParams(
-        files.config.projectId,
-        files.config.dataset,
-        files.groq,
-        files.params,
+        params,
         useCDN
       )
       queryResult = result
@@ -140,7 +98,7 @@ type RequiredFiles = {
   params: string
 }
 
-async function readRequiredFiles(askParamsFile: boolean): Promise<RequiredFiles> {
+async function readRequiredFiles(): Promise<RequiredFiles> {
   let files = <RequiredFiles>{}
   const activeDir = getRootPath()
 
@@ -155,21 +113,6 @@ async function readRequiredFiles(askParamsFile: boolean): Promise<RequiredFiles>
   }
 
   files.groq = activeTextEditor.document.getText()
-  if (askParamsFile) {
-    let defaultParamFile
-    const activeFile = getActiveFileName()
-    if (activeFile && activeFile !== '') {
-      let f = activeFile.replace('.groq', '.json')
-      if (await checkFileExists(f)) {
-        defaultParamFile = path.basename(f)
-      }
-    }
-    const paramsFile = await vscode.window.showInputBox({value: defaultParamFile})
-    if (!paramsFile) {
-      throw new Error('Invalid param file received')
-    }
-    files.params = await fs.readFile(activeDir + '/' + paramsFile, 'utf8')
-  }
   return files
 }
 
@@ -223,4 +166,21 @@ function findVariables(node: any, found: string[]): string[] {
   }
 
   return Object.keys(node).reduce((acc, key) => findVariables(node[key], acc), found)
+}
+
+async function readParamsFile(): Promise<string> {
+  let defaultParamFile
+  const activeFile = getActiveFileName()
+  if (activeFile && activeFile !== '') {
+    let f = activeFile.replace('.groq', '.json')
+    if (await checkFileExists(f)) {
+      defaultParamFile = path.basename(f)
+    }
+  }
+  const paramsFile = await vscode.window.showInputBox({value: defaultParamFile})
+  if (!paramsFile) {
+    throw new Error('Invalid param file received')
+  }
+  const activeDir = getRootPath()
+  return await fs.readFile(activeDir + '/' + paramsFile, 'utf8')
 }

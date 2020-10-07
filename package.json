@@ -51,10 +51,6 @@
       {
         "command": "sanity.executeGroq",
         "title": "Execute GROQ query"
-      },
-      {
-        "command": "sanity.executeGroqWithParams",
-        "title": "Execute GROQ query with params"
       }
     ],
     "menus": {
