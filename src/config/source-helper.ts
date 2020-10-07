@@ -9,7 +9,7 @@ export interface ExtractedTemplateLiteral {
 export function extractAllTemplateLiterals(document: TextDocument): ExtractedTemplateLiteral[] {
   const documents: ExtractedTemplateLiteral[] = []
   const text = document.getText()
-  const regExpGQL = new RegExp('\\s*groq`([\\s\\S]+?)`', 'mg')
+  const regExpGQL = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
 
   let result
   while ((result = regExpGQL.exec(text)) !== null) {
