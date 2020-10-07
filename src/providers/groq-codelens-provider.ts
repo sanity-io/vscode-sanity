@@ -17,7 +17,7 @@ function extractAllTemplateLiterals(document: TextDocument): ExtractedTemplateLi
     documents.push({
       content: content,
       uri: document.uri.path,
-      position: document.positionAt(text.indexOf(content) + content.length),
+      position: document.positionAt(text.indexOf(content)),
     })
   }
   return documents
@@ -33,10 +33,7 @@ export class GROQCodeLensProvider implements CodeLensProvider {
     // add a button above each line that has groq
     return literals.map((literal) => {
       return new CodeLens(
-        new Range(
-          new Position(literal.position.line + 1, 0),
-          new Position(literal.position.line + 1, 0)
-        ),
+        new Range(new Position(literal.position.line, 0), new Position(literal.position.line, 0)),
         {
           title: `Execute Query`,
           command: 'sanity.executeGroq',
