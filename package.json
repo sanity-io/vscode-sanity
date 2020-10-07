@@ -36,6 +36,10 @@
       {
         "command": "extension.executeGroq",
         "title": "Execute GROQ query"
+      },
+      {
+        "command": "extension.executeGroqWithParams",
+        "title": "Execute GROQ query with params"
       }
     ],
     "languages": [
