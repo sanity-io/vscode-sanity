@@ -44,6 +44,11 @@
           "type": "boolean",
           "default": true,
           "description": "Use APICDN for GROQ queries."
+        },
+        "vscode-sanity.openJSONFile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open query results in a new tab with an editable JSON."
         }
       }
     },
