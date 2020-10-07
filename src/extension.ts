@@ -61,13 +61,15 @@ export function activate(context: vscode.ExtensionContext) {
         resultPanel.onDidDispose(() => {
           resultPanel = undefined
         })
+      }
 
+      if (openJSONFile) {
+        vscode.window.setStatusBarMessage(`result=${result}`)
+        await openInUntitled(result, 'json')
+      } else if (resultPanel) {
         const contentProvider = await registerContentProvider(context, result || [])
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
-      } else {
-        vscode.window.setStatusBarMessage(`result=${result}`)
-        await openInUntitled(result, 'json')
       }
     } catch (err) {
       vscode.window.showErrorMessage(err.message)
