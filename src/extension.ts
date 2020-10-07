@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
-import {promises as fs} from 'fs'
+import {promises as fs, constants as fsconstants} from 'fs'
 import {loadConfig} from './config/findConfig'
 import {executeGroq, executeGroqWithParams} from './query'
 import {GroqContentProvider} from './providers/content-provider'
@@ -148,7 +148,15 @@ async function readRequiredFiles(askParamsFile: boolean): Promise<RequiredFiles>
 
   files.groq = activeTextEditor.document.getText()
   if (askParamsFile) {
-    const paramsFile = await vscode.window.showInputBox()
+	let defaultParamFile
+	const activeFile = getActiveFileName()
+	if (activeFile && activeFile !== '') {
+		let f = activeFile.replace(".groq", ".json")
+		if (await checkFileExists(f)) {
+			defaultParamFile = path.basename(f)
+		}
+	}
+    const paramsFile = await vscode.window.showInputBox({ value: defaultParamFile })
     if (!paramsFile) {
       throw new Error('Invalid param file received')
     }
@@ -173,7 +181,17 @@ function getRootPath(): string {
     return folders[0].uri.fsPath
   }
 
-  const activeFile = vscode.window.activeTextEditor?.document.fileName || ''
+  const activeFile = getActiveFileName()
   const activeDir = path.dirname(activeFile)
   return activeDir
+}
+
+function getActiveFileName(): string {
+	return vscode.window.activeTextEditor?.document.fileName || ''
+}
+
+async function checkFileExists(file) {
+  return fs.access(file, fsconstants.F_OK)
+           .then(() => true)
+           .catch(() => false)
 }
