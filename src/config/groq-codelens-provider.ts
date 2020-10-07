@@ -25,8 +25,8 @@ export class GROQCodeLensProvider implements CodeLensProvider {
       return new CodeLens(
         new Range(new Position(line.number - 1, 0), new Position(line.number - 1, 0)),
         {
-          title: `Execute Query`,
-          command: 'extension.executeGroq',
+          title: 'Execute Query',
+          command: 'sanity.executeGroq',
           arguments: [],
         }
       )
