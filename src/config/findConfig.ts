@@ -1,7 +1,16 @@
 import * as path from 'path'
+import os from 'os'
 import {promises as fs} from 'fs'
+import osenv from 'osenv'
+import xdgBasedir from 'xdg-basedir'
 
-export async function loadConfig(basePath: string) {
+export interface Config {
+  projectId: string
+  dataset: string
+  token?: string
+}
+
+export async function loadConfig(basePath: string): Promise<Config | false> {
   let dir = basePath
   while (!(await hasConfig(dir))) {
     const parent = path.dirname(dir)
@@ -18,7 +27,10 @@ export async function loadConfig(basePath: string) {
     return false
   }
 
-  return config.api
+  const cliConfigContent = await fs.readFile(getGlobalConfigLocation(), 'utf8')
+  const cliConfig = parseJson(cliConfigContent)
+
+  return cliConfig ? {...config.api, token: cliConfig.authToken} : config.api
 }
 
 async function hasConfig(dir: string): Promise<boolean> {
@@ -34,4 +46,10 @@ function parseJson(content: string) {
   } catch (err) {
     return false
   }
+}
+
+function getGlobalConfigLocation() {
+  const user = (osenv.user() || 'user').replace(/\\/g, '')
+  const configDir = xdgBasedir.config || path.join(os.tmpdir(), user, '.config')
+  return path.join(configDir, 'sanity', 'config.json')
 }

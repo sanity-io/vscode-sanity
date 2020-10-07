@@ -117,12 +117,14 @@
     "@sanity/client": "^1.150.7",
     "groq-js": "^0.1.8",
     "line-number": "^0.1.0",
+    "osenv": "^0.1.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-jason": "^1.1.2",
     "typescript": "^4.0.3",
     "vsce": "^1.81.1",
-    "vscode": "^1.1.37"
+    "vscode": "^1.1.37",
+    "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
     "@types/react": "^16.9.51",
