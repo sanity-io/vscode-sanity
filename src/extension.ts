@@ -10,7 +10,7 @@ import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 export function activate(context: vscode.ExtensionContext) {
   const settings = vscode.workspace.getConfiguration('vscode-sanity')
 
-  const registerCodeLens = () => {
+  if (settings.codelens) {
     context.subscriptions.push(
       vscode.languages.registerCodeLensProvider(
         ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
@@ -19,70 +19,56 @@ export function activate(context: vscode.ExtensionContext) {
     )
   }
 
-  if (settings.codelens) {
-    registerCodeLens()
-  }
-
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    let files
+    let config: config
+    let query: string = groqQuery
+    let params: string = '{}'
     try {
-      files = await readRequiredFiles()
-    } catch (err) {
-      vscode.window.showErrorMessage(err.message)
-      return
-    }
-
-    const query = groqQuery || files.groq
-    const variables = findVariablesInQuery(query)
-    let params
-    if (variables.length > 0) {
-      console.log('variables found:', variables)
-      try {
-        params = await readParamsFile()
-      } catch (err) {
-        vscode.window.showErrorMessage(err.message)
-        return
+      config = await loadSanityJson()
+      if (!query) {
+        query = await loadGroqFromFile()
       }
-    }
+      const variables = findVariablesInQuery(query)
+      if (variables.length > 0) {
+        console.log('variables found:', variables)
+        params = await readParamsFile()
+      }
 
-    // FIXME: Throw error object in webview?
-    let queryResult
-    try {
-      let useCDN = vscode.workspace.getConfiguration('vscode-sanity').get('useCDN', true)
+      // FIXME: Throw error object in webview?
+      let useCDN = settings.get('useCDN', true)
       const {ms, result} = await executeGroq(
-        files.config.projectId,
-        files.config.dataset,
+        config.projectId,
+        config.dataset,
         query,
         params,
         useCDN
       )
-      queryResult = result
       vscode.window.setStatusBarMessage(
         `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
         10000
       )
+
+      if (!resultPanel) {
+        resultPanel = vscode.window.createWebviewPanel(
+          'executionResultsWebView',
+          'GROQ Execution Result',
+          vscode.ViewColumn.Beside,
+          {}
+        )
+
+        resultPanel.onDidDispose(() => {
+          resultPanel = undefined
+        })
+      }
+
+      const contentProvider = await registerContentProvider(context, result || [])
+      const html = await contentProvider.getCurrentHTML()
+      resultPanel.webview.html = html
     } catch (err) {
-      vscode.window.showErrorMessage(err)
+      vscode.window.showErrorMessage(err.message)
       return
     }
-
-    if (!resultPanel) {
-      resultPanel = vscode.window.createWebviewPanel(
-        'executionResultsWebView',
-        'GROQ Execution Result',
-        vscode.ViewColumn.Beside,
-        {}
-      )
-
-      resultPanel.onDidDispose(() => {
-        resultPanel = undefined
-      })
-    }
-
-    const contentProvider = await registerContentProvider(context, queryResult || [])
-    const html = await contentProvider.getCurrentHTML()
-    resultPanel.webview.html = html
   })
   context.subscriptions.push(disposable)
 }
@@ -92,28 +78,22 @@ type config = {
   dataset: string
 }
 
-type RequiredFiles = {
-  config: config
-  groq: string
-  params: string
-}
-
-async function readRequiredFiles(): Promise<RequiredFiles> {
-  let files = <RequiredFiles>{}
+async function loadSanityJson() {
   const activeDir = getRootPath()
-
-  files.config = await loadConfig(activeDir)
-  if (!files.config) {
+  const config = await loadConfig(activeDir)
+  if (!config) {
     throw new Error('Could not resolve sanity.json configuration file')
   }
+  return config
+}
 
+async function loadGroqFromFile() {
   const activeTextEditor = vscode.window.activeTextEditor
   if (!activeTextEditor) {
     throw new Error('Nothing to execute')
   }
 
-  files.groq = activeTextEditor.document.getText()
-  return files
+  return activeTextEditor.document.getText()
 }
 
 async function registerContentProvider(
