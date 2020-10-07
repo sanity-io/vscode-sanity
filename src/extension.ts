@@ -38,7 +38,6 @@ export function activate(context: vscode.ExtensionContext) {
 
       // FIXME: Throw error object in webview?
       let useCDN = settings.get('useCDN', true)
-
       const {ms, result} = await executeGroq(
         config.projectId,
         config.dataset,
