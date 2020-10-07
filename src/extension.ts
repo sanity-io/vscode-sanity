@@ -149,20 +149,19 @@ function findVariables(node: any, found: string[]): string[] {
 }
 
 async function readParamsFile(): Promise<Record<string, unknown>> {
-  let defaultParamFile
+  let defaultParamFile, absoluteParamFile
   const activeFile = getActiveFileName()
   if (activeFile && activeFile !== '') {
-    let f = activeFile.replace('.groq', '.json')
-    if (await checkFileExists(f)) {
-      defaultParamFile = path.basename(f)
+    absoluteParamFile = activeFile.replace('.groq', '.json')
+    if (await checkFileExists(absoluteParamFile)) {
+      defaultParamFile = path.basename(absoluteParamFile)
     }
   }
   const paramsFile = await vscode.window.showInputBox({value: defaultParamFile})
   if (!paramsFile) {
     throw new Error('Invalid param file received')
   }
-  const activeDir = getRootPath()
-  const content = await fs.readFile(path.join(activeDir, paramsFile), 'utf8')
+  const content = await fs.readFile(path.join(path.dirname(absoluteParamFile), paramsFile), 'utf8')
   return JSON.parse(content)
 }
 
