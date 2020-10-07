@@ -14,6 +14,12 @@ Syntax highlighting for the GROQ query language is available in the following si
 - Template literals prefixed with the `/* groq */` comment
 - Template literals starting with a `// groq` comment
 
+### Execute GROQ-queries
+
+When GROQ-queries are detected, the extension will allow you to run the query and displays the result as JSON in a separate tab.
+
+The project ID and dataset used is determined by looking at `sanity.json`.
+
 ## Usage
 
 Install the [VSCode Sanity.io Extension](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity). This extension adds syntax highlighting for GROQ-files and `groq` tags.
