@@ -8,19 +8,19 @@ import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
-  const settings = vscode.workspace.getConfiguration('vscode-sanity')
-
-  if (settings.codelens) {
-    context.subscriptions.push(
-      vscode.languages.registerCodeLensProvider(
-        ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-        new GROQCodeLensProvider()
-      )
-    )
-  }
-
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
+    const settings = vscode.workspace.getConfiguration('vscode-sanity')
+
+    if (settings.codelens) {
+      context.subscriptions.push(
+        vscode.languages.registerCodeLensProvider(
+          ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
+          new GROQCodeLensProvider()
+        )
+      )
+    }
+    let openJSONFile = settings.get('openJSONFile')
     let config: config
     let query: string = groqQuery
     let params: string = '{}'
@@ -37,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       // FIXME: Throw error object in webview?
       let useCDN = settings.get('useCDN', true)
+
       const {ms, result} = await executeGroq(
         config.projectId,
         config.dataset,
@@ -49,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
         10000
       )
 
-      if (!resultPanel) {
+      if (!openJSONFile && !resultPanel) {
         resultPanel = vscode.window.createWebviewPanel(
           'executionResultsWebView',
           'GROQ Execution Result',
@@ -62,9 +63,14 @@ export function activate(context: vscode.ExtensionContext) {
         })
       }
 
-      const contentProvider = await registerContentProvider(context, result || [])
-      const html = await contentProvider.getCurrentHTML()
-      resultPanel.webview.html = html
+      if (!openJSONFile && resultPanel) {
+        const contentProvider = await registerContentProvider(context, result || [])
+        const html = await contentProvider.getCurrentHTML()
+        resultPanel.webview.html = html
+      } else {
+        vscode.window.setStatusBarMessage(`result=${result}`)
+        await openInUntitled(result, 'json')
+      }
     } catch (err) {
       vscode.window.showErrorMessage(err.message)
       return
@@ -163,4 +169,12 @@ async function readParamsFile(): Promise<string> {
   }
   const activeDir = getRootPath()
   return await fs.readFile(activeDir + '/' + paramsFile, 'utf8')
+}
+
+async function openInUntitled(content: string, language?: string) {
+  const cs = JSON.stringify(content)
+  await vscode.workspace.openTextDocument({content: cs}).then((document) => {
+    vscode.window.showTextDocument(document)
+    vscode.languages.setTextDocumentLanguage(document, language || 'json')
+  })
 }
