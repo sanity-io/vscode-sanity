@@ -3,8 +3,8 @@ import * as vscode from 'vscode'
 import {loadConfig} from './config/findConfig'
 import {promises as fs} from 'fs'
 import {executeGroq, executeGroqWithParams} from './query'
-import {GroqContentProvider} from './content-provider'
-import {GROQCodeLensProvider} from './config/groq-codelens-provider'
+import {GroqContentProvider} from './providers/content-provider'
+import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 
 export function activate(context: vscode.ExtensionContext) {
   const settings = vscode.workspace.getConfiguration('vscode-sanity')

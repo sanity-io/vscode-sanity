@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/server'
 import * as vscode from 'vscode'
-import {ResultView} from './resultView/ResultView'
+import {ResultView} from '../resultView/ResultView'
 
 export class GroqContentProvider implements vscode.TextDocumentContentProvider {
   private html: string = ''
