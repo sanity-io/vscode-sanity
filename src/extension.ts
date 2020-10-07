@@ -32,7 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
       const variables = findVariablesInQuery(query)
       if (variables.length > 0) {
-        console.log('variables found:', variables)
         params = await readParamsFile()
       }
 
