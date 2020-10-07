@@ -61,9 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
         resultPanel.onDidDispose(() => {
           resultPanel = undefined
         })
-      }
 
-      if (!openJSONFile && resultPanel) {
         const contentProvider = await registerContentProvider(context, result || [])
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
