@@ -27,6 +27,16 @@ export class GROQCodeLensProvider implements CodeLensProvider {
   constructor() {}
 
   public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
+    if (document.languageId === 'groq') {
+      return [
+        new CodeLens(new Range(new Position(0, 0), new Position(0, 0)), {
+          title: 'Execute Query',
+          command: 'sanity.executeGroq',
+          arguments: [document.getText()],
+        }),
+      ]
+    }
+
     // find all lines where "groq" exists
     const literals: ExtractedTemplateLiteral[] = extractAllTemplateLiterals(document)
 
@@ -35,7 +45,7 @@ export class GROQCodeLensProvider implements CodeLensProvider {
       return new CodeLens(
         new Range(new Position(literal.position.line, 0), new Position(literal.position.line, 0)),
         {
-          title: `Execute Query`,
+          title: 'Execute Query',
           command: 'sanity.executeGroq',
           arguments: [literal.content],
         }
