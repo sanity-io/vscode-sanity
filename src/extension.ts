@@ -22,8 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
     registerCodeLens()
   }
 
-  let activePanel
-  let disposable = vscode.commands.registerCommand('extension.executeGroq', async () => {
+  let resultPanel
+  let disposable = vscode.commands.registerCommand('sanity.executeGroq', async () => {
+    console.log(vscode.workspace.workspaceFolders)
     let files
     try {
       files = await readRequiredFiles(false)
@@ -37,16 +38,22 @@ export function activate(context: vscode.ExtensionContext) {
     )
 
     // FIXME: Throw error object in webview?
-    let result
+    let queryResult
     try {
-      result = await executeGroq(files.config.projectId, files.config.dataset, files.groq)
+      const {ms, result} = await executeGroq(
+        files.config.projectId,
+        files.config.dataset,
+        files.groq
+      )
+      queryResult = result
+      vscode.window.setStatusBarMessage(`Query took ${ms}ms`, 10000)
     } catch (err) {
       vscode.window.showErrorMessage(err)
       return
     }
 
-    if (!activePanel) {
-      activePanel = vscode.window.createWebviewPanel(
+    if (!resultPanel) {
+      resultPanel = vscode.window.createWebviewPanel(
         'executionResultsWebView',
         'GROQ Execution Result',
         vscode.ViewColumn.Beside,
@@ -54,13 +61,13 @@ export function activate(context: vscode.ExtensionContext) {
       )
     }
 
-    const contentProvider = await registereContentProvider(context, result)
+    const contentProvider = await registerContentProvider(context, queryResult || [])
     const html = await contentProvider.getCurrentHTML()
-    activePanel.webview.html = html
+    resultPanel.webview.html = html
   })
   context.subscriptions.push(disposable)
 
-  disposable = vscode.commands.registerCommand('extension.executeGroqWithParams', async () => {
+  disposable = vscode.commands.registerCommand('sanity.executeGroqWithParams', async () => {
     let files
     try {
       files = await readRequiredFiles(true)
@@ -76,14 +83,19 @@ export function activate(context: vscode.ExtensionContext) {
     // FIXME: Throw error object in webview?
     let result
     try {
-      result = await executeGroqWithParams(files.config.projectId, files.config.dataset, files.groq, files.params)
+      result = await executeGroqWithParams(
+        files.config.projectId,
+        files.config.dataset,
+        files.groq,
+        files.params
+      )
     } catch (err) {
       vscode.window.showErrorMessage(err)
       return
     }
 
-    if (!activePanel) {
-      activePanel = vscode.window.createWebviewPanel(
+    if (!resultPanel) {
+      resultPanel = vscode.window.createWebviewPanel(
         'executionResultsWebView',
         'GROQ Execution Result',
         vscode.ViewColumn.Beside,
@@ -91,9 +103,9 @@ export function activate(context: vscode.ExtensionContext) {
       )
     }
 
-    const contentProvider = await registereContentProvider(context, result)
+    const contentProvider = await registerContentProvider(context, result)
     const html = await contentProvider.getCurrentHTML()
-    activePanel.webview.html = html
+    resultPanel.webview.html = html
   })
   context.subscriptions.push(disposable)
 }
@@ -111,8 +123,8 @@ type RequiredFiles = {
 
 async function readRequiredFiles(askParamsFile: boolean): Promise<RequiredFiles> {
   let files = <RequiredFiles>{}
-  const activeFile = vscode.window.activeTextEditor?.document.fileName || ''
-  const activeDir = path.dirname(activeFile)
+  const activeDir = getRootPath()
+
   files.config = await loadConfig(activeDir)
   if (!files.config) {
     throw new Error('Could not resolve sanity.json configuration file')
@@ -134,7 +146,7 @@ async function readRequiredFiles(askParamsFile: boolean): Promise<RequiredFiles>
   return files
 }
 
-async function registereContentProvider(
+async function registerContentProvider(
   context: vscode.ExtensionContext,
   result: any
 ): Promise<any> {
@@ -142,4 +154,15 @@ async function registereContentProvider(
   const registration = vscode.workspace.registerTextDocumentContentProvider('groq', contentProvider)
   context.subscriptions.push(registration)
   return contentProvider
+}
+
+function getRootPath(): string {
+  const folders = vscode.workspace.workspaceFolders || []
+  if (folders.length > 0) {
+    return folders[0].uri.fsPath
+  }
+
+  const activeFile = vscode.window.activeTextEditor?.document.fileName || ''
+  const activeDir = path.dirname(activeFile)
+  return activeDir
 }

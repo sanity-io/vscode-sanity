@@ -34,14 +34,22 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.executeGroq",
+        "command": "sanity.executeGroq",
         "title": "Execute GROQ query"
       },
       {
-        "command": "extension.executeGroqWithParams",
+        "command": "sanity.executeGroqWithParams",
         "title": "Execute GROQ query with params"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "sanity.executeGroq",
+          "when": "editorLangId == groq || editorLangId == plaintext"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "groq",
