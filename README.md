@@ -22,7 +22,7 @@ The project ID and dataset used is determined by finding the nearest `sanity.jso
 
 If the GROQ file/query has any variables, then extension asks for a relative filename of a JSON-file containing an object of key-value mappings. It autofills the param filename based on the current file with a `.json` extension, if it exists.
 
-![Execute GROQ in VS Code](screenshots/previewofquery.png)
+![Execute GROQ in VS Code](https://raw.githubusercontent.com/sanity-io/vscode-sanity/main/screenshots/previewofquery.png)
 
 ## Usage
 
