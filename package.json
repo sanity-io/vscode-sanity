@@ -56,6 +56,10 @@
       {
         "command": "sanity.executeGroq",
         "title": "Execute GROQ query"
+      },
+      {
+        "command": "sanity.setupListener",
+        "title": "Set up listener"
       }
     ],
     "menus": {
@@ -129,6 +133,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-jason": "^1.1.2",
+    "rxjs": "^6.6.3",
     "typescript": "^4.0.3",
     "vsce": "^1.81.1",
     "vscode": "^1.1.37",

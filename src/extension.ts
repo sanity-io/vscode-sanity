@@ -6,6 +6,7 @@ import {Config, loadConfig} from './config/findConfig'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {executeGroq} from './query'
+import {setupListener} from './listen'
 
 export function activate(context: vscode.ExtensionContext) {
   // Assigned by `readConfig()`
@@ -19,66 +20,121 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeConfiguration(() => readConfig())
 
   let resultPanel: vscode.WebviewPanel | undefined
-  let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    let config: Config
-    let query: string = groqQuery
-    let params = {}
-    try {
-      config = await loadSanityJson()
-      if (!query) {
-        query = await loadGroqFromFile()
-      }
-      const variables = findVariablesInQuery(query)
-      if (variables.length > 0) {
-        params = await readParamsFile()
-      }
+  const executeDisposable = vscode.commands.registerCommand(
+    'sanity.executeGroq',
+    async (groqQuery) => {
+      let config: Config
+      let query: string = groqQuery
+      let params = {}
+      try {
+        config = await loadSanityJson()
+        if (!query) {
+          query = await loadGroqFromFile()
+        }
 
-      // FIXME: Throw error object in webview?
-      const {ms, result} = await executeGroq({
-        ...config,
-        query,
-        params,
-        useCdn: config.token ? false : useCDN,
-      })
+        const variables = findVariablesInQuery(query)
+        if (variables.length > 0) {
+          params = await readParamsFile()
+        }
 
-      vscode.window.setStatusBarMessage(
-        `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10000
-      )
+        // FIXME: Throw error object in webview?
+        const {ms, result} = await executeGroq({
+          ...config,
+          query,
+          params,
+          useCdn: config.token ? false : useCDN,
+        })
 
-      if (!openJSONFile && !resultPanel) {
-        resultPanel = vscode.window.createWebviewPanel(
-          'executionResultsWebView',
-          'GROQ Execution Result',
-          vscode.ViewColumn.Beside,
-          {}
+        vscode.window.setStatusBarMessage(
+          `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
+          10000
         )
 
-        resultPanel.onDidDispose(() => {
-          resultPanel = undefined
-        })
-      }
+        if (!openJSONFile && !resultPanel) {
+          resultPanel = vscode.window.createWebviewPanel(
+            'executionResultsWebView',
+            'GROQ Execution Result',
+            vscode.ViewColumn.Beside,
+            {}
+          )
 
-      if (openJSONFile) {
-        await openInUntitled(result, 'json')
-      } else if (resultPanel) {
-        const contentProvider = await registerContentProvider(context, result || [])
-        const html = await contentProvider.getCurrentHTML()
-        resultPanel.webview.html = html
+          resultPanel.onDidDispose(() => {
+            resultPanel = undefined
+          })
+        }
+
+        if (openJSONFile) {
+          await openInUntitled(result, 'json')
+        } else if (resultPanel) {
+          const contentProvider = await registerContentProvider(context, result || [])
+          const html = await contentProvider.getCurrentHTML()
+          resultPanel.webview.html = html
+        }
+      } catch (err) {
+        vscode.window.showErrorMessage(err.message)
+        return
       }
-    } catch (err) {
-      vscode.window.showErrorMessage(err.message)
-      return
     }
-  })
-  context.subscriptions.push(disposable)
+  )
+
+  const listenDisposable = vscode.commands.registerCommand(
+    'sanity.setupListener',
+    async (groqQuery) => {
+      let config: Config
+      let query: string = groqQuery
+      let params = {}
+      try {
+        config = await loadSanityJson()
+        if (!query) {
+          query = await loadGroqFromFile()
+        }
+
+        const variables = findVariablesInQuery(query)
+        if (variables.length > 0) {
+          params = await readParamsFile()
+        }
+
+        vscode.window.setStatusBarMessage('Setting up listener...', 5000)
+
+        const subscription = setupListener({
+          ...config,
+          query,
+          params,
+        }).subscribe(async (next) => {
+          console.log(next)
+
+          const {type, ...message} = next
+          if (next.type === 'welcome') {
+            vscode.window.setStatusBarMessage('Listener ready', 5000)
+            return
+          }
+
+          if (next.type !== 'mutation') {
+            // @todo present messages somewhere else
+            console.log(message)
+            return
+          }
+        })
+
+        // @todo Figure out when to actually stop listening. Button? Closing of a document?
+        setTimeout(() => {
+          subscription.unsubscribe()
+        }, 30000)
+      } catch (err) {
+        vscode.window.showErrorMessage(err.message)
+        return
+      }
+    }
+  )
+
+  context.subscriptions.push(executeDisposable)
+  context.subscriptions.push(listenDisposable)
 
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
     openJSONFile = settings.get('openJSONFile', false)
     useCodelens = settings.get('useCodelens', true)
     useCDN = settings.get('useCDN', false)
-    console.log({openJSONFile, useCodelens, useCDN})
 
     if (useCodelens && !codelens) {
       codelens = vscode.languages.registerCodeLensProvider(
@@ -183,10 +239,11 @@ async function readParamsFile(): Promise<Record<string, unknown>> {
   return JSON.parse(content)
 }
 
-async function openInUntitled(content: string, language?: string) {
-  const cs = JSON.stringify(content)
-  await vscode.workspace.openTextDocument({content: cs}).then((document) => {
+function openInUntitled(content: unknown, language?: string) {
+  const cs = JSON.stringify(content, null, 2)
+  return vscode.workspace.openTextDocument({content: cs}).then((document) => {
     vscode.window.showTextDocument(document, {viewColumn: vscode.ViewColumn.Beside})
     vscode.languages.setTextDocumentLanguage(document, language || 'json')
+    return document
   })
 }
