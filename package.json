@@ -129,15 +129,15 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-jason": "^1.1.2",
-    "typescript": "^4.0.3",
-    "vsce": "^1.81.1",
-    "vscode": "^1.1.37",
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
-    "@types/react": "^16.9.51",
     "@types/react-dom": "^16.9.8",
-    "prettier": "^2.1.2"
+    "@types/react": "^16.9.51",
+    "prettier": "^2.1.2",
+    "typescript": "^4.0.3",
+    "vsce": "^1.81.1",
+    "vscode": "^1.1.37"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
