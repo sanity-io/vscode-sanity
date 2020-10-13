@@ -18,9 +18,9 @@ Syntax highlighting for the GROQ query language is available in the following si
 
 When GROQ-queries are detected, the extension will allow you to run the query and displays the result as JSON in a separate tab.
 
-The project ID and dataset used is determined by looking at `sanity.json`.
+The project ID and dataset used is determined by finding the nearest `sanity.json`.
 
-If groq file has any variables, then extension asks for a relative file name of a json file which has all variables key-values. It autofills param file name which uses same name as groq file but with `.json` extension, if it exists.
+If the GROQ file/query has any variables, then extension asks for a relative filename of a JSON-file containing an object of key-value mappings. It autofills the param filename based on the current file with a `.json` extension, if it exists.
 
 ## Usage
 
