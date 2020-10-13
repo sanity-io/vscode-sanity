@@ -78,7 +78,6 @@ export function activate(context: vscode.ExtensionContext) {
     openJSONFile = settings.get('openJSONFile', false)
     useCodelens = settings.get('useCodelens', true)
     useCDN = settings.get('useCDN', false)
-    console.log({openJSONFile, useCodelens, useCDN})
 
     if (useCodelens && !codelens) {
       codelens = vscode.languages.registerCodeLensProvider(
