@@ -60,7 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       if (openJSONFile) {
-        vscode.window.setStatusBarMessage(`result=${result}`)
         await openInUntitled(result, 'json')
       } else if (resultPanel) {
         const contentProvider = await registerContentProvider(context, result || [])
