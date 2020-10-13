@@ -10,6 +10,7 @@ import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 export function activate(context: vscode.ExtensionContext) {
   const settings = vscode.workspace.getConfiguration('vscode-sanity')
 
+  // FIXME: Toggling codelens configuration should reload vscode.
   if (settings.codelens) {
     context.subscriptions.push(
       vscode.languages.registerCodeLensProvider(
@@ -21,6 +22,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
+    // Read the settings on every command to fetch the latest value.
+    const settings = vscode.workspace.getConfiguration('vscode-sanity')
     let openJSONFile = settings.get('openJSONFile')
     let config: Config
     let query: string = groqQuery
