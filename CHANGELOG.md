@@ -2,6 +2,10 @@
 
 All notable changes will be documented in this file.
 
+## 0.1.1 - 2020-10-13
+
+- Upgraded `@sanity/client`
+
 ## 0.1.0 - 2020-10-13
 
 - Added support for running GROQ-queries
