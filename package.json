@@ -1,8 +1,8 @@
 {
   "name": "vscode-sanity",
+  "displayName": "Sanity.io",
   "version": "0.0.3",
   "license": "MIT",
-  "displayName": "Sanity.io",
   "description": "Developer tools for applications powered by Sanity.io",
   "author": "Sanity.io <hello@sanity.io>",
   "publisher": "sanity-io",
@@ -33,22 +33,22 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "vscode-sanity",
+      "title": "Sanity",
       "properties": {
-        "vscode-sanity.codelens": {
+        "sanity.useCodelens": {
           "type": "boolean",
           "default": true,
           "description": "Enable GROQ codelens."
         },
-        "vscode-sanity.useCDN": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use APICDN for GROQ queries."
-        },
-        "vscode-sanity.openJSONFile": {
+        "sanity.useCDN": {
           "type": "boolean",
           "default": false,
-          "description": "Open query results in a new tab with an editable JSON."
+          "description": "Use APICDN for GROQ queries."
+        },
+        "sanity.openJSONFile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open query results in a new tab as an editable JSON file."
         }
       }
     },

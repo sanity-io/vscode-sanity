@@ -3,28 +3,23 @@ import * as vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'fs'
 import {parse} from 'groq-js'
 import {Config, loadConfig} from './config/findConfig'
-import {executeGroq} from './query'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
+import {executeGroq} from './query'
 
 export function activate(context: vscode.ExtensionContext) {
-  const settings = vscode.workspace.getConfiguration('vscode-sanity')
+  // Assigned by `readConfig()`
+  let codelens: vscode.Disposable | undefined
+  let useCodelens
+  let openJSONFile
+  let useCDN
 
-  // FIXME: Toggling codelens configuration should reload vscode.
-  if (settings.codelens) {
-    context.subscriptions.push(
-      vscode.languages.registerCodeLensProvider(
-        ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-        new GROQCodeLensProvider()
-      )
-    )
-  }
+  // Read and listen for configuration updates
+  readConfig()
+  vscode.workspace.onDidChangeConfiguration(() => readConfig())
 
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    // Read the settings on every command to fetch the latest value.
-    const settings = vscode.workspace.getConfiguration('vscode-sanity')
-    let openJSONFile = settings.get('openJSONFile')
     let config: Config
     let query: string = groqQuery
     let params = {}
@@ -39,8 +34,6 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // FIXME: Throw error object in webview?
-      let useCDN = settings.get('useCDN', true)
-
       const {ms, result} = await executeGroq({
         ...config,
         query,
@@ -80,6 +73,28 @@ export function activate(context: vscode.ExtensionContext) {
     }
   })
   context.subscriptions.push(disposable)
+
+  function readConfig() {
+    const settings = vscode.workspace.getConfiguration('sanity')
+    openJSONFile = settings.get('openJSONFile', false)
+    useCodelens = settings.get('useCodelens', true)
+    useCDN = settings.get('useCDN', false)
+    console.log({openJSONFile, useCodelens, useCDN})
+
+    if (useCodelens && !codelens) {
+      codelens = vscode.languages.registerCodeLensProvider(
+        ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
+        new GROQCodeLensProvider()
+      )
+
+      context.subscriptions.push(codelens)
+    } else if (!useCodelens && codelens) {
+      const subIndex = context.subscriptions.indexOf(codelens)
+      context.subscriptions.splice(subIndex, 1)
+      codelens.dispose()
+      codelens = undefined
+    }
+  }
 }
 
 async function loadSanityJson() {
