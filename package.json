@@ -116,7 +116,7 @@
       {
         "command": "sanity.executeGroq",
         "key": "ctrl+shift+g",
-        "mac": "cmd+shift+g",
+        "mac": "ctrl+shift+g",
         "when": "editorTextFocus"
       }
     ]
