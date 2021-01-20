@@ -2,6 +2,10 @@
 
 All notable changes will be documented in this file.
 
+## 0.1.4 - 2021-01-19
+
+- Fix Mac key binding for 'sanity.executeGroq' to not conflict with VSCode default keybindings
+
 ## 0.1.1 - 2020-10-13
 
 - Upgraded `@sanity/client`
