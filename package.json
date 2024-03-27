@@ -122,20 +122,20 @@
     ]
   },
   "dependencies": {
-    "@sanity/client": "^2.0.1",
-    "groq-js": "^0.1.8",
+    "@sanity/client": "^6.15.7",
+    "groq-js": "^1.5.0",
     "line-number": "^0.1.0",
     "osenv": "^0.1.5",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-jason": "^1.1.2",
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
-    "@types/react": "^16.9.52",
-    "@types/react-dom": "^16.9.8",
+    "@types/react": "^18.2.72",
+    "@types/react-dom": "^18.2.22",
     "prettier": "^2.1.2",
-    "typescript": "^4.0.3",
+    "typescript": "^5.4.3",
     "vsce": "^1.81.1",
     "vscode": "^1.1.37"
   },
