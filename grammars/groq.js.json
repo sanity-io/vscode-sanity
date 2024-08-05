@@ -57,6 +57,29 @@
           "include": "source.groq"
         }
       ]
+    },
+    {
+      "name": "meta.embedded.block.defineQuery",
+      "begin": "(defineQuery)\\s*\\(\\s*(['\"`])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.js"
+        },
+        "2": {
+          "name": "punctuation.definition.string.begin.js"
+        }
+      },
+      "end": "(['\"`])\\s*\\)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.string.end.js"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.groq"
+        }
+      ]
     }
   ],
   "scopeName": "inline.groq"
