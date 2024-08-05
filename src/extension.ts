@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
         resultPanel.webview.html = html
       }
     } catch (err) {
-      vscode.window.showErrorMessage(err.message)
+      vscode.window.showErrorMessage(getErrorMessage(err))
       return
     }
   })
@@ -188,4 +188,16 @@ async function openInUntitled(content: string, language?: string) {
     vscode.window.showTextDocument(document, {viewColumn: vscode.ViewColumn.Beside})
     vscode.languages.setTextDocumentLanguage(document, language || 'json')
   })
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message
+  }
+
+  if (typeof err === 'string') {
+    return err
+  }
+
+  return 'An error occurred'
 }
