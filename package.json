@@ -7,7 +7,7 @@
   "author": "Sanity.io <hello@sanity.io>",
   "publisher": "sanity-io",
   "engines": {
-    "vscode": "^1.29.0"
+    "vscode": "^1.91.0"
   },
   "keywords": [
     "vscode",
@@ -134,17 +134,16 @@
   "devDependencies": {
     "@types/react": "^16.9.52",
     "@types/react-dom": "^16.9.8",
+    "@types/vscode": "^1.91.0",
     "prettier": "^2.1.2",
     "typescript": "5.5",
-    "vsce": "^1.81.1",
-    "vscode": "^1.1.37"
+    "vsce": "^1.81.1"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test",
+    "test": "npm run compile",
     "vsce:package": "vsce package",
     "env:source": "export $(cat .envrc | xargs)",
     "vsce:publish": "sh publish.sh",
