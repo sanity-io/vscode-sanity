@@ -1,4 +1,4 @@
-import sanityClient from '@sanity/client'
+import {createClient} from '@sanity/client'
 import * as vscode from 'vscode'
 
 export async function executeGroq(options: {
@@ -11,12 +11,12 @@ export async function executeGroq(options: {
 }) {
   const {query, params, ...clientOptions} = options
   const {token, ...noTokenClientOptions} = clientOptions
-  return sanityClient(clientOptions)
+  return createClient(clientOptions)
     .fetch(query, params, {filterResponse: false})
     .catch((err) => {
       if (err.statusCode === 401) {
         vscode.window.showInformationMessage(err.message + '. Falling back to public dataset.')
-        return sanityClient(noTokenClientOptions).fetch(query, params, {filterResponse: false})
+        return createClient(noTokenClientOptions).fetch(query, params, {filterResponse: false})
       }
 
       throw err

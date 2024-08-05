@@ -122,7 +122,7 @@
     ]
   },
   "dependencies": {
-    "@sanity/client": "^2.0.1",
+    "@sanity/client": "^6.21.1",
     "groq-js": "^0.1.8",
     "line-number": "^0.1.0",
     "osenv": "^0.1.5",
