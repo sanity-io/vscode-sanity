@@ -6,7 +6,7 @@ import {ResultView} from '../resultView/ResultView'
 export class GroqContentProvider implements vscode.TextDocumentContentProvider {
   private html: string = ''
 
-  constructor(data: any) {
+  constructor(query: string, params: Record<string, unknown>, ms: number, data: any) {
     this.html = `
     <html>
       <head>
@@ -16,7 +16,7 @@ export class GroqContentProvider implements vscode.TextDocumentContentProvider {
           body {padding: 10px;}
         </style>
       </head>
-      <body>${this.render(data)}</body>
+      <body>${this.render(query, params, ms, data)}</body>
     </html>
 `
   }
@@ -31,10 +31,10 @@ export class GroqContentProvider implements vscode.TextDocumentContentProvider {
     })
   }
 
-  render(result: any) {
+  render(query: string, params: Record<string, unknown>, ms: number, result: any) {
     return ReactDOM.renderToStaticMarkup(
       <>
-        <ResultView result={result} />
+        <ResultView query={query} params={params} ms={ms} result={result} />
       </>
     )
   }
