@@ -6,9 +6,11 @@ import osenv from 'osenv'
 import xdgBasedir from 'xdg-basedir'
 
 export interface Config {
-  projectId: string
-  dataset: string
-  token?: string
+  api: {
+    projectId: string
+    dataset: string
+    token?: string
+  }
 }
 
 export async function loadConfig(basePath: string): Promise<Config | false> {

@@ -2,12 +2,16 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'fs'
 import {parse} from 'groq-js'
-import {Config, loadConfig} from './config/findConfig'
+import {register as registerTsNode} from 'ts-node'
+import {Config} from './config/findConfig'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {executeGroq} from './query'
 
 export function activate(context: vscode.ExtensionContext) {
+  // needed to load sanity.cli.ts
+  registerTsNode()
+
   // Assigned by `readConfig()`
   let codelens: vscode.Disposable | undefined
   let useCodelens
@@ -17,6 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Read and listen for configuration updates
   readConfig()
   vscode.workspace.onDidChangeConfiguration(() => readConfig())
+  const output = vscode.window.createOutputChannel('Sanity')
+  output.show()
 
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
@@ -24,7 +30,13 @@ export function activate(context: vscode.ExtensionContext) {
     let query: string = groqQuery
     let params = {}
     try {
-      config = await loadSanityJson()
+      output.appendLine('trying to load sanity json')
+      config = await loadSanityConfig()
+      if (config === null) {
+        return
+      }
+
+      vscode.window.showInformationMessage('Configuration loaded: ' + JSON.stringify(config.api))
       if (!query) {
         query = await loadGroqFromFile()
       }
@@ -33,12 +45,13 @@ export function activate(context: vscode.ExtensionContext) {
         params = await readParamsFile()
       }
 
+      vscode.window.showInformationMessage(`Executing GROQ query: ${query}`)
       // FIXME: Throw error object in webview?
       const {ms, result} = await executeGroq({
-        ...config,
+        ...config.api,
         query,
         params,
-        useCdn: config.token ? false : useCDN,
+        useCdn: config.api.token ? false : useCDN,
       })
 
       vscode.window.setStatusBarMessage(
@@ -95,12 +108,41 @@ export function activate(context: vscode.ExtensionContext) {
   }
 }
 
-async function loadSanityJson() {
-  const config = (await loadConfig(getRootPath())) || (await loadConfig(getWorkspacePath()))
-  if (!config) {
-    throw new Error('Could not resolve sanity.json configuration file')
+async function loadSanityConfig() {
+  const configFiles = await vscode.workspace.findFiles('**/sanity.cli.ts', '**/node_modules/**', 1)
+  if (configFiles.length === 0) {
+    throw new Error('Could not resolve sanity.cli.ts configuration file')
   }
-  return config
+  let configFilePath: string | undefined = configFiles[0].fsPath
+
+  // if there are multiple files, ask the user to pick one
+  if (configFilePath.length > 1) {
+    const values = configFiles.map((value) => {
+      const workspacePath = vscode.workspace.getWorkspaceFolder(value)
+      const label = path.relative(workspacePath?.uri.fsPath || '', value.fsPath)
+      return {label, value}
+    })
+
+    configFilePath = await vscode.window
+      .showQuickPick(values, {})
+      .then((selected) => selected?.value.fsPath)
+  }
+
+  // the user canceled the quick pick
+  if (!configFilePath) {
+    return null
+  }
+
+  const exists = await checkFileExists(configFilePath)
+  if (!exists) {
+    throw new Error('Could not resolve sanity.cli.ts configuration file')
+  }
+
+  // clear require cache to ensure we get the latest version
+  delete require.cache[require.resolve(configFilePath)]
+
+  const config = require(configFilePath)
+  return config.default
 }
 
 async function loadGroqFromFile() {
@@ -120,17 +162,6 @@ async function registerContentProvider(
   const registration = vscode.workspace.registerTextDocumentContentProvider('groq', contentProvider)
   context.subscriptions.push(registration)
   return contentProvider
-}
-
-function getRootPath(): string {
-  const activeFile = getActiveFileName()
-  const activeDir = path.dirname(activeFile)
-  return activeDir
-}
-
-function getWorkspacePath(): string {
-  const folders = vscode.workspace.workspaceFolders || []
-  return folders.length > 0 ? folders[0].uri.fsPath : ''
 }
 
 function getActiveFileName(): string {
