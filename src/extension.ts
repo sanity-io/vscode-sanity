@@ -111,14 +111,14 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 async function loadSanityConfig() {
-  const configFiles = await vscode.workspace.findFiles('**/sanity.cli.ts', '**/node_modules/**', 1)
+  const configFiles = await vscode.workspace.findFiles('**/sanity.cli.ts', '**/node_modules/**')
   if (configFiles.length === 0) {
     throw new Error('Could not resolve sanity.cli.ts configuration file')
   }
   let configFilePath: string | undefined = configFiles[0].fsPath
 
   // if there are multiple files, ask the user to pick one
-  if (configFilePath.length > 1) {
+  if (configFiles.length > 1) {
     const values = configFiles.map((value) => {
       const workspacePath = vscode.workspace.getWorkspaceFolder(value)
       const label = path.relative(workspacePath?.uri.fsPath || '', value.fsPath)
