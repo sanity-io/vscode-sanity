@@ -1,4 +1,4 @@
-import {CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Position} from 'vscode'
+import {type CodeLensProvider, type TextDocument, type CancellationToken, CodeLens, Range, Position} from 'vscode'
 
 interface ExtractedQuery {
   content: string

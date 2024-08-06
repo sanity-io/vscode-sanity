@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/server'
-import * as vscode from 'vscode'
+import {type TextDocumentContentProvider, type Uri, type ProviderResult} from 'vscode'
 import {ResultView} from '../resultView/ResultView'
 
-export class GroqContentProvider implements vscode.TextDocumentContentProvider {
+export class GroqContentProvider implements TextDocumentContentProvider {
   private html: string = ''
 
   constructor(query: string, params: Record<string, unknown>, ms: number, data: any) {
@@ -21,7 +21,7 @@ export class GroqContentProvider implements vscode.TextDocumentContentProvider {
 `
   }
 
-  provideTextDocumentContent(_: vscode.Uri): vscode.ProviderResult<string> {
+  provideTextDocumentContent(_: Uri): ProviderResult<string> {
     return this.html
   }
 
