@@ -138,7 +138,7 @@
     "@types/vscode": "^1.91.0",
     "prettier": "^2.1.2",
     "typescript": "5.5",
-    "vsce": "^1.81.1"
+    "vsce": "^2.15.0"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
