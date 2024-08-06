@@ -2,12 +2,16 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'fs'
 import {parse} from 'groq-js'
-import {Config, loadConfig} from './config/findConfig'
+import {register as registerTsNode} from 'ts-node'
+import {Config} from './config/findConfig'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {executeGroq} from './query'
 
 export function activate(context: vscode.ExtensionContext) {
+  // needed to load sanity.cli.ts
+  registerTsNode()
+
   // Assigned by `readConfig()`
   let codelens: vscode.Disposable | undefined
   let useCodelens
@@ -22,23 +26,28 @@ export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
     let config: Config
     let query: string = groqQuery
-    let params = {}
+    let params: Record<string, unknown> = {}
     try {
-      config = await loadSanityJson()
+      config = await loadSanityConfig()
+      if (config === null) {
+        return
+      }
+
       if (!query) {
         query = await loadGroqFromFile()
       }
       const variables = findVariablesInQuery(query)
       if (variables.length > 0) {
-        params = await readParamsFile()
+        params = await readParams(variables)
       }
 
+      vscode.window.showInformationMessage(`Executing GROQ query: ${query}`)
       // FIXME: Throw error object in webview?
       const {ms, result} = await executeGroq({
-        ...config,
+        ...config.api,
         query,
         params,
-        useCdn: config.token ? false : useCDN,
+        useCdn: config.api.token ? false : useCDN,
       })
 
       vscode.window.setStatusBarMessage(
@@ -62,12 +71,18 @@ export function activate(context: vscode.ExtensionContext) {
       if (openJSONFile) {
         await openInUntitled(result, 'json')
       } else if (resultPanel) {
-        const contentProvider = await registerContentProvider(context, result || [])
+        const contentProvider = await registerContentProvider(
+          context,
+          query,
+          params,
+          ms,
+          result || []
+        )
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
       }
     } catch (err) {
-      vscode.window.showErrorMessage(err.message)
+      vscode.window.showErrorMessage(getErrorMessage(err))
       return
     }
   })
@@ -95,12 +110,41 @@ export function activate(context: vscode.ExtensionContext) {
   }
 }
 
-async function loadSanityJson() {
-  const config = (await loadConfig(getRootPath())) || (await loadConfig(getWorkspacePath()))
-  if (!config) {
-    throw new Error('Could not resolve sanity.json configuration file')
+async function loadSanityConfig() {
+  const configFiles = await vscode.workspace.findFiles('**/sanity.cli.ts', '**/node_modules/**')
+  if (configFiles.length === 0) {
+    throw new Error('Could not resolve sanity.cli.ts configuration file')
   }
-  return config
+  let configFilePath: string | undefined = configFiles[0].fsPath
+
+  // if there are multiple files, ask the user to pick one
+  if (configFiles.length > 1) {
+    const values = configFiles.map((value) => {
+      const workspacePath = vscode.workspace.getWorkspaceFolder(value)
+      const label = path.relative(workspacePath?.uri.fsPath || '', value.fsPath)
+      return {label, value}
+    })
+
+    configFilePath = await vscode.window
+      .showQuickPick(values, {})
+      .then((selected) => selected?.value.fsPath)
+  }
+
+  // the user canceled the quick pick
+  if (!configFilePath) {
+    return null
+  }
+
+  const exists = await checkFileExists(configFilePath)
+  if (!exists) {
+    throw new Error('Could not resolve sanity.cli.ts configuration file')
+  }
+
+  // clear require cache to ensure we get the latest version
+  delete require.cache[require.resolve(configFilePath)]
+
+  const config = require(configFilePath)
+  return config.default
 }
 
 async function loadGroqFromFile() {
@@ -114,23 +158,15 @@ async function loadGroqFromFile() {
 
 async function registerContentProvider(
   context: vscode.ExtensionContext,
+  query: string,
+  params: Record<string, unknown>,
+  ms: number,
   result: any
 ): Promise<any> {
-  const contentProvider = new GroqContentProvider(result)
+  const contentProvider = new GroqContentProvider(query, params, ms, result)
   const registration = vscode.workspace.registerTextDocumentContentProvider('groq', contentProvider)
   context.subscriptions.push(registration)
   return contentProvider
-}
-
-function getRootPath(): string {
-  const activeFile = getActiveFileName()
-  const activeDir = path.dirname(activeFile)
-  return activeDir
-}
-
-function getWorkspacePath(): string {
-  const folders = vscode.workspace.workspaceFolders || []
-  return folders.length > 0 ? folders[0].uri.fsPath : ''
 }
 
 function getActiveFileName(): string {
@@ -165,21 +201,41 @@ function findVariables(node: any, found: string[]): string[] {
 }
 
 async function readParamsFile(): Promise<Record<string, unknown>> {
-  let defaultParamFile, absoluteParamFile
   const activeFile = getActiveFileName()
   if (activeFile && activeFile !== '') {
     var pos = activeFile.lastIndexOf('.')
-    absoluteParamFile = activeFile.substr(0, pos < 0 ? activeFile.length : pos) + '.json'
+    const absoluteParamFile = activeFile.substring(0, pos < 0 ? activeFile.length : pos) + '.json'
     if (await checkFileExists(absoluteParamFile)) {
-      defaultParamFile = path.basename(absoluteParamFile)
+      try {
+        const content = await fs.readFile(absoluteParamFile)
+        return JSON.parse(content.toString())
+      } catch (err) {
+        vscode.window.showErrorMessage(`Failed to read parameter file: ${getErrorMessage(err)}`)
+      }
     }
   }
-  const paramsFile = await vscode.window.showInputBox({value: defaultParamFile})
-  if (!paramsFile) {
-    throw new Error('Invalid param file received')
+
+  return {}
+}
+
+async function readParams(variables: string[]): Promise<Record<string, unknown>> {
+  const values: Record<string, unknown> = await readParamsFile()
+  const missing = variables.filter((variable) => !values[variable])
+  for (const variable of missing) {
+    let value = await vscode.window.showInputBox({title: `value for "${variable}"`, value: ''})
+    if (!value) {
+      continue
+    }
+
+    try {
+      value = JSON.parse(value)
+    } catch (err) {
+      // noop
+    }
+    values[variable] = value
   }
-  const content = await fs.readFile(path.join(path.dirname(absoluteParamFile), paramsFile), 'utf8')
-  return JSON.parse(content)
+
+  return values
 }
 
 async function openInUntitled(content: string, language?: string) {
@@ -188,4 +244,16 @@ async function openInUntitled(content: string, language?: string) {
     vscode.window.showTextDocument(document, {viewColumn: vscode.ViewColumn.Beside})
     vscode.languages.setTextDocumentLanguage(document, language || 'json')
   })
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message
+  }
+
+  if (typeof err === 'string') {
+    return err
+  }
+
+  return 'An error occurred'
 }

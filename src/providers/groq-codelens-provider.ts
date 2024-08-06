@@ -1,13 +1,13 @@
 import {CodeLensProvider, TextDocument, CancellationToken, CodeLens, Range, Position} from 'vscode'
 
-interface ExtractedTemplateLiteral {
+interface ExtractedQuery {
   content: string
   uri: string
   position: Position
 }
 
-function extractAllTemplateLiterals(document: TextDocument): ExtractedTemplateLiteral[] {
-  const documents: ExtractedTemplateLiteral[] = []
+function extractAllTemplateLiterals(document: TextDocument): ExtractedQuery[] {
+  const documents: ExtractedQuery[] = []
   const text = document.getText()
   const regExpGQL = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
 
@@ -16,6 +16,27 @@ function extractAllTemplateLiterals(document: TextDocument): ExtractedTemplateLi
   while ((result = regExpGQL.exec(text)) !== null) {
     const content = result[1]
     const queryPosition = text.indexOf(content, prevIndex)
+    documents.push({
+      content: content,
+      uri: document.uri.path,
+      position: document.positionAt(queryPosition),
+    })
+    prevIndex = queryPosition + 1
+  }
+  return documents
+}
+
+function extractAllDefineQuery(document: TextDocument): ExtractedQuery[] {
+  const documents: ExtractedQuery[] = []
+  const text = document.getText()
+  const pattern = '(\\s*defineQuery\\((["\'`])([\\s\\S]*?)\\2\\))'
+  const regexp = new RegExp(pattern, 'g');
+
+  let prevIndex = 0
+  let result
+  while ((result = regexp.exec(text)) !== null) {
+    const content = result[3]
+    const queryPosition = text.indexOf(result[1], prevIndex)
     documents.push({
       content: content,
       uri: document.uri.path,
@@ -41,16 +62,16 @@ export class GROQCodeLensProvider implements CodeLensProvider {
     }
 
     // find all lines where "groq" exists
-    const literals: ExtractedTemplateLiteral[] = extractAllTemplateLiterals(document)
+    const queries: ExtractedQuery[] = [...extractAllTemplateLiterals(document), ...extractAllDefineQuery(document)]
 
     // add a button above each line that has groq
-    return literals.map((literal) => {
+    return queries.map((def) => {
       return new CodeLens(
-        new Range(new Position(literal.position.line, 0), new Position(literal.position.line, 0)),
+        new Range(new Position(def.position.line, 0), new Position(def.position.line, 0)),
         {
           title: 'Execute Query',
           command: 'sanity.executeGroq',
-          arguments: [literal.content],
+          arguments: [def.content],
         }
       )
     })
