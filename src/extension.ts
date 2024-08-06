@@ -21,8 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
   // Read and listen for configuration updates
   readConfig()
   vscode.workspace.onDidChangeConfiguration(() => readConfig())
-  const output = vscode.window.createOutputChannel('Sanity')
-  output.show()
 
   let resultPanel: vscode.WebviewPanel | undefined
   let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
@@ -30,13 +28,11 @@ export function activate(context: vscode.ExtensionContext) {
     let query: string = groqQuery
     let params: Record<string, unknown> = {}
     try {
-      output.appendLine('trying to load sanity json')
       config = await loadSanityConfig()
       if (config === null) {
         return
       }
 
-      vscode.window.showInformationMessage('Configuration loaded: ' + JSON.stringify(config.api))
       if (!query) {
         query = await loadGroqFromFile()
       }
