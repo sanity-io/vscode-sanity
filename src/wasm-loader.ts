@@ -7,8 +7,7 @@ import '@groqfmt/wasm/dist/wasm-exec';
 const go = new (global as any).Go();
 
 async function loadWasm() {
-  // FIXME: Maybe put this in the out/ folder instead?
-  const wasmPath = path.resolve(__dirname, '../node_modules/@groqfmt/wasm/dist/groqfmt.wasm');
+  const wasmPath = path.resolve(__dirname, '../vendor/groqfmt.wasm');
 
   const wasmData = await util.promisify(fs.readFile)(wasmPath);
   const { instance } = await WebAssembly.instantiate(wasmData, go.importObject);

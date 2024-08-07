@@ -20,6 +20,6 @@
   "exclude": ["node_modules", ".vscode-test", "ts-graphql-plugin"],
   "include": [
     "src/**/*.ts",
-    "node_modules/@groqfmt/wasm/dist/groqfmt.wasm"
+    "vendor/groqfmt.wasm"
   ]
 }

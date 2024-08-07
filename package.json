@@ -122,7 +122,6 @@
     ]
   },
   "dependencies": {
-    "@groqfmt/wasm": "^1.2.2",
     "@sanity/client": "^6.21.1",
     "groq-js": "^1.12.0",
     "line-number": "^0.1.0",
@@ -154,6 +153,6 @@
   },
   "files": [
     "out/**/*",
-    "node_modules/@groqfmt/wasm/dist/groqfmt.wasm"
+    "vendor/**/*"
   ]
 }
