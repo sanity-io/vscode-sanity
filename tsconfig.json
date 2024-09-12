@@ -17,5 +17,9 @@
     "esModuleInterop": true,
     "jsx": "react"
   },
-  "exclude": ["node_modules", ".vscode-test", "ts-graphql-plugin"]
+  "exclude": ["node_modules", ".vscode-test", "ts-graphql-plugin"],
+  "include": [
+    "src/**/*.ts",
+    "vendor/groqfmt.wasm"
+  ]
 }
