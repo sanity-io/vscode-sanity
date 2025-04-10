@@ -151,5 +151,9 @@
     "env:source": "export $(cat .envrc | xargs)",
     "vsce:publish": "sh publish.sh",
     "upgrade-interactive": "npx npm-check -u"
-  }
+  },
+  "files": [
+    "out/**/*",
+    "vendor/**/*"
+  ]
 }

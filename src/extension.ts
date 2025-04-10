@@ -7,6 +7,7 @@ import {Config} from './config/findConfig'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {executeGroq} from './query'
+import {formatGroq} from './format'
 
 export function activate(context: vscode.ExtensionContext) {
   // needed to load sanity.cli.ts
@@ -87,6 +88,21 @@ export function activate(context: vscode.ExtensionContext) {
     }
   })
   context.subscriptions.push(disposable)
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('sanity.formatGroq', async (groqQuery: string, uri: string, range: vscode.Range) => {
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(uri));
+      const query = groqQuery;
+      const formattedQuery = await formatGroq(query); // Await the async function
+
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(document.uri, range, formattedQuery);
+      await vscode.workspace.applyEdit(edit);
+
+      // Refresh the CodeLens
+      await vscode.commands.executeCommand('vscode.executeCodeLensProvider', document.uri);
+    })
+  );
 
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
