@@ -130,6 +130,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-jason": "^1.1.2",
+    "ts-morph": "^26.0.0",
     "ts-node": "^10.9.2",
     "xdg-basedir": "^4.0.0"
   },
@@ -138,7 +139,7 @@
     "@types/react": "^16.9.52",
     "@types/react-dom": "^16.9.8",
     "@types/vscode": "^1.91.0",
-    "prettier": "^2.1.2",
+    "prettier": "^3.6.2",
     "typescript": "5.5",
     "vsce": "^2.15.0"
   },
