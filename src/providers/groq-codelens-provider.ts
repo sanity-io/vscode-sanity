@@ -1,4 +1,13 @@
-import {type CodeLensProvider, type TextDocument, type CancellationToken, CodeLens, Range, Position} from 'vscode'
+import {
+  type CodeLensProvider,
+  type TextDocument,
+  type CancellationToken,
+  CodeLens,
+  Range,
+  Position,
+} from 'vscode'
+
+import {resolveQueries} from '../ast/resolve-queries'
 
 interface ExtractedQuery {
   content: string
@@ -6,51 +15,32 @@ interface ExtractedQuery {
   position: Position
 }
 
-function extractAllTemplateLiterals(document: TextDocument): ExtractedQuery[] {
-  const documents: ExtractedQuery[] = []
+async function extractAllQueries(document: TextDocument): Promise<ExtractedQuery[]> {
   const text = document.getText()
-  const regExpGQL = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
+  const path = document.uri.path
 
-  let prevIndex = 0
-  let result
-  while ((result = regExpGQL.exec(text)) !== null) {
-    const content = result[1]
-    const queryPosition = text.indexOf(content, prevIndex)
-    documents.push({
-      content: content,
-      uri: document.uri.path,
-      position: document.positionAt(queryPosition),
+  if (text.match(/defineQuery/g) || text.match(/groq`/g)) {
+    const resolved = await resolveQueries(text, path)
+
+    return resolved.map((query) => {
+      return {
+        content: query.content,
+        uri: document.uri.path,
+        position: query.position,
+      }
     })
-    prevIndex = queryPosition + 1
   }
-  return documents
-}
 
-function extractAllDefineQuery(document: TextDocument): ExtractedQuery[] {
-  const documents: ExtractedQuery[] = []
-  const text = document.getText()
-  const pattern = '(\\s*defineQuery\\((["\'`])([\\s\\S]*?)\\2\\))'
-  const regexp = new RegExp(pattern, 'g');
-
-  let prevIndex = 0
-  let result
-  while ((result = regexp.exec(text)) !== null) {
-    const content = result[3]
-    const queryPosition = text.indexOf(result[1], prevIndex)
-    documents.push({
-      content: content,
-      uri: document.uri.path,
-      position: document.positionAt(queryPosition),
-    })
-    prevIndex = queryPosition + 1
-  }
-  return documents
+  return []
 }
 
 export class GROQCodeLensProvider implements CodeLensProvider {
   constructor() {}
 
-  public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
+  public async provideCodeLenses(
+    document: TextDocument,
+    _token: CancellationToken,
+  ): Promise<CodeLens[]> {
     if (document.languageId === 'groq') {
       return [
         new CodeLens(new Range(new Position(0, 0), new Position(0, 0)), {
@@ -61,19 +51,20 @@ export class GROQCodeLensProvider implements CodeLensProvider {
       ]
     }
 
-    // find all lines where "groq" exists
-    const queries: ExtractedQuery[] = [...extractAllTemplateLiterals(document), ...extractAllDefineQuery(document)]
+    const queries: ExtractedQuery[] = await extractAllQueries(document)
 
     // add a button above each line that has groq
-    return queries.map((def) => {
-      return new CodeLens(
-        new Range(new Position(def.position.line, 0), new Position(def.position.line, 0)),
-        {
-          title: 'Execute Query',
-          command: 'sanity.executeGroq',
-          arguments: [def.content],
-        }
-      )
+    return queries.flatMap((def) => {
+      return [
+        new CodeLens(
+          new Range(new Position(def.position.line, 0), new Position(def.position.line, 0)),
+          {
+            title: 'Execute Query',
+            command: 'sanity.executeGroq',
+            arguments: [def.content],
+          },
+        ),
+      ]
     })
   }
 }
