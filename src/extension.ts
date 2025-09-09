@@ -239,7 +239,7 @@ async function readParams(variables: string[]): Promise<Record<string, unknown>>
 }
 
 async function openInUntitled(content: string, language?: string) {
-  const cs = JSON.stringify(content)
+  const cs = JSON.stringify(content, null, 2)
   await vscode.workspace.openTextDocument({content: cs}).then((document) => {
     vscode.window.showTextDocument(document, {viewColumn: vscode.ViewColumn.Beside})
     vscode.languages.setTextDocumentLanguage(document, language || 'json')
