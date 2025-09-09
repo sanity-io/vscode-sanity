@@ -56,12 +56,20 @@
       {
         "command": "sanity.executeGroq",
         "title": "Execute GROQ query"
+      },
+      {
+        "command": "sanity.copyGroq",
+        "title": "Copy GROQ query"
       }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "sanity.executeGroq",
+          "when": "editorLangId == groq || editorLangId == plaintext"
+        },
+        {
+          "command": "sanity.copyGroq",
           "when": "editorLangId == groq || editorLangId == plaintext"
         }
       ]
