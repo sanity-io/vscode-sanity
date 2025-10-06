@@ -150,6 +150,8 @@
     "watch": "tsc -watch -p ./",
     "env:source": "export $(cat .envrc | xargs)",
     "prepackage": "npm run compile",
+    "package": "vsce package --allow-star-activation",
+    "prerelease": "npm run compile",
     "release": "semantic-release",
     "release:dryrun": "semantic-release --dry-run",
     "upgrade-interactive": "npx npm-check -u"

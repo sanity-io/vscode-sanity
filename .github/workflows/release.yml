@@ -18,8 +18,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      # In case you want to publish to Open VSX Registry
-      # OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
