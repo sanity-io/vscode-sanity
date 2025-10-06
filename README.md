@@ -39,6 +39,20 @@ Install the [VSCode Sanity.io Extension](https://marketplace.visualstudio.com/it
 6.  Open a file that should be syntax highlighted
 7.  Make changes to the extension code, then press (`Ctrl+R` or `Cmd+R` on Mac) in the syntax highlighted file to test the changes
 
+> We follow the principles of semantic versioning and the commits are used as the basis for determining if it's a patch/minor/major when building and releasing new version, as well as for the release notes. A good explanation of what commit messages translate to what version bumps can be found in the [`semantic release`](https://github.com/semantic-release/semantic-release?tab=readme-ov-file#commit-message-format) docs.
+
+If you want to build/inspect the vsix file, you can do `npm run package`.
+
+## Publishing
+
+The extension is built whenever new code is pushed to the `main` branch of the repo. The release notes and tagging is done automatically in CI by `semantic-release` and the extension is pushed to Open VSX registry and [Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity).
+
+If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GITHUB_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
+
+```sh
+npm run release:dry-run
+```
+
 ## License
 
 MIT
