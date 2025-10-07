@@ -39,7 +39,7 @@ Install the [VSCode Sanity.io Extension](https://marketplace.visualstudio.com/it
 6.  Open a file that should be syntax highlighted
 7.  Make changes to the extension code, then press (`Ctrl+R` or `Cmd+R` on Mac) in the syntax highlighted file to test the changes
 
-> We follow the principles of semantic versioning and the commits are used as the basis for determining if it's a patch/minor/major when building and releasing new version, as well as for the release notes. A good explanation of what commit messages translate to what version bumps can be found in the [`semantic release`](https://github.com/semantic-release/semantic-release?tab=readme-ov-file#commit-message-format) docs.
+> We follow the principles of semantic versioning and conventional commits, meaning that the commits are used as the basis for determining if it's a patch/minor/major when building and releasing new version, as well as for generating the release notes. A good explanation of what commit messages translate to what version bumps can be found in the [`semantic release`](https://github.com/semantic-release/semantic-release?tab=readme-ov-file#commit-message-format) docs.
 
 If you want to build/inspect the vsix file, you can do `npm run package`.
 
