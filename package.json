@@ -155,5 +155,8 @@
     "release": "semantic-release",
     "release:dryrun": "semantic-release --dry-run",
     "upgrade-interactive": "npx npm-check -u"
+  },
+  "volta": {
+    "node": "22.20.0"
   }
 }
