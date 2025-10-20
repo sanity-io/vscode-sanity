@@ -23,11 +23,11 @@ The project ID and dataset used is determined by finding `sanity.cli.ts` in the 
 
 If the GROQ file/query has any variables, then extension asks for a relative filename of a JSON-file containing an object of key-value mappings. It autofills the param filename based on the current file with a `.json` extension, if it exists.
 
-![Execute GROQ in VS Code](https://raw.githubusercontent.com/sanity-io/vscode-sanity/main/screenshots/previewofquery.png)
+![Execute GROQ](https://raw.githubusercontent.com/sanity-io/vscode-sanity/main/screenshots/previewofquery.png)
 
 ## Usage
 
-Install the extension for [VSCode](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) or [Cursor](https://open-vsx.org/extension/sanity-io/vscode-sanity) by searching for `vscode-sanity`. This extension adds syntax highlighting for GROQ-files and `groq` tags.
+Install the extension for [VSCode](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) or [Cursor](https://open-vsx.org/extension/sanity-io/vscode-sanity) by searching for `sanity`. This extension adds syntax highlighting for GROQ-files and `groq` tags.
 
 ## Development
 
@@ -47,7 +47,7 @@ If you want to build/inspect the vsix file, you can do `npm run package`. It can
 
 The extension is built whenever new code is pushed to the `main` branch of the repo. The release notes and tagging is done automatically in CI by `semantic-release` and the extension is pushed to Open VSX registry and [Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity).
 
-If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GH_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
+If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GITHUB_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
 
 ```sh
 # you can dry-run using
