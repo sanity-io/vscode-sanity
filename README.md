@@ -1,6 +1,6 @@
 # vscode-sanity
 
-Extension for [Visual Studio Code](https://code.visualstudio.com/) that makes developing applications for [Sanity.io](https://www.sanity.io/) that much more awesome.
+Extension for [Visual Studio Code](https://code.visualstudio.com/) / [Cursor](https://cursor.com/) that makes developing applications for [Sanity.io](https://www.sanity.io/) that much more awesome.
 
 ## Features
 
@@ -27,7 +27,7 @@ If the GROQ file/query has any variables, then extension asks for a relative fil
 
 ## Usage
 
-Install the [VSCode Sanity.io Extension](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity). This extension adds syntax highlighting for GROQ-files and `groq` tags.
+Install the extension for [VSCode](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) or [Cursor](https://open-vsx.org/extension/sanity-io/vscode-sanity) by searching for `vscode-sanity`. This extension adds syntax highlighting for GROQ-files and `groq` tags.
 
 ## Development
 
@@ -41,17 +41,24 @@ Install the [VSCode Sanity.io Extension](https://marketplace.visualstudio.com/it
 
 > We follow the principles of semantic versioning and conventional commits, meaning that the commits are used as the basis for determining if it's a patch/minor/major when building and releasing new version, as well as for generating the release notes. A good explanation of what commit messages translate to what version bumps can be found in the [`semantic release`](https://github.com/semantic-release/semantic-release?tab=readme-ov-file#commit-message-format) docs.
 
-If you want to build/inspect the vsix file, you can do `npm run package`.
+If you want to build/inspect the vsix file, you can do `npm run package`. It can then be "installed from location" in either Cursor or VS Code.
 
 ## Publishing
 
 The extension is built whenever new code is pushed to the `main` branch of the repo. The release notes and tagging is done automatically in CI by `semantic-release` and the extension is pushed to Open VSX registry and [Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity).
 
-If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GITHUB_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
+If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GH_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
 
 ```sh
-npm run release:dry-run
+# first you need to package the extension
+npm run package
+
+# and when all is good you can do
+npm run publish:vsce
+npm run publish:ovsx
 ```
+
+> ⚠️ The `release` script will not publish from your local machine (unless you do `--no-ci`). The publishing should be handled in CI – if you need to do it, see the workflow file for details on what ENV vars you need to provide.
 
 ## License
 
