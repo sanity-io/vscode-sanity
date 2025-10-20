@@ -19,7 +19,6 @@ export default {
         "npmPublish": false
       }
     ],
-    "@semantic-release/git",
-    "semantic-release-stop-before-publish",
+    "@semantic-release/git"
   ]
 };
