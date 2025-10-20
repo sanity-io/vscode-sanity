@@ -50,12 +50,11 @@ The extension is built whenever new code is pushed to the `main` branch of the r
 If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GH_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
 
 ```sh
-# first you need to package the extension
-npm run package
+# you can dry-run using
+npm run release:dryrun
 
-# and when all is good you can do
-npm run publish:vsce
-npm run publish:ovsx
+# and when all is good you do
+npm run release
 ```
 
 > ⚠️ The `release` script will not publish from your local machine (unless you do `--no-ci`). The publishing should be handled in CI – if you need to do it, see the workflow file for details on what ENV vars you need to provide.

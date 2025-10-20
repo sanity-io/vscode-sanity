@@ -9,66 +9,29 @@ permissions:
   contents: read # for checkout
 
 jobs:
-  package:
+  release:
     runs-on: ubuntu-latest
+    outputs:
+      new_release: ${{ steps.check_release.outputs.new_release }}
     permissions:
       contents: write # to be able to publish a GitHub release
       issues: write # to be able to comment on released issues
       pull-requests: write # to be able to comment on released pull requests
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      OVSX: ${{ secrets.OVSX_PAT }}
+      VSCE: ${{ secrets.VSCE_PAT }}
     steps:
+      - name: Set OVSX_PAT env var
+        if: env.OVSX != ''
+        run: echo "OVSX_PAT=${{ env.OVSX }}" >> $GITHUB_ENV
+      - name: Set VSCE_PAT env var
+        if: env.VSCE != ''
+        run: echo "VSCE_PAT=${{ env.VSCE }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci
+      - run: npm run lint
       - run: npm run release
-      - run: npm run package
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: packaged
-          path: |
-            vscode-sanity.vsix
-            package.json
-            package-lock.json
-
-  openvsx:
-    name: "Publish: Open VSX"
-    runs-on: ubuntu-latest
-    needs: package
-    env:
-      OVSX_PAT: ${{ secrets.OVSX_PAT }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: packaged
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm ci
-      - run: npm run publish:ovsx
-
-  vsce:
-    if: false
-    name: "Publish: VSCode Extension"
-    runs-on: ubuntu-latest
-    needs: package
-    env:
-      VSCE_PAT: ${{ secrets.VSCE_PAT }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: packaged
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm ci
-      - run: npm run publish:vsce
