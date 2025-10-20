@@ -51,7 +51,7 @@ jobs:
             package-lock.json
 
   test:
-    name: "Test step"
+    name: "Test step."
     runs-on: ubuntu-latest
     needs: package
     if: needs.package.outputs.new_release == 'true'
