@@ -33,10 +33,13 @@ jobs:
       - name: Check if new release was created
         id: check_release
         run: |
-          if git describe --exact-match HEAD 2>/dev/null; then
+          # Check if package.json was modified (indicating a new release)
+          if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q "package.json"; then
             echo "new_release=true" >> $GITHUB_OUTPUT
+            echo "New release created"
           else
             echo "new_release=false" >> $GITHUB_OUTPUT
+            echo "No new release created"
           fi
       - run: npm run package
         if: steps.check_release.outputs.new_release == 'true'
