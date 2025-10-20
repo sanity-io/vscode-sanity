@@ -1,7 +1,7 @@
 {
   "name": "vscode-sanity",
   "displayName": "Sanity.io",
-  "version": "0.2.1",
+  "version": "0.0.0",
   "license": "MIT",
   "description": "Developer tools for applications powered by Sanity.io",
   "author": "Sanity.io <hello@sanity.io>",
@@ -134,13 +134,15 @@
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
+    "@semantic-release/npm": "^13.1.1",
     "@types/node": "^20.14.14",
     "@types/react": "^16.9.52",
     "@types/react-dom": "^16.9.8",
     "@types/vscode": "^1.91.0",
     "@vscode/vsce": "^3.6.2",
+    "ovsx": "^0.10.6",
     "prettier": "^2.1.2",
-    "semantic-release-vsce": "^6.0.12",
+    "semantic-release-stop-before-publish": "^2.0.0",
     "typescript": "5.5"
   },
   "scripts": {
@@ -150,10 +152,11 @@
     "watch": "tsc -watch -p ./",
     "env:source": "export $(cat .envrc | xargs)",
     "prepackage": "npm run compile",
-    "package": "vsce package --allow-star-activation",
-    "prerelease": "npm run compile",
+    "package": "vsce package --allow-star-activation --out vscode-sanity.vsix",
     "release": "semantic-release",
     "release:dryrun": "semantic-release --dry-run",
+    "publish:vsce": "vsce publish --packagePath vscode-sanity.vsix",
+    "publish:ovsx": "ovsx publish --packagePath vscode-sanity.vsix",
     "upgrade-interactive": "npx npm-check -u"
   },
   "volta": {

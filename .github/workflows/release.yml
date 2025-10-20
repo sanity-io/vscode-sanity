@@ -9,7 +9,7 @@ permissions:
   contents: read # for checkout
 
 jobs:
-  release:
+  package:
     runs-on: ubuntu-latest
     permissions:
       contents: write # to be able to publish a GitHub release
@@ -25,4 +25,50 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - run: npm release
+      - run: npm run release
+      - run: npm run package
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: packaged
+          path: |
+            vscode-sanity.vsix
+            package.json
+            package-lock.json
+
+  openvsx:
+    name: "Publish: Open VSX"
+    runs-on: ubuntu-latest
+    needs: package
+    env:
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: packaged
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run publish:ovsx
+
+  vsce:
+    if: false
+    name: "Publish: VSCode Extension"
+    runs-on: ubuntu-latest
+    needs: package
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: packaged
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run publish:vsce

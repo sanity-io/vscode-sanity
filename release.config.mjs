@@ -4,23 +4,22 @@
 export default {
   branches: ["main"],
   plugins: [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
     [
-      "semantic-release-vsce",
+      "@semantic-release/commit-analyzer",
       {
-        "packageVsix": true,
-      }
-    ],
-    [
-      "@semantic-release/github",
-      {
-        "assets": [
-          {
-            "path": "*.vsix"
-          }
+        "releaseRules": [
+          { "type": "docs", "scope": "README", "release": "patch" }
         ]
       }
-    ]
-  ]  
+    ],
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
+    "@semantic-release/git",
+    "semantic-release-stop-before-publish",
+  ]
 };
