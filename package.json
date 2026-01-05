@@ -7,7 +7,7 @@
   "author": "Sanity.io <hello@sanity.io>",
   "publisher": "sanity-io",
   "engines": {
-    "vscode": "^1.91.0"
+    "vscode": "^1.107.0"
   },
   "keywords": [
     "vscode",
