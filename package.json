@@ -1,7 +1,7 @@
 {
   "name": "vscode-sanity",
   "displayName": "Sanity.io",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "license": "MIT",
   "description": "Developer tools for applications powered by Sanity.io",
   "author": "Sanity.io <hello@sanity.io>",
