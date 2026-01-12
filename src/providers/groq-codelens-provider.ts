@@ -1,4 +1,11 @@
-import {type CodeLensProvider, type TextDocument, type CancellationToken, CodeLens, Range, Position} from 'vscode'
+import {
+  type CodeLensProvider,
+  type TextDocument,
+  type CancellationToken,
+  CodeLens,
+  Range,
+  Position,
+} from 'vscode'
 
 interface ExtractedQuery {
   content: string
@@ -30,7 +37,7 @@ function extractAllDefineQuery(document: TextDocument): ExtractedQuery[] {
   const documents: ExtractedQuery[] = []
   const text = document.getText()
   const pattern = '(\\s*defineQuery\\((["\'`])([\\s\\S]*?)\\2\\))'
-  const regexp = new RegExp(pattern, 'g');
+  const regexp = new RegExp(pattern, 'g')
 
   let prevIndex = 0
   let result
@@ -58,22 +65,40 @@ export class GROQCodeLensProvider implements CodeLensProvider {
           command: 'sanity.executeGroq',
           arguments: [document.getText()],
         }),
+        new CodeLens(new Range(new Position(0, 0), new Position(0, 0)), {
+          title: 'Copy Query',
+          command: 'sanity.copyGroq',
+          arguments: [document.getText()],
+        }),
       ]
     }
 
     // find all lines where "groq" exists
-    const queries: ExtractedQuery[] = [...extractAllTemplateLiterals(document), ...extractAllDefineQuery(document)]
+    const queries: ExtractedQuery[] = [
+      ...extractAllTemplateLiterals(document),
+      ...extractAllDefineQuery(document),
+    ]
 
-    // add a button above each line that has groq
-    return queries.map((def) => {
-      return new CodeLens(
-        new Range(new Position(def.position.line, 0), new Position(def.position.line, 0)),
-        {
-          title: 'Execute Query',
-          command: 'sanity.executeGroq',
-          arguments: [def.content],
-        }
-      )
+    // add a buttons above each line that has groq
+    return queries.flatMap((def) => {
+      return [
+        new CodeLens(
+          new Range(new Position(def.position.line, 0), new Position(def.position.line, 0)),
+          {
+            title: 'Execute Query',
+            command: 'sanity.executeGroq',
+            arguments: [def.content],
+          },
+        ),
+        new CodeLens(
+          new Range(new Position(def.position.line, 0), new Position(def.position.line, 0)),
+          {
+            title: 'Copy Query',
+            command: 'sanity.copyGroq',
+            arguments: [def.content],
+          },
+        ),
+      ]
     })
   }
 }
