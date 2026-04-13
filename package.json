@@ -83,7 +83,7 @@
       {
         "language": "groq",
         "scopeName": "source.groq",
-        "path": "./grammars/groq.json"
+        "path": "./node_modules/@sanity/textmate-groq/syntaxes/groq.tmLanguage.json"
       },
       {
         "injectTo": [
@@ -96,20 +96,20 @@
           "source.php",
           "source.astro"
         ],
-        "scopeName": "inline.groq",
-        "path": "./grammars/groq.js.json",
+        "scopeName": "groq-injection.js",
+        "path": "./node_modules/@sanity/textmate-groq/injections/javascript.tmLanguage.json",
         "embeddedLanguages": {
           "meta.embedded.block.groq": "groq"
         }
       },
       {
-        "scopeName": "markdown.groq.codeblock",
-        "path": "./grammars/groq.md.json",
+        "scopeName": "groq-injection.markdown",
+        "path": "./node_modules/@sanity/textmate-groq/injections/markdown.tmLanguage.json",
         "injectTo": [
           "text.html.markdown"
         ],
         "embeddedLanguages": {
-          "meta.embedded.block.groq": "javascript"
+          "meta.embedded.block.groq": "groq"
         }
       }
     ],
@@ -123,8 +123,9 @@
     ]
   },
   "dependencies": {
-    "@sanity/client": "^6.29.1",
-    "groq-js": "^1.24.1",
+    "@sanity/client": "^7.20.0",
+    "@sanity/textmate-groq": "^1.1.1",
+    "groq-js": "^1.29.0",
     "line-number": "^0.1.0",
     "osenv": "^0.1.5",
     "react": "^16.14.0",
