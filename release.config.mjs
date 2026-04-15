@@ -20,11 +20,14 @@ export default {
       }
     ],
     [
-      "@semantic-release/npm",
+      "@semantic-release/github",
       {
-        npmPublish: false
+        assets: [
+          {
+            path: "*.vsix",
+          }
+        ]
       }
     ],
-    "@semantic-release/git",
   ]
 };
