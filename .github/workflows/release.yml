@@ -28,7 +28,7 @@ jobs:
       - name: Set VSCE_PAT env var
         if: env.VSCE != ''
         run: echo "VSCE_PAT=${{ env.VSCE }}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 22.21.1
