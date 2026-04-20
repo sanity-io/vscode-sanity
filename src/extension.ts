@@ -23,70 +23,105 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeConfiguration(() => readConfig())
 
   let resultPanel: vscode.WebviewPanel | undefined
-  let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    let config: Config
-    let query: string = groqQuery
-    let params: Record<string, unknown> = {}
-    try {
-      config = await loadSanityConfig()
-      if (config === null) {
-        return
-      }
+  let executeDisposable = vscode.commands.registerCommand(
+    'sanity.executeGroq',
+    async (groqQuery) => {
+      let config: Config
+      let query: string = groqQuery
+      let params: Record<string, unknown> = {}
+      try {
+        config = await loadSanityConfig()
+        if (config === null) {
+          return
+        }
 
-      if (!query) {
-        query = await loadGroqFromFile()
-      }
-      const variables = findVariablesInQuery(query)
-      if (variables.length > 0) {
-        params = await readParams(variables)
-      }
+        if (!query) {
+          query = await loadGroqFromFile()
+        }
+        const variables = findVariablesInQuery(query)
+        if (variables.length > 0) {
+          params = await readParams(variables)
+        }
 
-      vscode.window.showInformationMessage(`Executing GROQ query: ${query}`)
-      // FIXME: Throw error object in webview?
-      const {ms, result} = await executeGroq({
-        ...config.api,
-        query,
-        params,
-        useCdn: config.api.token ? false : useCDN,
-      })
-
-      vscode.window.setStatusBarMessage(
-        `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10000
-      )
-
-      if (!openJSONFile && !resultPanel) {
-        resultPanel = vscode.window.createWebviewPanel(
-          'executionResultsWebView',
-          'GROQ Execution Result',
-          vscode.ViewColumn.Beside,
-          {}
-        )
-
-        resultPanel.onDidDispose(() => {
-          resultPanel = undefined
-        })
-      }
-
-      if (openJSONFile) {
-        await openInUntitled(result, 'json')
-      } else if (resultPanel) {
-        const contentProvider = await registerContentProvider(
-          context,
+        vscode.window.showInformationMessage(`Executing GROQ query: ${query}`)
+        // FIXME: Throw error object in webview?
+        const {ms, result} = await executeGroq({
+          ...config.api,
           query,
           params,
-          ms,
-          result || []
+          useCdn: config.api.token ? false : useCDN,
+        })
+
+        vscode.window.setStatusBarMessage(
+          `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
+          10000,
         )
-        const html = await contentProvider.getCurrentHTML()
-        resultPanel.webview.html = html
+
+        if (!openJSONFile && !resultPanel) {
+          resultPanel = vscode.window.createWebviewPanel(
+            'executionResultsWebView',
+            'GROQ Execution Result',
+            vscode.ViewColumn.Beside,
+            {},
+          )
+
+          resultPanel.onDidDispose(() => {
+            resultPanel = undefined
+          })
+        }
+
+        if (openJSONFile) {
+          await openInUntitled(result, 'json')
+        } else if (resultPanel) {
+          const contentProvider = await registerContentProvider(
+            context,
+            query,
+            params,
+            ms,
+            result || [],
+          )
+          const html = await contentProvider.getCurrentHTML()
+          resultPanel.webview.html = html
+        }
+      } catch (err) {
+        vscode.window.showErrorMessage(getErrorMessage(err))
+        return
       }
-    } catch (err) {
-      vscode.window.showErrorMessage(getErrorMessage(err))
-      return
-    }
-  })
-  context.subscriptions.push(disposable)
+    },
+  )
+  context.subscriptions.push(executeDisposable)
+
+  const copyDisposable = vscode.commands.registerCommand(
+    'sanity.copyGroq',
+    async (groqQuery?: string) => {
+      try {
+        let query: string | undefined = groqQuery
+        if (!query) {
+          const editor = vscode.window.activeTextEditor
+
+          if (editor) {
+            const selection = editor.selection
+            if (!selection.isEmpty) {
+              query = editor.document.getText(selection)
+            } else {
+              query = editor.document.getText()
+            }
+          }
+        }
+
+        if (!query || query.trim() === '') {
+          vscode.window.showWarningMessage('No GROQ query found to copy')
+          return
+        }
+
+        await vscode.env.clipboard.writeText(query)
+        vscode.window.setStatusBarMessage('GROQ query copied to clipboard', 3000)
+      } catch (err) {
+        vscode.window.showErrorMessage(`Failed to copy GROQ query: ${getErrorMessage(err)}`)
+      }
+    },
+  )
+  context.subscriptions.push(copyDisposable)
 
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
@@ -97,7 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (useCodelens && !codelens) {
       codelens = vscode.languages.registerCodeLensProvider(
         ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-        new GROQCodeLensProvider()
+        new GROQCodeLensProvider(),
       )
 
       context.subscriptions.push(codelens)
@@ -161,7 +196,7 @@ async function registerContentProvider(
   query: string,
   params: Record<string, unknown>,
   ms: number,
-  result: any
+  result: any,
 ): Promise<any> {
   const contentProvider = new GroqContentProvider(query, params, ms, result)
   const registration = vscode.workspace.registerTextDocumentContentProvider('groq', contentProvider)
