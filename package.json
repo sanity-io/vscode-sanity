@@ -141,7 +141,7 @@
     "@types/react-dom": "^16.9.25",
     "@types/vscode": "^1.107.0",
     "@vscode/vsce": "^3.7.1",
-    "ovsx": "^0.10.7",
+    "ovsx": "^1.1.1",
     "prettier": "^2.8.8",
     "semantic-release-vsce": "^6.0.20",
     "typescript": "5.9.3"
