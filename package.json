@@ -158,6 +158,6 @@
     "upgrade-interactive": "npx npm-check -u"
   },
   "volta": {
-    "node": "22.21.1"
+    "node": "24.21.0"
   }
 }
