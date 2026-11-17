@@ -5,8 +5,11 @@ export type GroqInHover =
       kind: 'query'
       /** The decoded query, with real line breaks and no JS string escaping. */
       query: string
-      /** How the query was spelled in the hover text. */
-      form: 'string' | 'template'
+      /**
+       * How the query was spelled in the hover text: a string or template literal in the type, or
+       * a fenced `groq` block in the documentation (groq-content-mapper writes one).
+       */
+      form: 'string' | 'template' | 'doc-block'
     }
   | {
       kind: 'truncated'
@@ -25,9 +28,11 @@ interface Literal {
   terminated: boolean
 }
 
-const FENCE = /^[ \t]*(`{3,}|~{3,})[^\n]*\n([\s\S]*?)^[ \t]*\1[ \t]*$/gm
+const FENCE = /^[ \t]*(`{3,}|~{3,})([^\n]*)\n([\s\S]*?)^[ \t]*\1[ \t]*$/gm
 const GROQ_COMMENT_MARKER = /\/\*\s*groq\s*\*\/\s*$/i
 const TRUNCATION_MARK = /\.\.\.\s*$/
+// A cut can land between a backslash and the character it escapes.
+const DANGLING_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\$/
 const SIMPLE_ESCAPES: Record<string, string> = {
   n: '\n',
   r: '\r',
@@ -83,12 +88,12 @@ export function isGroqQuery(candidate: string, hasGroqMarker = false): boolean {
   }
 }
 
-function codeBlocks(markdown: string): string[] {
-  const blocks: string[] = []
+function codeBlocks(markdown: string): {language: string; code: string}[] {
+  const blocks: {language: string; code: string}[] = []
   FENCE.lastIndex = 0
   let match: RegExpExecArray | null
   while ((match = FENCE.exec(markdown)) !== null) {
-    blocks.push(match[2])
+    blocks.push({language: match[2].trim().toLowerCase(), code: match[3]})
   }
   return blocks
 }
@@ -150,7 +155,9 @@ export function findGroqInCode(snippet: string): GroqInHover[] {
     // Language servers cut long hovers off with "..." and leave the literal open, so what is left
     // is a broken query that must not be formatted.
     if (TRUNCATION_MARK.test(code)) {
-      const partial = decodeEscapes(literal.body.replace(TRUNCATION_MARK, ''))
+      const partial = decodeEscapes(
+        literal.body.replace(TRUNCATION_MARK, '').replace(DANGLING_ESCAPE, '$1')
+      )
       if (looksLikeGroq(partial.trim(), hasMarker)) {
         found.push({kind: 'truncated', partial: partial.trim(), form: literal.form})
       }
@@ -160,9 +167,37 @@ export function findGroqInCode(snippet: string): GroqInHover[] {
 }
 
 /**
+ * The query with trailing whitespace dropped from each line, which a doc comment does not keep,
+ * so the type's literal and the doc block compare equal.
+ */
+export function comparable(query: string): string {
+  return query
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .join('\n')
+    .trim()
+}
+
+/**
  * Finds GROQ queries in the markdown of a TypeScript hover. Only fenced code is inspected, so
- * quotes in JSDoc prose are never mistaken for string literals.
+ * quotes in JSDoc prose are never mistaken for string literals. A fenced `groq` block is taken as
+ * a query as it is. When the type is cut off but the same query is also in such a block, the
+ * block wins and no truncation is reported.
  */
 export function findGroqInHoverMarkdown(markdown: string): GroqInHover[] {
-  return codeBlocks(markdown).flatMap(findGroqInCode)
+  const found: GroqInHover[] = []
+  for (const {language, code} of codeBlocks(markdown)) {
+    if (language === 'groq') {
+      const query = code.trim()
+      if (query) found.push({kind: 'query', query, form: 'doc-block'})
+    } else {
+      found.push(...findGroqInCode(code))
+    }
+  }
+
+  const queries = found.flatMap((hit) => (hit.kind === 'query' ? [comparable(hit.query)] : []))
+  return found.filter(
+    (hit) =>
+      hit.kind === 'query' || !queries.some((query) => query.startsWith(comparable(hit.partial)))
+  )
 }

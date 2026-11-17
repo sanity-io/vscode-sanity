@@ -1,0 +1,5 @@
+# Pinned so that the committed build in out-wasm/ rebuilds byte for byte.
+[toolchain]
+channel = "1.100.0"
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

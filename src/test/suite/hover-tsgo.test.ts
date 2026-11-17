@@ -6,6 +6,30 @@ import {TRUNCATED_NOTICE} from '../../providers/groq-hover-provider'
 
 const project = process.env.SANITY_TEST_TSGO
 
+// groq-format at 80 columns. The custom functions and the leading comment are as authored, as
+// the mapper prepends them.
+const LONG_QUERY_FORMATTED = [
+  'fn image::asset($asset) = $asset->{url, metadata};',
+  'fn image::field($image) = $image{crop, hotspot, "asset": image::asset(asset)};',
+  '// All published posts with their author, categories and related posts',
+  '',
+  '*[_type == "post" && defined(slug.current) && publishedAt < now()]',
+  '  | order(publishedAt desc)[$start...$end] {',
+  '  _id,',
+  '  title,',
+  '  slug,',
+  '  "image": image::field(mainImage),',
+  '  "author": author-> { name, "avatar": image::field(avatar) },',
+  '  "categories": categories[]-> { title, "slug": slug.current },',
+  '  "related": *[_type == "post" && _id != ^._id',
+  '    && count(categories[@._ref in ^.^.categories[]._ref]) > 0][0...3] {',
+  '    _id,',
+  '    title,',
+  '    "image": image::field(mainImage)',
+  '  }',
+  '}',
+].join('\n')
+
 function markdownOf(hovers: vscode.Hover[]): string[] {
   return hovers.flatMap((hover) =>
     hover.contents.map((content) => (typeof content === 'string' ? content : content.value))
@@ -67,43 +91,35 @@ describe('GROQ in TypeScript 7.1 hovers (tsgo + groq-content-mapper)', function 
 
     const block = md.find((part) => part.startsWith('```groq\n'))
     assert.ok(block, JSON.stringify(md))
-    const lines = block.split('\n')
-    assert.ok(lines.length > 15, 'expected the query on real lines')
-    assert.ok(!block.includes('\\n'), 'line breaks must not be the two characters \\n')
-
-    assert.deepStrictEqual(lines.slice(1, 3), [
-      'fn image::asset($asset) = $asset-> { url, metadata };',
-      'fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };',
-    ])
-    assert.ok(
-      lines.includes('// All published posts with their author, categories and related posts')
-    )
-    assert.ok(
-      lines.includes(
-        '*[_type == "post" && defined(slug.current) && publishedAt < now()] | order(publishedAt desc)[$start...$end] {'
-      ) || lines.some((line) => line.startsWith('*[_type == "post"')),
-      block
-    )
-    assert.ok(lines.includes('  _id,'), block)
+    assert.strictEqual(block, '```groq\n' + LONG_QUERY_FORMATTED + '\n```')
   })
 
   it('formats a short query', async () => {
     const md = await hoverOn('shortQuery')
-    assert.ok(
-      md.includes('```groq\n*[_type == "post"][0] {\n  _id,\n  title\n}\n```'),
-      JSON.stringify(md)
-    )
+    assert.ok(md.includes('```groq\n*[_type == "post"][0] { _id, title }\n```'), JSON.stringify(md))
   })
 
-  it('says so when tsgo truncates the hover, instead of formatting half a query', async () => {
+  it("formats the mapper's doc block when tsgo truncates the type", async () => {
     const md = await hoverOn('huge')
 
     const tsHover = md.find((part) => part.includes('const query'))
     assert.ok(tsHover, JSON.stringify(md))
-    assert.ok(/\.\.\.\s*```\s*$/.test(tsHover), 'expected tsgo to cut the hover off with "..."')
-    assert.ok(!tsHover.includes('}" &'), 'expected the string literal to be left open')
+    assert.match(
+      tsHover,
+      /^```typescript\n\(alias\) const query: "[^\n]*\.\.\.\n```/,
+      'expected tsgo to cut the type off with "..." and leave the literal open'
+    )
 
-    assert.ok(md.includes(TRUNCATED_NOTICE), JSON.stringify(md.map((part) => part.slice(0, 80))))
-    assert.ok(!md.some((part) => part.includes('```groq')))
+    assert.ok(!md.includes(TRUNCATED_NOTICE), 'the doc block holds the whole query')
+    const block = md.find((part) => part.startsWith('```groq\n'))
+    assert.ok(block, JSON.stringify(md.map((part) => part.slice(0, 80))))
+    const lines = block.split('\n').slice(1, -1)
+    assert.deepStrictEqual(lines.slice(0, 3), [
+      '*[_type == "post" && defined(slug.current)] | order(publishedAt desc)[$start...$end] {',
+      '  _id,',
+      '  "field0": coalesce(title, "fallback value number 0"),',
+    ])
+    assert.strictEqual(lines.length, 113)
+    assert.strictEqual(lines.at(-1), '}')
   })
 })

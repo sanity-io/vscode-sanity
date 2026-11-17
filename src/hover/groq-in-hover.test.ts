@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import {describe, it} from 'node:test'
-import {decodeEscapes, findGroqInHoverMarkdown, isGroqQuery} from './groq-in-hover'
+import {comparable, decodeEscapes, findGroqInHoverMarkdown, isGroqQuery} from './groq-in-hover'
 
 const QUERY = `*[_type == "post" && defined(slug.current)]{
   _id,
@@ -141,6 +141,52 @@ describe('findGroqInHoverMarkdown', () => {
     assert.deepEqual(
       findGroqInHoverMarkdown(fence('const query: "*[_type == \\"post\\"]{ _id }')),
       []
+    )
+  })
+
+  it("takes groq-content-mapper's fenced groq doc block as the query as authored", () => {
+    const query = '*[_type == "post"]{\n  title\n}'
+    const markdown =
+      fence('(alias) const query: ' + JSON.stringify(query) + ' & ...') +
+      '\n' +
+      fence(query, 'groq')
+    assert.deepEqual(findGroqInHoverMarkdown(markdown), [
+      {kind: 'query', query, form: 'string'},
+      {kind: 'query', query, form: 'doc-block'},
+    ])
+  })
+
+  it('uses the doc block instead of reporting truncation when the type was cut off', () => {
+    const query = '*[_type == "post"]{\n  title,\n  slug\n}'
+    const cut = '(alias) const query: "*[_type == \\"post\\"]{\\n  title,...'
+    assert.deepEqual(findGroqInHoverMarkdown(fence(cut) + '\n' + fence(query, 'groq')), [
+      {kind: 'query', query, form: 'doc-block'},
+    ])
+  })
+
+  it('matches the doc block when the cut lands between a backslash and what it escapes', () => {
+    const query = '*[_type == "post"]{\n  "title": title,\n  slug\n}'
+    const cut = '(alias) const query: "*[_type == \\"post\\"]{\\n  \\...'
+    assert.deepEqual(findGroqInHoverMarkdown(fence(cut) + '\n' + fence(query, 'groq')), [
+      {kind: 'query', query, form: 'doc-block'},
+    ])
+  })
+
+  it('still reports truncation when the doc block holds a different query', () => {
+    const cut = '(alias) const query: "*[_type == \\"post\\"]{\\n  title,...'
+    const found = findGroqInHoverMarkdown(fence(cut) + '\n' + fence('*[_type == "author"]', 'groq'))
+    assert.deepEqual(
+      found.map(({kind}) => kind),
+      ['truncated', 'query']
+    )
+  })
+})
+
+describe('comparable', () => {
+  it('ignores trailing whitespace a doc comment drops', () => {
+    assert.equal(
+      comparable('*[_type == "post"]{  \n  title \n}\n'),
+      '*[_type == "post"]{\n  title\n}'
     )
   })
 })

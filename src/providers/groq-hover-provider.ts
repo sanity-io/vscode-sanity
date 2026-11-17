@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
-import {formatGroq} from '../format'
+import {DEFAULT_FORMAT_WIDTH, formatGroq} from '../format'
 import {formatQueryForHover} from '../hover/format-hover-query'
-import {findGroqInHoverMarkdown} from '../hover/groq-in-hover'
+import {comparable, findGroqInHoverMarkdown} from '../hover/groq-in-hover'
 
 export const HOVER_LANGUAGES = ['typescript', 'typescriptreact', 'javascript', 'javascriptreact']
 
@@ -34,8 +34,9 @@ export class GroqHoverProvider implements vscode.HoverProvider {
     position: vscode.Position,
     token: vscode.CancellationToken
   ): Promise<vscode.Hover | undefined> {
-    if (!vscode.workspace.getConfiguration('sanity').get('formatGroqInHover', true))
-      return undefined
+    const settings = vscode.workspace.getConfiguration('sanity')
+    if (!settings.get('formatGroqInHover', true)) return undefined
+    const width = settings.get('formatGroqInHoverWidth', DEFAULT_FORMAT_WIDTH)
 
     // `executeHoverProvider` asks every provider, including this one.
     const key = `${document.uri.toString()}:${document.version}:${position.line}:${
@@ -61,13 +62,13 @@ export class GroqHoverProvider implements vscode.HoverProvider {
     for (const hover of hovers) {
       for (const content of hover.contents) {
         for (const found of findGroqInHoverMarkdown(markdownOf(content))) {
-          const key = found.kind === 'query' ? found.query : found.partial
+          const key = comparable(found.kind === 'query' ? found.query : found.partial)
           if (seen.has(key)) continue
           seen.add(key)
 
           switch (found.kind) {
             case 'query': {
-              const formatted = await formatQueryForHover(found.query, formatGroq)
+              const formatted = formatQueryForHover(found.query, formatGroq, width)
               const fence = fenceFor(formatted)
               blocks.push(`${fence}groq\n${formatted}\n${fence}`)
               break

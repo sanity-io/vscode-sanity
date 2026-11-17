@@ -3,6 +3,6 @@
   "include": ["src"],
   "contentMappers": [
     {"package": "@sanity-labs/groq-content-mapper", "extensions": [".groq"],
-     "options": {"schema": "./schema.json", "functions": ["groq/*.groq"]}}
+     "options": {"schema": "./schema.json", "functions": ["groq/*.groq"], "prettify": false}}
   ]
 }

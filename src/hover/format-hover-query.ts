@@ -1,4 +1,4 @@
-export type FormatGroq = (query: string) => Promise<string | undefined>
+export type FormatGroq = (query: string, width: number) => string | undefined
 
 /**
  * Walks `query` from `from` past whitespace and `//` comments, and returns the index of the next
@@ -59,33 +59,19 @@ export function splitPreamble(query: string): {preamble: string; body: string} {
   }
 }
 
-/** Whether a `//` comment appears outside strings; groqfmt would silently drop it. */
-export function hasComment(query: string): boolean {
-  for (let i = 0; i < query.length; i++) {
-    const char = query[i]
-    if (char === '"' || char === "'") {
-      i++
-      while (i < query.length && query[i] !== char) {
-        if (query[i] === '\\') i++
-        i++
-      }
-    } else if (query.startsWith('//', i)) {
-      return true
-    }
-  }
-  return false
-}
-
 /**
- * Lays a query out on real lines for display. Custom function definitions and leading comments are
- * kept exactly as authored, because groqfmt cannot read the former and drops the latter. A query
- * that groqfmt cannot parse, or that has comments inside it, is returned as it is.
+ * Lays a query out on real lines for display, wrapped to `width` columns. Custom function
+ * definitions and leading comments are kept exactly as authored; only the query itself is
+ * formatted. A query that cannot be parsed is returned as it is.
  */
-export async function formatQueryForHover(query: string, format: FormatGroq): Promise<string> {
+export function formatQueryForHover(query: string, format: FormatGroq, width: number): string {
   const {preamble, body} = splitPreamble(query)
-  if (hasComment(body)) return query
-
-  const formatted = await format(body).catch(() => undefined)
+  let formatted: string | undefined
+  try {
+    formatted = format(body, width)
+  } catch {
+    formatted = undefined
+  }
   if (formatted === undefined) return query
   return preamble ? `${preamble}\n\n${formatted}` : formatted
 }

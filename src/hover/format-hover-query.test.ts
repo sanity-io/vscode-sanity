@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import {describe, it} from 'node:test'
 import {formatGroq} from '../format'
-import {formatQueryForHover, hasComment, splitPreamble} from './format-hover-query'
+import {formatQueryForHover, splitPreamble} from './format-hover-query'
 
 const FUNCTIONS = [
   'fn image::asset($asset) = $asset-> { url, metadata };',
@@ -37,48 +37,65 @@ describe('splitPreamble', () => {
   })
 })
 
-describe('hasComment', () => {
-  it('ignores slashes inside strings', () => {
-    assert.ok(!hasComment('*[url == "https://example.com"]'))
-    assert.ok(hasComment('*[_type == "post"] // posts'))
-  })
-})
-
 describe('formatQueryForHover', () => {
-  it('formats a minified query', async () => {
+  it('formats a minified query', () => {
     assert.equal(
-      await formatQueryForHover('*[_type=="post"]{_id,title}', formatGroq),
-      '*[_type == "post"] {\n  _id,\n  title\n}'
+      formatQueryForHover('*[_type=="post"]{_id,title}', formatGroq, 80),
+      '*[_type == "post"] { _id, title }'
     )
   })
 
-  it('keeps custom functions and leading comments as authored and formats the query', async () => {
+  it('breaks a query that does not fit the width across lines', () => {
+    const query =
+      '*[_type=="post"&&defined(slug.current)&&publishedAt<now()]|order(publishedAt desc)[$start...$end]{_id,title,"author":author->{name}}'
+    assert.equal(
+      formatQueryForHover(query, formatGroq, 80),
+      [
+        '*[_type == "post" && defined(slug.current) && publishedAt < now()]',
+        '  | order(publishedAt desc)[$start...$end] {',
+        '  _id,',
+        '  title,',
+        '  "author": author-> { name }',
+        '}',
+      ].join('\n')
+    )
+  })
+
+  it('keeps custom functions and leading comments as authored and formats the query', () => {
     const query = `${FUNCTIONS}\n\n// All posts\n*[_type=="post"]{_id,"image":image::field(mainImage)}`
     assert.equal(
-      await formatQueryForHover(query, formatGroq),
-      `${FUNCTIONS}\n\n// All posts\n\n*[_type == "post"] {\n  _id,\n  "image": image::field(mainImage)\n}`
+      formatQueryForHover(query, formatGroq, 80),
+      `${FUNCTIONS}\n\n// All posts\n\n*[_type == "post"] { _id, "image": image::field(mainImage) }`
     )
   })
 
-  it('formats slices that use params', async () => {
+  it('keeps comments inside the query', () => {
     assert.equal(
-      await formatQueryForHover('*[_type=="post"][$start...$end]{_id}', formatGroq),
-      '*[_type == "post"][$start...$end] {\n  _id\n}'
+      formatQueryForHover('*[_type == "post"] {\n  _id, // the id\n  title\n}', formatGroq, 80),
+      '*[_type == "post"] {\n  _id, // the id\n  title\n}'
     )
   })
 
-  it('does not format over comments inside the query, since groqfmt would drop them', async () => {
-    const query = '*[_type == "post"] {\n  _id, // the id\n  title\n}'
-    assert.equal(await formatQueryForHover(query, formatGroq), query)
+  it('passes the width to the formatter', () => {
+    const widths: number[] = []
+    formatQueryForHover('*[_type == "post"]', (query, width) => (widths.push(width), query), 42)
+    assert.deepEqual(widths, [42])
   })
 
-  it('returns the query as is when it cannot be formatted', async () => {
+  it('returns the query as is when it cannot be formatted', () => {
     const query = '*[_type == "post"]{\n  title}'
-    assert.equal(await formatQueryForHover(query, async () => undefined), query)
     assert.equal(
-      await formatQueryForHover(query, async () => {
-        throw new Error('boom')
-      }),
+      formatQueryForHover(query, () => undefined, 80),
+      query
+    )
+    assert.equal(
+      formatQueryForHover(
+        query,
+        () => {
+          throw new Error('boom')
+        },
+        80
+      ),
       query
     )
   })
