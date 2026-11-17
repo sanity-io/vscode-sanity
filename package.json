@@ -141,6 +141,7 @@
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
+    "@sanity-labs/groq-content-mapper": "^0.6.0",
     "@semantic-release/github": "^12.0.6",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.27",
@@ -153,12 +154,14 @@
     "ovsx": "^0.10.7",
     "prettier": "^2.8.8",
     "semantic-release-vsce": "^6.0.20",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "typescript-7": "npm:typescript@^7.1.0-beta"
   },
   "scripts": {
     "lint": "tsc --noEmit",
     "test": "npm run compile && node --test \"out/*.test.js\" \"out/hover/*.test.js\"",
     "test:integration": "npm run compile && node out/test/runTest.js",
+    "test:integration:tsgo": "npm run compile && node out/test/runTest.js --tsgo",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "env:source": "export $(cat .envrc | xargs)",

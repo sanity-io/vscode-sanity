@@ -1,8 +1,12 @@
 import * as vscode from 'vscode'
 import {formatGroq} from '../format'
+import {formatQueryForHover} from '../hover/format-hover-query'
 import {findGroqInHoverMarkdown} from '../hover/groq-in-hover'
 
 export const HOVER_LANGUAGES = ['typescript', 'typescriptreact', 'javascript', 'javascriptreact']
+
+export const TRUNCATED_NOTICE =
+  '*GROQ query not formatted: TypeScript cut this hover off before the end of the query. Open the `.groq` file to read it in full.*'
 
 type HoverContent = vscode.Hover['contents'][number]
 
@@ -56,12 +60,26 @@ export class GroqHoverProvider implements vscode.HoverProvider {
     const blocks: string[] = []
     for (const hover of hovers) {
       for (const content of hover.contents) {
-        for (const {query} of findGroqInHoverMarkdown(markdownOf(content))) {
-          if (seen.has(query)) continue
-          seen.add(query)
-          const formatted = (await formatGroq(query).catch(() => undefined)) ?? query
-          const fence = fenceFor(formatted)
-          blocks.push(`${fence}groq\n${formatted}\n${fence}`)
+        for (const found of findGroqInHoverMarkdown(markdownOf(content))) {
+          const key = found.kind === 'query' ? found.query : found.partial
+          if (seen.has(key)) continue
+          seen.add(key)
+
+          switch (found.kind) {
+            case 'query': {
+              const formatted = await formatQueryForHover(found.query, formatGroq)
+              const fence = fenceFor(formatted)
+              blocks.push(`${fence}groq\n${formatted}\n${fence}`)
+              break
+            }
+            case 'truncated':
+              blocks.push(TRUNCATED_NOTICE)
+              break
+            default: {
+              const unhandled: never = found
+              throw new Error(`Unhandled GROQ hover result: ${JSON.stringify(unhandled)}`)
+            }
+          }
         }
       }
     }
