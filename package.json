@@ -49,6 +49,11 @@
           "type": "boolean",
           "default": false,
           "description": "Open query results in a new tab as an editable JSON file."
+        },
+        "sanity.formatGroqInHover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show GROQ queries found in JavaScript and TypeScript hovers (such as types of .groq imports) as formatted, syntax-highlighted code."
         }
       }
     },
@@ -123,6 +128,7 @@
     ]
   },
   "dependencies": {
+    "@groqfmt/wasm": "^1.2.2",
     "@sanity/client": "^7.20.0",
     "@sanity/textmate-groq": "^1.1.1",
     "groq-js": "^1.29.0",
@@ -136,11 +142,14 @@
   },
   "devDependencies": {
     "@semantic-release/github": "^12.0.6",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.27",
     "@types/react": "^16.14.68",
     "@types/react-dom": "^16.9.25",
     "@types/vscode": "^1.107.0",
+    "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^3.7.1",
+    "mocha": "^10.8.2",
     "ovsx": "^0.10.7",
     "prettier": "^2.8.8",
     "semantic-release-vsce": "^6.0.20",
@@ -148,7 +157,8 @@
   },
   "scripts": {
     "lint": "tsc --noEmit",
-    "test": "npm run compile",
+    "test": "npm run compile && node --test \"out/*.test.js\" \"out/hover/*.test.js\"",
+    "test:integration": "npm run compile && node out/test/runTest.js",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "env:source": "export $(cat .envrc | xargs)",

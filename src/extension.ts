@@ -6,6 +6,7 @@ import {register as registerTsNode} from 'ts-node'
 import {Config} from './config/findConfig'
 import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
+import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
 import {executeGroq} from './query'
 
 export function activate(context: vscode.ExtensionContext) {
@@ -87,6 +88,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
   })
   context.subscriptions.push(disposable)
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider())
+  )
 
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
