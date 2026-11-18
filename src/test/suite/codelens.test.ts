@@ -60,8 +60,14 @@ const EXPECTED = [
   '*[_type == "post"]{${notAFragment}}',
 ]
 
+function queriesOf(lenses: Array<vscode.CodeLens>, command = 'sanity.executeGroq') {
+  return lenses.flatMap((lens) =>
+    lens.command?.command === command ? [lens.command.arguments?.[0]] : [],
+  )
+}
+
 describe('GROQ codelens', () => {
-  it('executes the query with the fragments interpolated into it', async () => {
+  it('executes and copies the query with the fragments interpolated into it', async () => {
     const dir = mkdtempSync(path.join(tmpdir(), 'vscode-sanity-codelens-'))
     mkdirSync(path.join(dir, 'src'))
     writeFileSync(path.join(dir, 'src', 'fragments.ts'), FRAGMENTS)
@@ -81,11 +87,9 @@ describe('GROQ codelens', () => {
       await new Promise((resolve) => setTimeout(resolve, 500))
     }
 
-    const executes = lenses.filter((lens) => lens.command?.command === 'sanity.executeGroq')
-    assert.deepStrictEqual(
-      executes.map((lens) => lens.command?.arguments?.[0]),
-      EXPECTED,
-    )
+    for (const command of ['sanity.executeGroq', 'sanity.copyGroq']) {
+      assert.deepStrictEqual(queriesOf(lenses, command), EXPECTED, command)
+    }
   })
 
   it('refreshes Execute Query when an imported fragment is edited or saved', async () => {
@@ -103,10 +107,7 @@ describe('GROQ codelens', () => {
       const query = await vscode.workspace.openTextDocument(vscode.Uri.file(queryPath))
       const fragment = await vscode.workspace.openTextDocument(vscode.Uri.file(fragmentPath))
       const before = await provider.provideCodeLenses(query, tokens.token)
-      assert.deepStrictEqual(
-        before.map((lens) => lens.command?.arguments?.[0]),
-        ['*{OLD}'],
-      )
+      assert.deepStrictEqual(queriesOf(before), ['*{OLD}'])
 
       const unrelated = await vscode.workspace.openTextDocument(
         vscode.Uri.file(path.join(dir, 'src', 'other.ts')),
@@ -131,10 +132,7 @@ describe('GROQ codelens', () => {
       assert.strictEqual(refreshes, 1)
 
       const afterEdit = await provider.provideCodeLenses(query, tokens.token)
-      assert.deepStrictEqual(
-        afterEdit.map((lens) => lens.command?.arguments?.[0]),
-        ['*{NEW}'],
-      )
+      assert.deepStrictEqual(queriesOf(afterEdit), ['*{NEW}'])
 
       await fragment.save()
       assert.strictEqual(refreshes, 2)

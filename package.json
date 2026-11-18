@@ -116,6 +116,10 @@
         "title": "Execute GROQ query"
       },
       {
+        "command": "sanity.copyGroq",
+        "title": "Copy GROQ query"
+      },
+      {
         "command": "groq.formatQueries",
         "title": "Format GROQ Queries",
         "category": "GROQ"
@@ -135,6 +139,10 @@
       "commandPalette": [
         {
           "command": "sanity.executeGroq",
+          "when": "editorLangId == groq || editorLangId == plaintext"
+        },
+        {
+          "command": "sanity.copyGroq",
           "when": "editorLangId == groq || editorLangId == plaintext"
         },
         {

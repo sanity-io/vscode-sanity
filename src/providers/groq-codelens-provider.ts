@@ -90,6 +90,17 @@ function extractAllDefineQuery(document: TextDocument): Array<ExtractedQuery> {
   return documents
 }
 
+function queryLenses(range: Range, query: string): Array<CodeLens> {
+  return [
+    new CodeLens(range, {
+      title: 'Execute Query',
+      command: 'sanity.executeGroq',
+      arguments: [query],
+    }),
+    new CodeLens(range, {title: 'Copy Query', command: 'sanity.copyGroq', arguments: [query]}),
+  ]
+}
+
 function formatLens(range: Range, document: TextDocument, query: ExtractedQuery) {
   return new CodeLens(range, {
     title: 'Format Query',
@@ -143,11 +154,7 @@ export class GROQCodeLensProvider implements CodeLensProvider, Disposable {
       const range = new Range(new Position(0, 0), new Position(0, 0))
       const content = document.getText()
       return [
-        new CodeLens(range, {
-          title: 'Execute Query',
-          command: 'sanity.executeGroq',
-          arguments: [content],
-        }),
+        ...queryLenses(range, content),
         ...(formatting && content.trim()
           ? [
               formatLens(range, document, {
@@ -169,19 +176,15 @@ export class GROQCodeLensProvider implements CodeLensProvider, Disposable {
     ]
     const resolved = await resolvedQueries(document)
 
-    // add a button above each line that has groq
+    // add buttons above each line that has groq
     return queries.flatMap((def) => {
       const range = new Range(
         new Position(def.position.line, 0),
         new Position(def.position.line, 0),
       )
-      const execute = new CodeLens(range, {
-        title: 'Execute Query',
-        command: 'sanity.executeGroq',
-        // A query the resolver does not see keeps the text it had, which is what ran before.
-        arguments: [resolved.get(def.anchor) ?? def.content],
-      })
-      return formatting && def.formattable ? [execute, formatLens(range, document, def)] : [execute]
+      // A query the resolver does not see keeps the text it had, which is what ran before.
+      const lenses = queryLenses(range, resolved.get(def.anchor) ?? def.content)
+      return formatting && def.formattable ? [...lenses, formatLens(range, document, def)] : lenses
     })
   }
 }
