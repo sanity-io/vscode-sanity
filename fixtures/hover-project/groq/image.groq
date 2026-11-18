@@ -1,0 +1,2 @@
+fn image::asset($asset) = $asset->{url, metadata};
+fn image::field($image) = $image{crop, hotspot, "asset": image::asset(asset)};

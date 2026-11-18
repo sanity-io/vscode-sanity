@@ -25,6 +25,16 @@ If the GROQ file/query has any variables, then extension asks for a relative fil
 
 ![Execute GROQ](https://raw.githubusercontent.com/sanity-io/vscode-sanity/main/screenshots/previewofquery.png)
 
+### GROQ in TypeScript hovers
+
+TypeScript prints the type of a GROQ query (for example a `.groq` import typed as `/* groq */` template literal) as a single double-quoted string with `\n` escapes. When you hover such a type, or a value of that type, the extension adds a second section to the hover with the query formatted onto real lines and syntax highlighted as GROQ. VS Code cannot hide the language server's own section, so both are shown.
+
+Detection works on the hover text itself: a string or template literal in a code block that parses as GROQ and references the dataset (`*[...]`) is picked up, as is a fenced `groq` block from the query's documentation (groq-content-mapper adds one with the query as authored). The mapper's prettify option is not needed: the extension formats the query with [groq-format](https://github.com/atombender/groq-format) (through [`@sanity-labs/groq-wasm`](https://github.com/sanity-labs/sanity-lint/tree/main/packages/groq-wasm)), wrapped to 80 columns by default (`sanity.formatGroqInHoverWidth`). The whole string is formatted together, including prepended custom function definitions (`fn image::asset($asset) = ...;`) and comments, which are kept. A query that cannot be parsed is shown as it is.
+
+TypeScript 7 cuts long types off after about 5,000 characters, in the middle of the query. If the hover also has the query's documentation block, that full copy is formatted instead. Otherwise the extension does not format half a query: it says the hover was truncated, and the full query is in the `.groq` file.
+
+Turn the whole feature off with `sanity.formatGroqInHover`.
+
 ## Usage
 
 Install the extension for [VSCode](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) or [Cursor](https://open-vsx.org/extension/sanity-io/vscode-sanity) by searching for `sanity`. This extension adds syntax highlighting for GROQ-files and `groq` tags.
@@ -40,6 +50,8 @@ Install the extension for [VSCode](https://marketplace.visualstudio.com/items?it
 7.  Make changes to the extension code, then press (`Ctrl+R` or `Cmd+R` on Mac) in the syntax highlighted file to test the changes
 
 > We follow the principles of semantic versioning and conventional commits, meaning that the commits are used as the basis for determining if it's a patch/minor/major when building and releasing new version, as well as for generating the release notes. A good explanation of what commit messages translate to what version bumps can be found in the [`semantic release`](https://github.com/semantic-release/semantic-release?tab=readme-ov-file#commit-message-format) docs.
+
+Run `npm test` for the unit tests. `npm run test:integration` downloads VS Code and checks the hover end to end against the built-in TypeScript extension. `npm run test:integration:tsgo` does the same with the TypeScript 7 extension (`TypeScriptTeam.native-preview`, downloaded from the Marketplace) running TypeScript 7.1 and `@sanity-labs/groq-content-mapper` on the `.groq` files in `fixtures/hover-project`. On Linux without a display, run either with `xvfb-run -a`.
 
 If you want to build/inspect the vsix file, you can do `npm run package`. It can then be "installed from location" in either Cursor or VS Code.
 

@@ -1,0 +1,10 @@
+// All published posts with their author, categories and related posts
+*[_type == "post" && defined(slug.current) && publishedAt < now()] | order(publishedAt desc) [$start...$end] {
+  _id,
+  title,
+  slug,
+  "image": image::field(mainImage),
+  "author": author->{name, "avatar": image::field(avatar)},
+  "categories": categories[]->{title, "slug": slug.current},
+  "related": *[_type == "post" && _id != ^._id && count(categories[@._ref in ^.^.categories[]._ref]) > 0][0...3]{_id, title, "image": image::field(mainImage)}
+}
