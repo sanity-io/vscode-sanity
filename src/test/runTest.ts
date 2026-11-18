@@ -45,7 +45,7 @@ async function prepareTsgo(vscodeExecutablePath: string) {
   const [, publisher, name] = /^(.+)\.(.+)$/.exec(NATIVE_PREVIEW.id) ?? []
   const vsix = path.join(
     cacheDir,
-    `${NATIVE_PREVIEW.id}-${NATIVE_PREVIEW.version}-${process.platform}-${process.arch}.vsix`,
+    `${NATIVE_PREVIEW.id}-${NATIVE_PREVIEW.version}-${process.platform}-${process.arch}.vsix`
   )
   if (!existsSync(vsix)) {
     const target = `${process.platform}-${process.arch}`
@@ -73,7 +73,7 @@ async function prepareTsgo(vscodeExecutablePath: string) {
     {
       encoding: 'utf8',
       shell: process.platform === 'win32',
-    },
+    }
   )
   if (install.status !== 0) {
     throw new Error(`Installing ${NATIVE_PREVIEW.id} failed:\n${install.stdout}${install.stderr}`)
@@ -86,7 +86,7 @@ async function prepareTsgo(vscodeExecutablePath: string) {
       'js/ts.experimental.useTsgo': true,
       'js/ts.tsdk.path': path.join(root, 'node_modules', 'typescript-7'),
       'window.restoreWindows': 'none',
-    }),
+    })
   )
 
   const project = path.join(cacheDir, 'hover-project')
@@ -95,11 +95,57 @@ async function prepareTsgo(vscodeExecutablePath: string) {
   return {extensionsDir, userDataDir, project}
 }
 
+/**
+ * Installs the packaged vsix into a clean extensions directory, so the tests run against what is
+ * published. VS Code still needs an extension under development to host the tests, so an empty one
+ * is created for that.
+ */
+function installVsix(vscodeExecutablePath: string, vsix: string, launchArgs: Array<string>) {
+  const extensionsDir = path.join(cacheDir, 'vsix-extensions')
+  const userDataDir = path.join(cacheDir, 'vsix-user-data')
+  rmSync(extensionsDir, {recursive: true, force: true})
+  rmSync(userDataDir, {recursive: true, force: true})
+  const [cli, ...cliArgs] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
+  const install = spawnSync(
+    cli,
+    [
+      ...cliArgs,
+      `--extensions-dir=${extensionsDir}`,
+      `--user-data-dir=${userDataDir}`,
+      '--install-extension',
+      vsix,
+      '--force',
+    ],
+    {encoding: 'utf8', shell: process.platform === 'win32'}
+  )
+  if (install.status !== 0) {
+    throw new Error(`Installing ${vsix} failed:\n${install.stdout}${install.stderr}`)
+  }
+
+  const host = path.join(cacheDir, 'vsix-test-host')
+  mkdirSync(host, {recursive: true})
+  writeFileSync(
+    path.join(host, 'package.json'),
+    JSON.stringify({
+      name: 'vsix-test-host',
+      publisher: 'local',
+      version: '0.0.0',
+      engines: {vscode: '*'},
+    })
+  )
+  launchArgs.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDataDir}`)
+  return host
+}
+
 async function main() {
   const tsgo = process.argv.includes('--tsgo')
-  const vscodeExecutablePath = await downloadAndUnzipVSCode()
   const launchArgs = ['--disable-workspace-trust']
+  const vscodeVersion = process.argv
+    .find((arg) => arg.startsWith('--vscode='))
+    ?.slice('--vscode='.length)
+  const vsix = process.argv.find((arg) => arg.startsWith('--vsix='))?.slice('--vsix='.length)
   const extensionTestsEnv: Record<string, string> = {}
+  const vscodeExecutablePath = await downloadAndUnzipVSCode(vscodeVersion)
 
   if (tsgo) {
     const {extensionsDir, userDataDir, project} = await prepareTsgo(vscodeExecutablePath)
@@ -107,15 +153,21 @@ async function main() {
     extensionTestsEnv.SANITY_TEST_TSGO = project
   } else {
     // A workspace folder that is not the process cwd, so a relative schema path only resolves if
-    // the client joins it to the folder.
+    // the client joins it to the folder. The execute-query fixture is a second folder so
+    // sanity.cli.ts is in the workspace too. lsp-workspace stays first.
     const workspaceDir = path.join(cacheDir, 'lsp-workspace')
     mkdirSync(workspaceDir, {recursive: true})
-    launchArgs.push(workspaceDir)
+    launchArgs.push(workspaceDir, path.join(root, 'fixtures', 'execute-project'))
+  }
+
+  let extensionDevelopmentPath = root
+  if (vsix) {
+    extensionDevelopmentPath = installVsix(vscodeExecutablePath, path.resolve(vsix), launchArgs)
   }
 
   await runTests({
     vscodeExecutablePath,
-    extensionDevelopmentPath: root,
+    extensionDevelopmentPath,
     extensionTestsPath: path.resolve(__dirname, 'suite/index'),
     extensionTestsEnv,
     launchArgs,

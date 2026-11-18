@@ -20,6 +20,7 @@ Write, check and run [GROQ](https://www.sanity.io/docs/groq) queries without lea
 Open a `.groq` file, or a JavaScript or TypeScript file with a GROQ query, and click **Execute Query** above the query. The result opens in a **GROQ Execution Result** panel beside the editor, together with how long the query took. In a `.groq` file you can also run **Execute GROQ query** from the command palette, or press `Ctrl+Shift+G` in the editor.
 
 - **Project and dataset.** They are read from `sanity.cli.ts` in your workspace. If the workspace has several, you are asked which one to use. If the file sets an API `token`, it is used to query private datasets.
+- **API version.** Queries use the API version in `sanity.apiVersion`, `v2025-02-19` by default. Set a date such as `v2021-03-25`, or `v1` or `vX` (experimental). Newer GROQ features, such as `pt::text()`, need a recent version. An invalid value is ignored with a warning, and the default is used.
 - **Query parameters.** If the query uses variables such as `$slug`, you are asked for a JSON file with the values. A file with the same name as the current file and a `.json` extension is suggested when it exists.
 
 ## GROQ language support
@@ -66,17 +67,18 @@ GROQ is highlighted in:
 
 Find these in **Settings** by searching for `sanity` or `groq`.
 
-| Setting                         | Default | Description                                                                          |
-| ------------------------------- | ------- | ------------------------------------------------------------------------------------ |
-| `sanity.useCodelens`            | `true`  | Show **Execute Query** and **Format Query** above queries.                           |
-| `sanity.useCDN`                 | `false` | Use the Sanity API CDN when executing queries.                                       |
-| `sanity.openJSONFile`           | `false` | Open query results as an editable JSON file instead of the result panel.             |
-| `sanity.formatGroqInHover`      | `true`  | Show GROQ queries in TypeScript hovers formatted and highlighted.                    |
-| `sanity.formatGroqInHoverWidth` | `80`    | Column width that queries in hovers are wrapped to.                                  |
-| `groq.enable`                   | `true`  | Turn on diagnostics, completion, hover and formatting.                               |
-| `groq.schemaPath`               | `""`    | Schema file from `npx sanity schema extract`, absolute or relative to the workspace. |
-| `groq.maxDiagnostics`           | `100`   | Maximum number of diagnostics per file.                                              |
-| `groq.enableFormatting`         | `true`  | Turn on GROQ formatting.                                                             |
+| Setting                         | Default       | Description                                                                          |
+| ------------------------------- | ------------- | ------------------------------------------------------------------------------------ |
+| `sanity.useCodelens`            | `true`        | Show **Execute Query** and **Format Query** above queries.                           |
+| `sanity.useCDN`                 | `false`       | Use the Sanity API CDN when executing queries.                                       |
+| `sanity.apiVersion`             | `v2025-02-19` | API version used when executing queries: a date, `v1` or `vX`.                       |
+| `sanity.openJSONFile`           | `false`       | Open query results as an editable JSON file instead of the result panel.             |
+| `sanity.formatGroqInHover`      | `true`        | Show GROQ queries in TypeScript hovers formatted and highlighted.                    |
+| `sanity.formatGroqInHoverWidth` | `80`          | Column width that queries in hovers are wrapped to.                                  |
+| `groq.enable`                   | `true`        | Turn on diagnostics, completion, hover and formatting.                               |
+| `groq.schemaPath`               | `""`          | Schema file from `npx sanity schema extract`, absolute or relative to the workspace. |
+| `groq.maxDiagnostics`           | `100`         | Maximum number of diagnostics per file.                                              |
+| `groq.enableFormatting`         | `true`        | Turn on GROQ formatting.                                                             |
 
 If GROQ support stops responding, run **GROQ: Restart Language Server** from the command palette. **GROQ: Show Language Server Output** shows its log.
 
