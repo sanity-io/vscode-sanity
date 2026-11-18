@@ -1,4 +1,6 @@
+import path from 'node:path'
 import {clearRequireCache} from '../clearRequireCache'
+import {withConfigEnv} from './env'
 import type {Config} from './findConfig'
 
 /**
@@ -13,13 +15,14 @@ export async function loadConfigFile(configFilePath: string): Promise<Config> {
   clearRequireCache(require.resolve(configFilePath))
 
   // The extension host is shared with other extensions, so only hook `.ts` while loading the config.
+  // The same goes for the `.env` files the Sanity CLI loads for it, see withConfigEnv.
   // Sucrase is imported here, not at the top, to keep activation fast.
   const {registerTS} = await import('sucrase/dist/register')
   const revertTsHook = registerTS()
   try {
     // sanity.cli.ts is a file the user wrote. It is loaded by path, so it cannot be a static import.
     // oxlint-disable-next-line @typescript-eslint/no-require-imports
-    const config = require(configFilePath)
+    const config = withConfigEnv(path.dirname(configFilePath), () => require(configFilePath))
     return config.default
   } finally {
     revertTsHook()
