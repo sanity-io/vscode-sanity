@@ -1,7 +1,8 @@
 {
   "name": "vscode-sanity",
   "displayName": "Sanity.io",
-  "version": "0.0.0",
+  "version": "0.3.0",
+  "private": true,
   "license": "MIT",
   "description": "Developer tools for applications powered by Sanity.io",
   "author": "Sanity.io <hello@sanity.io>",
@@ -147,20 +148,20 @@
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
     "@sanity-labs/groq-content-mapper": "^0.6.2",
     "@sanity-labs/lint-core": "^1.0.1",
-    "@semantic-release/github": "^12.0.6",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.27",
     "@types/react": "^16.14.68",
     "@types/react-dom": "^16.9.25",
     "@types/vscode": "^1.107.0",
     "@vscode/test-electron": "^3.1.0",
-    "@vscode/vsce": "^3.7.1",
+    "@vscode/vsce": "^4.1.1",
     "mocha": "^10.8.2",
-    "ovsx": "^0.10.7",
+    "ovsx": "^1.4.0",
     "prettier": "^2.8.8",
-    "semantic-release-vsce": "^6.0.20",
     "typescript": "5.9.3",
     "typescript-7": "npm:typescript@^7.1.0-beta"
   },
@@ -173,8 +174,9 @@
     "watch": "tsc -watch -p ./",
     "env:source": "export $(cat .envrc | xargs)",
     "package": "npm run compile && vsce package --allow-star-activation",
-    "release": "npm run compile && semantic-release",
-    "release:dryrun": "npm run compile && semantic-release --dry-run",
+    "changeset": "changeset",
+    "changeset:version": "changeset version && npm install --package-lock-only",
+    "release": "bash scripts/release.sh",
     "upgrade-interactive": "npx npm-check -u"
   },
   "volta": {

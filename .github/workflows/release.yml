@@ -1,37 +1,61 @@
-name: release
+name: Release
 
 on:
   push:
     branches:
       - main
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 permissions:
   contents: read # for checkout
 
 jobs:
   release:
+    if: github.repository_owner == 'sanity-io'
     runs-on: ubuntu-latest
-    outputs:
-      new_release: ${{ steps.check_release.outputs.new_release }}
     permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      OVSX: ${{ secrets.OVSX_PAT }}
-      VSCE: ${{ secrets.VSCE_PAT }}
+      contents: read # for checkout
+      id-token: write # for Marketplace and Open VSX trusted publishing
     steps:
-      - name: Set OVSX_PAT env var
-        if: env.OVSX != ''
-        run: echo "OVSX_PAT=${{ env.OVSX }}" >> $GITHUB_ENV
-      - name: Set VSCE_PAT env var
-        if: env.VSCE != ''
-        run: echo "VSCE_PAT=${{ env.VSCE }}" >> $GITHUB_ENV
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/create-github-app-token@v3
+        id: app-token
         with:
+          client-id: ${{ vars.ECOSPARK_CLIENT_ID }}
+          private-key: ${{ secrets.ECOSPARK_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+      - name: Get app token user id
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Setup git user
+        run: |
+          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
+          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+      - uses: actions/setup-node@v7
+        with:
+          cache: npm
           node-version: 22.21.1
       - run: npm ci
       - run: npm run lint
-      - run: npm run release
+      - name: Create Release Pull Request or Publish to the registries
+        id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          version-script: npm run changeset:version
+          publish-script: npm run release
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Attach the vsix to the GitHub release
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          gh release upload "v${version}" "vscode-sanity-${version}.vsix" --clobber
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
