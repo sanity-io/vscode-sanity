@@ -65,6 +65,10 @@ The extension picks up `schema.json`, `sanity.schema.json`, `.sanity/schema.json
 
 When TypeScript shows the type of a GROQ query, for example for a `defineQuery` result, hovering it also shows the query formatted over multiple lines and highlighted as GROQ. Turn this off with `sanity.formatGroqInHover`.
 
+### Go to Definition for `.groq` imports
+
+Go to Definition, and Cmd/Ctrl+click, on a `.groq` import such as `import query from '#queries/slugPage.groq'` opens the file. Relative paths and the `paths` and `baseUrl` of the nearest `tsconfig.json` or `jsconfig.json` are followed. A `tsconfig.json` that gets its `paths` from `extends` is not read.
+
 ## Syntax highlighting
 
 GROQ is highlighted in:

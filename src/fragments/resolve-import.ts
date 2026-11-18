@@ -10,9 +10,11 @@ const EMITTED_EXTENSIONS = new Map([
   ['.cjs', ['.cts']],
 ])
 
-interface PathMapping {
+export interface PathMapping {
   /** Directory the targets are relative to. */
   base: string
+  /** Whether `base` comes from an explicit `baseUrl`, so bare specifiers may resolve from it. */
+  hasBaseUrl: boolean
   paths: Record<string, Array<string>>
 }
 
@@ -43,7 +45,7 @@ function stripJsonc(text: string): string {
   return out.replaceAll(/,(\s*[}\]])/g, '$1')
 }
 
-async function readPathMapping(
+export async function readPathMapping(
   fromFile: string,
   host: FragmentHost,
 ): Promise<PathMapping | undefined> {
@@ -58,10 +60,14 @@ async function readPathMapping(
         const {compilerOptions} = JSON.parse(stripJsonc(text))
         const paths = compilerOptions?.paths
         if (paths && typeof paths === 'object') {
-          return {base: path.resolve(dir, compilerOptions.baseUrl ?? '.'), paths}
+          return {
+            base: path.resolve(dir, compilerOptions.baseUrl ?? '.'),
+            hasBaseUrl: Boolean(compilerOptions.baseUrl),
+            paths,
+          }
         }
         if (compilerOptions?.baseUrl) {
-          return {base: path.resolve(dir, compilerOptions.baseUrl), paths: {}}
+          return {base: path.resolve(dir, compilerOptions.baseUrl), hasBaseUrl: true, paths: {}}
         }
       } catch {
         // A tsconfig that does not parse maps nothing.
@@ -93,17 +99,24 @@ function matchPattern(pattern: string, specifier: string): string | undefined {
   return specifier.slice(prefix.length, specifier.length - suffix.length)
 }
 
-function mapThroughPaths(specifier: string, mapping: PathMapping): Array<string> {
-  const candidates: Array<string> = []
+/** Where the `paths` of the mapping send the specifier, the most specific pattern first like TypeScript. */
+export function pathCandidates(specifier: string, mapping: PathMapping): Array<string> {
+  const matches: Array<{prefixLength: number; targets: Array<string>; matched: string}> = []
   for (const [pattern, targets] of Object.entries(mapping.paths)) {
     const matched = matchPattern(pattern, specifier)
     if (matched === undefined || !Array.isArray(targets)) {
       continue
     }
-    for (const target of targets) {
-      candidates.push(path.resolve(mapping.base, String(target).replace('*', matched)))
-    }
+    matches.push({prefixLength: pattern.indexOf('*') === -1 ? pattern.length : pattern.indexOf('*'), targets, matched})
   }
+  matches.sort((a, b) => b.prefixLength - a.prefixLength)
+  return matches.flatMap(({targets, matched}) =>
+    targets.map((target) => path.resolve(mapping.base, String(target).replace('*', matched))),
+  )
+}
+
+function mapThroughPaths(specifier: string, mapping: PathMapping): Array<string> {
+  const candidates = pathCandidates(specifier, mapping)
   // `baseUrl` alone also makes `lib/queries` resolve from the base.
   candidates.push(path.resolve(mapping.base, specifier))
   return candidates
