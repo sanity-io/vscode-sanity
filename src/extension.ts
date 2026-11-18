@@ -99,6 +99,20 @@ export function activate(context: vscode.ExtensionContext) {
   })
   context.subscriptions.push(
     disposable,
+    vscode.commands.registerCommand('sanity.copyGroq', async (groqQuery?: string) => {
+      try {
+        const query = groqQuery || loadGroqFromSelectionOrFile()
+        if (!query?.trim()) {
+          vscode.window.showWarningMessage('No GROQ query found to copy')
+          return
+        }
+
+        await vscode.env.clipboard.writeText(query)
+        vscode.window.setStatusBarMessage('GROQ query copied to clipboard', 3000)
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to copy GROQ query: ${getErrorMessage(error)}`)
+      }
+    }),
     vscode.commands.registerCommand(
       'sanity.formatQuery',
       async (uri: vscode.Uri, start: number, source: string) => {
@@ -201,6 +215,15 @@ async function loadGroqFromFile() {
   }
 
   return activeTextEditor.document.getText()
+}
+
+function loadGroqFromSelectionOrFile(): string | undefined {
+  const editor = vscode.window.activeTextEditor
+  if (!editor) {
+    return undefined
+  }
+
+  return editor.document.getText(editor.selection.isEmpty ? undefined : editor.selection)
 }
 
 async function registerContentProvider(

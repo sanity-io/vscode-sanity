@@ -22,6 +22,7 @@ Open a `.groq` file, or a JavaScript or TypeScript file with a GROQ query, and c
 - **Project and dataset.** They are read from `sanity.cli.ts` in your workspace. If the workspace has several, you are asked which one to use. If the file sets an API `token`, it is used to query private datasets.
 - **API version.** Queries use the API version in `sanity.apiVersion`, `v2025-02-19` by default. Set a date such as `v2021-03-25`, or `v1` or `vX` (experimental). Newer GROQ features, such as `pt::text()`, need a recent version. An invalid value is ignored with a warning, and the default is used.
 - **Query parameters.** If the query uses variables such as `$slug`, you are asked for a JSON file with the values. A file with the same name as the current file and a `.json` extension is suggested when it exists.
+- **Copy instead.** Click **Copy Query** next to **Execute Query** to copy the query to the clipboard, with the same `${}` fragments filled in that Execute Query uses. In a `.groq` file, **Copy GROQ query** in the command palette copies the selection, or the whole file when nothing is selected.
 
 ## GROQ language support
 
