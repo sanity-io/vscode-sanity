@@ -1,8 +1,9 @@
 import vscode from 'vscode'
 import {DEFAULT_FORMAT_WIDTH, formatGroq} from '../format'
 import {comparable, findGroqInHoverMarkdown} from '../hover/groq-in-hover'
+import {EMBEDDED_GROQ_LANGUAGES} from '../languages'
 
-export const HOVER_LANGUAGES = ['typescript', 'typescriptreact', 'javascript', 'javascriptreact']
+export const HOVER_LANGUAGES = EMBEDDED_GROQ_LANGUAGES
 
 export const TRUNCATED_NOTICE =
   '*GROQ query not formatted: TypeScript cut this hover off before the end of the query. Open the `.groq` file to read it in full.*'

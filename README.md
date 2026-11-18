@@ -6,7 +6,7 @@ Write, check and run [GROQ](https://www.sanity.io/docs/groq) queries without lea
 - **Catch mistakes as you type.** Syntax errors and common performance problems are flagged in the editor.
 - **Autocomplete GROQ.** Get suggestions for functions, system fields and, with your schema, your document types and fields.
 - **Format queries.** Tidy a query with one click, or a whole `.groq` file with **Format Document**.
-- **Syntax highlighting** for GROQ in `.groq` files, JavaScript and TypeScript template literals, and Markdown.
+- **Syntax highlighting** for GROQ in `.groq` files, JavaScript, TypeScript and Astro template literals, and Markdown. Astro files need the [Astro extension](https://marketplace.visualstudio.com/items?itemName=astro-build.astro-vscode).
 
 ![A GROQ query in a TypeScript file with the Execute Query code lens, and its JSON result in a panel beside it](media/execute-query.png)
 
@@ -17,11 +17,21 @@ Write, check and run [GROQ](https://www.sanity.io/docs/groq) queries without lea
 
 ## Execute queries
 
-Open a `.groq` file, or a JavaScript or TypeScript file with a GROQ query, and click **Execute Query** above the query. The result opens in a **GROQ Execution Result** panel beside the editor, together with how long the query took. In a `.groq` file you can also run **Execute GROQ query** from the command palette, or press `Ctrl+Shift+G` in the editor.
+Open a `.groq` file, or a JavaScript, TypeScript or Astro file with a GROQ query, and click **Execute Query** above the query. The result opens in a **GROQ Execution Result** panel beside the editor, together with how long the query took. In a `.groq` file you can also run **Execute GROQ query** from the command palette, or press `Ctrl+Shift+G` in the editor.
 
 - **Project and dataset.** They are read from `sanity.cli.ts` in your workspace. If the workspace has several, you are asked which one to use. If the file sets an API `token`, it is used to query private datasets.
 - **API version.** Queries use the API version in `sanity.apiVersion`, `v2025-02-19` by default. Set a date such as `v2021-03-25`, or `v1` or `vX` (experimental). Newer GROQ features, such as `pt::text()`, need a recent version. An invalid value is ignored with a warning, and the default is used.
 - **Query parameters.** If the query uses variables such as `$slug`, you are asked for a JSON file with the values. A file with the same name as the current file and a `.json` extension is suggested when it exists.
+
+`@sanity/astro` sets the project in `astro.config.mjs`, which this extension does not read. Add a `sanity.cli.ts` next to it:
+
+```ts
+import {defineCliConfig} from 'sanity/cli'
+
+export default defineCliConfig({
+  api: {projectId: '<your-project-id>', dataset: 'production'},
+})
+```
 
 ## GROQ language support
 
@@ -46,7 +56,7 @@ The extension picks up `schema.json`, `sanity.schema.json`, `.sanity/schema.json
 ### Format queries
 
 - In `.groq` files, use **Format Document**.
-- In JavaScript and TypeScript files, click **Format Query** above a query to format just that one. It works for `groq` and `defineQuery` template literals, but not for queries that contain `${}` interpolations or backslash escapes.
+- In JavaScript, TypeScript and Astro files, click **Format Query** above a query to format just that one. It works for `groq` and `defineQuery` template literals, but not for queries that contain `${}` interpolations or backslash escapes.
 - To format every GROQ query in a JavaScript or TypeScript file, run **GROQ: Format GROQ Queries** from the command palette. Your usual formatter keeps handling the rest of the file.
 - **Format Document** and **GROQ: Format GROQ Queries** indent with the editor's tab size, and with tabs when the editor uses tabs.
 
