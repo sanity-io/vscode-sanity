@@ -1,5 +1,13 @@
 # vscode-sanity
 
+## 0.5.0
+
+### Minor Changes
+
+- [#71](https://github.com/sanity-io/vscode-sanity/pull/71) [`2e30f51`](https://github.com/sanity-io/vscode-sanity/commit/2e30f51720295bf6a5135567e17ed3ff38dc45a2) Thanks [@runeb](https://github.com/runeb)! - Add a **Format Query** code lens next to **Execute Query**. It formats that one GROQ query in place: a `groq` template literal, a `defineQuery` template literal, or a whole `.groq` file. Unlike **GROQ: Format GROQ Queries**, it also formats `defineQuery` queries, and it works when the GROQ language server is off. It is hidden when `groq.enableFormatting` or `sanity.useCodelens` is off, and for queries with `${}` interpolations or backslash escapes, which cannot be rewritten safely.
+
+- [#63](https://github.com/sanity-io/vscode-sanity/pull/63) [`0975e38`](https://github.com/sanity-io/vscode-sanity/commit/0975e389493a47af92314cdca999a4abd7da6da7) Thanks [@stipsan](https://github.com/stipsan)! - Add GROQ linting, completion and formatting. The extension now runs the GROQ language server on `.groq` files and `groq` template literals in JavaScript and TypeScript: syntax errors and lint warnings show up as you type, completion suggests fields and functions (and your schema's types and fields when a `schema.json` is found or set with `groq.schemaPath`), and `Format Document` formats `.groq` files. In JavaScript and TypeScript files, run **GROQ: Format GROQ Queries** to format the queries without touching the rest of the file. It also adds GROQ snippets, the `groq.enable`, `groq.schemaPath`, `groq.maxDiagnostics`, `groq.enableFormatting` and `groq.trace.server` settings, and fixes "Execute GROQ query" failing on queries that contain `null`.
+
 ## 0.4.1
 
 ### Patch Changes
