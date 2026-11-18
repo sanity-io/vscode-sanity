@@ -12,6 +12,7 @@ export default defineConfig({
         'src/client.test.ts',
         'src/config/loadConfigFile.test.ts',
         'src/format.test.ts',
+        'src/fragments/resolve.test.ts',
         'src/hover/groq-in-hover.test.ts',
       ],
       rules: {
