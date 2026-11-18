@@ -1,5 +1,15 @@
 # vscode-sanity
 
+## 0.4.0
+
+### Minor Changes
+
+- [#57](https://github.com/sanity-io/vscode-sanity/pull/57) [`1687b37`](https://github.com/sanity-io/vscode-sanity/commit/1687b379c849611df5ffae3f7a6300265660ff25) Thanks [@stipsan](https://github.com/stipsan)! - Format and highlight GROQ queries in TypeScript hovers
+
+### Patch Changes
+
+- [#58](https://github.com/sanity-io/vscode-sanity/pull/58) [`3a76a25`](https://github.com/sanity-io/vscode-sanity/commit/3a76a25349388cb42158798759a61ce10651f731) Thanks [@stipsan](https://github.com/stipsan)! - enable trusted publishing
+
 ## 0.3.0 - 2026-04-15
 
 - Format JSON before opening ([#34](https://github.com/sanity-io/vscode-sanity/pull/34))
