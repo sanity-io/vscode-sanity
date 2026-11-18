@@ -47,6 +47,7 @@ The extension picks up `schema.json`, `sanity.schema.json`, `.sanity/schema.json
 - In `.groq` files, use **Format Document**.
 - In JavaScript and TypeScript files, click **Format Query** above a query to format just that one. It works for `groq` and `defineQuery` template literals, but not for queries that contain `${}` interpolations or backslash escapes.
 - To format every GROQ query in a JavaScript or TypeScript file, run **GROQ: Format GROQ Queries** from the command palette. Your usual formatter keeps handling the rest of the file.
+- **Format Document** and **GROQ: Format GROQ Queries** indent with the editor's tab size, and with tabs when the editor uses tabs.
 
 ### GROQ in TypeScript hovers
 
