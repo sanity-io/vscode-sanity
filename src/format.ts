@@ -39,9 +39,19 @@ export function canFormatInSource(source: string): boolean {
 }
 
 /**
+ * The indent of the line the query starts on: the spaces or tabs between the previous newline and
+ * the query. Empty when the query starts mid-line, since that prefix is code, not indent.
+ */
+function indentOfQueryLine(leading: string): string {
+  const indent = leading.slice(leading.lastIndexOf('\n') + 1)
+  return /^[ \t]*$/.test(indent) ? indent : ''
+}
+
+/**
  * Formats the query in `source` and keeps the whitespace around it, so a query on its own lines
- * inside a template literal, or a `.groq` file's final newline, stay where they were. Returns
- * `undefined` if the query cannot be parsed.
+ * inside a template literal, or a `.groq` file's final newline, stay where they were. Continuation
+ * lines keep the indent of the line the query starts on. Returns `undefined` if the query cannot
+ * be parsed.
  */
 export function formatQuerySource(source: string): string | undefined {
   const query = source.trim()
@@ -53,5 +63,13 @@ export function formatQuerySource(source: string): string | undefined {
     return undefined
   }
   const start = source.indexOf(query)
-  return source.slice(0, start) + formatted + source.slice(start + query.length)
+  const leading = source.slice(0, start)
+  const indent = indentOfQueryLine(leading)
+  const indented = indent
+    ? formatted
+        .split('\n')
+        .map((line, index) => (index === 0 || line.length === 0 ? line : indent + line))
+        .join('\n')
+    : formatted
+  return leading + indented + source.slice(start + query.length)
 }
