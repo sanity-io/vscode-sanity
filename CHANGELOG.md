@@ -1,5 +1,13 @@
 # vscode-sanity
 
+## 0.4.1
+
+### Patch Changes
+
+- [#60](https://github.com/sanity-io/vscode-sanity/pull/60) [`425651a`](https://github.com/sanity-io/vscode-sanity/commit/425651a8697cc670675081c8f09ea0a1c277f5cd) Thanks [@stipsan](https://github.com/stipsan)! - Smaller, faster-loading extension. It is now bundled into minified JavaScript, so the package is about 0.6 MB with 21 files instead of 10.7 MB with over 3,500. It no longer starts with every VS Code window, only when a GROQ, JavaScript or TypeScript file is opened, and activating it is much quicker: the TypeScript compiler is no longer loaded at startup, and the Sanity client and result view load the first time a query is executed. `sanity.cli.ts` is now compiled with Sucrase, which also handles configs that import other local `.ts` files.
+
+- [#62](https://github.com/sanity-io/vscode-sanity/pull/62) [`0e69ae2`](https://github.com/sanity-io/vscode-sanity/commit/0e69ae269efc756909c748d580a10df037303c99) Thanks [@stipsan](https://github.com/stipsan)! - Running a query again picks up edits in local files that `sanity.cli.ts` imports. Previously only the config file itself was reloaded.
+
 ## 0.4.0
 
 ### Minor Changes
