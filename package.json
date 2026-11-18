@@ -134,6 +134,7 @@
     ]
   },
   "dependencies": {
+    "@sanity-labs/groq-wasm": "^1.2.0",
     "@sanity/client": "^7.20.0",
     "@sanity/textmate-groq": "^1.1.1",
     "groq-js": "^1.29.0",
@@ -147,6 +148,7 @@
   },
   "devDependencies": {
     "@sanity-labs/groq-content-mapper": "^0.6.2",
+    "@sanity-labs/lint-core": "^1.0.1",
     "@semantic-release/github": "^12.0.6",
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.27",

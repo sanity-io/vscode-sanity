@@ -7,9 +7,3 @@ fixtures/**
 out/test/**
 out/**/*.test.js
 out/**/*.test.js.map
-groq-format-wasm/src/**
-groq-format-wasm/target/**
-groq-format-wasm/Cargo.*
-groq-format-wasm/rust-toolchain.toml
-groq-format-wasm/.gitignore
-scripts/**

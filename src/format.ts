@@ -1,4 +1,4 @@
-import {format} from '../groq-format-wasm/pkg/groq_format'
+import {format, WasmError} from '@sanity-labs/groq-wasm'
 
 export const DEFAULT_FORMAT_WIDTH = 80
 
@@ -7,5 +7,10 @@ export const DEFAULT_FORMAT_WIDTH = 80
  * `undefined` if the query cannot be parsed, so callers can fall back to showing it as-is.
  */
 export function formatGroq(query: string, width = DEFAULT_FORMAT_WIDTH): string | undefined {
-  return format(query, width)?.trimEnd()
+  try {
+    return format(query, {width}).trimEnd()
+  } catch (error) {
+    if (error instanceof WasmError && error.code === 'PARSE_ERROR') return undefined
+    throw error
+  }
 }

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "Node16",
+    "module": "node20",
     "target": "ES2022",
     "outDir": "out",
     "lib": ["ES2022", "esnext", "dom"],
