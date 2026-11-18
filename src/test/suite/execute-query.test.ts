@@ -64,6 +64,12 @@ suite('Execute GROQ query', () => {
     assert.ok(url.pathname.startsWith('/v2021-03-25/data/query/production'), url.pathname)
   })
 
+  it('loads a sanity.cli.ts importing CommonJS named exports on every run', async () => {
+    await execute()
+    requested = []
+    await execute()
+  })
+
   it('falls back to the default when sanity.apiVersion is invalid', async () => {
     await config.update('apiVersion', 'latest', vscode.ConfigurationTarget.Global)
     const url = await execute()

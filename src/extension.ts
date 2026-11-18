@@ -2,8 +2,8 @@ import path from 'node:path'
 import vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'node:fs'
 import {resolveApiVersion} from './apiVersion'
-import {clearRequireCache} from './clearRequireCache'
 import {Config} from './config/findConfig'
+import {loadConfigFile} from './config/loadConfigFile'
 import {formatQuerySource} from './format'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   let resultPanel: vscode.WebviewPanel | undefined
   const disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    let config: Config
+    let config: Config | null
     let query: string = groqQuery
     let params: QueryParams = {}
     try {
@@ -191,21 +191,7 @@ async function loadSanityConfig() {
     throw new Error('Could not resolve sanity.cli.ts configuration file')
   }
 
-  // Sucrase compiles local .ts imports too, and those stay cached after the hook is removed.
-  clearRequireCache(require.resolve(configFilePath))
-
-  // The extension host is shared with other extensions, so only hook `.ts` while loading the config.
-  // Sucrase is imported here, not at the top, to keep activation fast.
-  const {registerTS} = await import('sucrase/dist/register')
-  const revertTsHook = registerTS()
-  try {
-    // sanity.cli.ts is a file the user wrote. It is loaded by path, so it cannot be a static import.
-    // oxlint-disable-next-line @typescript-eslint/no-require-imports
-    const config = require(configFilePath)
-    return config.default
-  } finally {
-    revertTsHook()
-  }
+  return loadConfigFile(configFilePath)
 }
 
 async function loadGroqFromFile() {

@@ -10,6 +10,7 @@ export default defineConfig({
         'src/apiVersion.test.ts',
         'src/clearRequireCache.test.ts',
         'src/client.test.ts',
+        'src/config/loadConfigFile.test.ts',
         'src/format.test.ts',
         'src/hover/groq-in-hover.test.ts',
       ],
