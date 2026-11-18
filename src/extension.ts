@@ -1,6 +1,7 @@
 import path from 'node:path'
 import vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'node:fs'
+import {resolveApiVersion} from './apiVersion'
 import {clearRequireCache} from './clearRequireCache'
 import {Config} from './config/findConfig'
 import {formatQuerySource} from './format'
@@ -16,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
   let useCodelens
   let openJSONFile
   let useCDN
+  let apiVersion: string | undefined
 
   // Read and listen for configuration updates
   readConfig()
@@ -40,6 +42,13 @@ export function activate(context: vscode.ExtensionContext) {
         params = await readParams(variables)
       }
 
+      const resolvedApiVersion = resolveApiVersion(apiVersion)
+      if (resolvedApiVersion.invalid !== undefined) {
+        vscode.window.showWarningMessage(
+          `Ignoring invalid sanity.apiVersion "${resolvedApiVersion.invalid}". Using ${resolvedApiVersion.apiVersion}.`
+        )
+      }
+
       vscode.window.showInformationMessage(`Executing GROQ query: ${query}`)
       // Imported here, not at the top, to keep activation fast: @sanity/client alone takes ~100ms to load.
       const {executeGroq} = await import('./query')
@@ -48,12 +57,13 @@ export function activate(context: vscode.ExtensionContext) {
         ...config.api,
         query,
         params,
+        apiVersion: resolvedApiVersion.apiVersion,
         useCdn: config.api.token ? false : useCDN,
       })
 
       vscode.window.setStatusBarMessage(
         `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10_000,
+        10_000
       )
 
       if (!openJSONFile && !resultPanel) {
@@ -61,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
           'executionResultsWebView',
           'GROQ Execution Result',
           vscode.ViewColumn.Beside,
-          {},
+          {}
         )
 
         resultPanel.onDidDispose(() => {
@@ -77,7 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
           query,
           params,
           ms,
-          result || [],
+          result || []
         )
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
@@ -95,11 +105,11 @@ export function activate(context: vscode.ExtensionContext) {
         const document = await vscode.workspace.openTextDocument(uri)
         const range = new vscode.Range(
           document.positionAt(start),
-          document.positionAt(start + source.length),
+          document.positionAt(start + source.length)
         )
         if (document.getText(range) !== source) {
           vscode.window.showWarningMessage(
-            'The GROQ query changed before it could be formatted. Try again.',
+            'The GROQ query changed before it could be formatted. Try again.'
           )
           return
         }
@@ -114,9 +124,9 @@ export function activate(context: vscode.ExtensionContext) {
         const edit = new vscode.WorkspaceEdit()
         edit.replace(uri, range, formatted)
         await vscode.workspace.applyEdit(edit)
-      },
+      }
     ),
-    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()),
+    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider())
   )
   registerGroqLanguageServer(context)
 
@@ -125,6 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
     openJSONFile = settings.get('openJSONFile', false)
     useCodelens = settings.get('useCodelens', true)
     useCDN = settings.get('useCDN', false)
+    apiVersion = settings.get('apiVersion')
 
     if (useCodelens && !codelens) {
       const provider = new GROQCodeLensProvider()
@@ -132,8 +143,8 @@ export function activate(context: vscode.ExtensionContext) {
         provider,
         vscode.languages.registerCodeLensProvider(
           ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-          provider,
-        ),
+          provider
+        )
       )
 
       context.subscriptions.push(codelens)
@@ -211,7 +222,7 @@ async function registerContentProvider(
   query: string,
   params: QueryParams,
   ms: number,
-  result: unknown,
+  result: unknown
 ) {
   // Imported here, not at the top, to keep React out of activation.
   const {GroqContentProvider} = await import('./providers/content-provider')

@@ -54,6 +54,13 @@
           "default": false,
           "description": "Use APICDN for GROQ queries."
         },
+        "sanity.apiVersion": {
+          "type": "string",
+          "default": "v2025-02-19",
+          "pattern": "^v?(\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])|1|X)$",
+          "patternErrorMessage": "Use a date such as v2025-02-19, or v1 or vX.",
+          "markdownDescription": "[API version](https://www.sanity.io/docs/content-lake/api-versioning) used when executing GROQ queries, as a date (`v2025-02-19`), `v1` or `vX` (experimental). Newer GROQ features, such as `pt::text()`, need a recent version."
+        },
         "sanity.openJSONFile": {
           "type": "boolean",
           "default": false,
