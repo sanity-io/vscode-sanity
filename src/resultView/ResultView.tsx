@@ -3,9 +3,11 @@ import {ReactJason} from 'react-jason'
 import type {QueryParams} from '../queryParams'
 
 export function ResultView({query, params, ms, result}: {query: string; params: QueryParams; ms: number; result: unknown}) {
+  const count = Array.isArray(result) ? ` (${result.length})` : ''
+
   return (
     <div>
-      <h2>Query result</h2>
+      <h2>Query result{count}</h2>
       <p>Query: <code>{query}</code></p>
       <p>params: <code>{JSON.stringify(params)}</code></p>
       <p>Time: {ms}ms</p>
