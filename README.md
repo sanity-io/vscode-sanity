@@ -49,7 +49,7 @@ Install the extension for [VSCode](https://marketplace.visualstudio.com/items?it
 6.  Open a file that should be syntax highlighted
 7.  Make changes to the extension code, then press (`Ctrl+R` or `Cmd+R` on Mac) in the syntax highlighted file to test the changes
 
-> We follow the principles of semantic versioning and conventional commits, meaning that the commits are used as the basis for determining if it's a patch/minor/major when building and releasing new version, as well as for generating the release notes. A good explanation of what commit messages translate to what version bumps can be found in the [`semantic release`](https://github.com/semantic-release/semantic-release?tab=readme-ov-file#commit-message-format) docs.
+> We follow semantic versioning. Whether a change is a patch, minor or major release, and what the changelog says about it, comes from the changeset added with the change (see [Publishing](#publishing)).
 
 Run `npm test` for the unit tests. `npm run test:integration` downloads VS Code and checks the hover end to end against the built-in TypeScript extension. `npm run test:integration:tsgo` does the same with the TypeScript 7 extension (`TypeScriptTeam.native-preview`, downloaded from the Marketplace) running TypeScript 7.1 and `@sanity-labs/groq-content-mapper` on the `.groq` files in `fixtures/hover-project`. On Linux without a display, run either with `xvfb-run -a`.
 
@@ -57,19 +57,17 @@ If you want to build/inspect the vsix file, you can do `npm run package`. It can
 
 ## Publishing
 
-The extension is built whenever new code is pushed to the `main` branch of the repo. The release notes and tagging is done automatically in CI by `semantic-release` and the extension is pushed to Open VSX registry and [Visual Studio marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity).
-
-If you want to dry run the release, you can do 👇 to have `semantic-release` parse the git history and see if everything is ok. Since you're running locally it'll skip the actual steps of packaging and pushing etc. You need to set `GITHUB_TOKEN` + `OVSX_PAT` and/or `VSCE_PAT` env vars for the dry run release to complete.
+Releases are managed with [Changesets](https://github.com/changesets/changesets). Add a changeset to any PR that should be released, describing the change for the changelog:
 
 ```sh
-# you can dry-run using
-npm run release:dryrun
-
-# and when all is good you do
-npm run release
+npx changeset
 ```
 
-> ⚠️ The `release` script will not publish from your local machine (unless you do `--no-ci`). The publishing should be handled in CI – if you need to do it, see the workflow file for details on what ENV vars you need to provide.
+When changesets land on `main`, the release workflow opens (or updates) a "Version Packages" PR that bumps the version in `package.json` and writes `CHANGELOG.md`. Merging that PR packages the vsix, publishes it to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) and the [Open VSX registry](https://open-vsx.org/extension/sanity-io/vscode-sanity), and then tags the version and creates the GitHub release. If a publish fails nothing is tagged, so re-running the workflow retries it.
+
+Run `npx changeset status` to see what the next release will contain.
+
+> ⚠️ Publishing only works in CI: the workflow authenticates to both registries with GitHub OIDC trusted publishing, so there are no access tokens to publish with locally.
 
 ## License
 

@@ -2,6 +2,8 @@
 .vscode-test/**
 .git/**
 .gitignore
+.changeset/**
+scripts/**
 vsc-extension-quickstart.md
 fixtures/**
 out/test/**

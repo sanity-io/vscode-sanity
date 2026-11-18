@@ -2,6 +2,32 @@
 
 All notable changes will be documented in this file.
 
+## 0.3.0 - 2026-04-15
+
+- Format JSON before opening ([#34](https://github.com/sanity-io/vscode-sanity/pull/34))
+- Update and externalize the GROQ grammars, upgrade dependencies ([#52](https://github.com/sanity-io/vscode-sanity/pull/52))
+
+## 0.2.5 - 2026-01-05
+
+- Require VS Code 1.107 and update dependencies ([#40](https://github.com/sanity-io/vscode-sanity/pull/40), [#42](https://github.com/sanity-io/vscode-sanity/pull/42))
+
+## 0.2.4 - 2025-10-20
+
+- Make the README less specific to VS Code
+
+## 0.2.3 - 2025-10-20
+
+- Update the logo in the README
+
+## 0.2.2 - 2025-10-20
+
+- Support GROQ syntax highlighting in Astro files
+- Publish to the Open VSX registry ([#36](https://github.com/sanity-io/vscode-sanity/pull/36))
+
+## 0.2.1 - 2024-09-12
+
+- Treat `defineQuery` contents as GROQ ([#28](https://github.com/sanity-io/vscode-sanity/pull/28))
+
 ## 0.2.0 - 2024-08-06
 
 - BREAKING CHANGE: Drop support for Sanity Studio v2
