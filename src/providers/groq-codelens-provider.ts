@@ -6,8 +6,8 @@ interface ExtractedQuery {
   position: Position
 }
 
-function extractAllTemplateLiterals(document: TextDocument): ExtractedQuery[] {
-  const documents: ExtractedQuery[] = []
+function extractAllTemplateLiterals(document: TextDocument): Array<ExtractedQuery> {
+  const documents: Array<ExtractedQuery> = []
   const text = document.getText()
   const regExpGQL = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
 
@@ -17,7 +17,7 @@ function extractAllTemplateLiterals(document: TextDocument): ExtractedQuery[] {
     const content = result[1]
     const queryPosition = text.indexOf(content, prevIndex)
     documents.push({
-      content: content,
+      content,
       uri: document.uri.path,
       position: document.positionAt(queryPosition),
     })
@@ -26,8 +26,8 @@ function extractAllTemplateLiterals(document: TextDocument): ExtractedQuery[] {
   return documents
 }
 
-function extractAllDefineQuery(document: TextDocument): ExtractedQuery[] {
-  const documents: ExtractedQuery[] = []
+function extractAllDefineQuery(document: TextDocument): Array<ExtractedQuery> {
+  const documents: Array<ExtractedQuery> = []
   const text = document.getText()
   const pattern = '(\\s*defineQuery\\((["\'`])([\\s\\S]*?)\\2\\))'
   const regexp = new RegExp(pattern, 'g');
@@ -38,7 +38,7 @@ function extractAllDefineQuery(document: TextDocument): ExtractedQuery[] {
     const content = result[3]
     const queryPosition = text.indexOf(result[1], prevIndex)
     documents.push({
-      content: content,
+      content,
       uri: document.uri.path,
       position: document.positionAt(queryPosition),
     })
@@ -50,7 +50,7 @@ function extractAllDefineQuery(document: TextDocument): ExtractedQuery[] {
 export class GROQCodeLensProvider implements CodeLensProvider {
   constructor() {}
 
-  public provideCodeLenses(document: TextDocument, _token: CancellationToken): CodeLens[] {
+  public provideCodeLenses(document: TextDocument, _token: CancellationToken): Array<CodeLens> {
     if (document.languageId === 'groq') {
       return [
         new CodeLens(new Range(new Position(0, 0), new Position(0, 0)), {
@@ -62,7 +62,7 @@ export class GROQCodeLensProvider implements CodeLensProvider {
     }
 
     // find all lines where "groq" exists
-    const queries: ExtractedQuery[] = [...extractAllTemplateLiterals(document), ...extractAllDefineQuery(document)]
+    const queries: Array<ExtractedQuery> = [...extractAllTemplateLiterals(document), ...extractAllDefineQuery(document)]
 
     // add a button above each line that has groq
     return queries.map((def) => {

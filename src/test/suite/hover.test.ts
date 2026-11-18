@@ -1,8 +1,8 @@
-import * as assert from 'assert'
-import {mkdtempSync, writeFileSync} from 'fs'
-import {tmpdir} from 'os'
-import * as path from 'path'
-import * as vscode from 'vscode'
+import assert from 'node:assert'
+import {mkdtempSync, writeFileSync} from 'node:fs'
+import {tmpdir} from 'node:os'
+import path from 'node:path'
+import vscode from 'vscode'
 
 const FORMATTED = [
   '*[_type == "post" && defined(slug.current)] {',
@@ -21,7 +21,7 @@ declare const query: Query
 export const used = query
 `
 
-function markdownOf(hovers: vscode.Hover[]): string[] {
+function markdownOf(hovers: Array<vscode.Hover>): Array<string> {
   return hovers.flatMap((hover) =>
     hover.contents.map((content) =>
       typeof content === 'string' ? content : 'language' in content ? content.value : content.value
@@ -32,18 +32,18 @@ function markdownOf(hovers: vscode.Hover[]): string[] {
 async function hoversAt(
   uri: vscode.Uri,
   position: vscode.Position,
-  until: (md: string[]) => boolean
+  until: (md: Array<string>) => boolean
 ) {
   const deadline = Date.now() + 90_000
   for (;;) {
     const hovers =
-      (await vscode.commands.executeCommand<vscode.Hover[]>(
+      (await vscode.commands.executeCommand<Array<vscode.Hover>>(
         'vscode.executeHoverProvider',
         uri,
         position
       )) ?? []
     const md = markdownOf(hovers)
-    if (until(md) || Date.now() > deadline) return md
+    if (until(md) || Date.now() > deadline) {return md}
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 }
@@ -75,7 +75,7 @@ describe('GROQ in TypeScript hovers', () => {
     const tsHover = md.find((part) => part.includes('type Query'))
     assert.ok(tsHover, `TypeScript hover missing: ${JSON.stringify(md)}`)
     assert.ok(
-      tsHover.includes('\\n') || !tsHover.includes('\n*['),
+      tsHover.includes(String.raw`\n`) || !tsHover.includes('\n*['),
       'expected TypeScript to print an escaped one line string'
     )
 

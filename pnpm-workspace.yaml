@@ -7,3 +7,5 @@ allowBuilds:
 # org's own packages, and the extension cannot install without the current ones.
 minimumReleaseAgeExclude:
   - '@sanity-labs/*'
+  # 3.0.0 is the shared oxlint preset this repo extends, and it shipped within the last day.
+  - '@nkzw/oxlint-config'

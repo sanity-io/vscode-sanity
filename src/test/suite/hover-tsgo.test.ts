@@ -1,7 +1,7 @@
-import * as assert from 'assert'
-import {readFileSync} from 'fs'
-import * as path from 'path'
-import * as vscode from 'vscode'
+import assert from 'node:assert'
+import {readFileSync} from 'node:fs'
+import path from 'node:path'
+import vscode from 'vscode'
 import {TRUNCATED_NOTICE} from '../../providers/groq-hover-provider'
 
 const project = process.env.SANITY_TEST_TSGO
@@ -30,14 +30,14 @@ const LONG_QUERY_FORMATTED = [
   '}',
 ].join('\n')
 
-function markdownOf(hovers: vscode.Hover[]): string[] {
+function markdownOf(hovers: Array<vscode.Hover>): Array<string> {
   return hovers.flatMap((hover) =>
     hover.contents.map((content) => (typeof content === 'string' ? content : content.value))
   )
 }
 
 /** Hovers `identifier` in usage.ts until the TypeScript 7 hover is up and ours has answered. */
-async function hoverOn(identifier: string): Promise<string[]> {
+async function hoverOn(identifier: string): Promise<Array<string>> {
   const uri = vscode.Uri.file(path.join(project!, 'src', 'usage.ts'))
   const doc = await vscode.workspace.openTextDocument(uri)
   await vscode.window.showTextDocument(doc)
@@ -46,7 +46,7 @@ async function hoverOn(identifier: string): Promise<string[]> {
   const deadline = Date.now() + 150_000
   for (;;) {
     const hovers =
-      (await vscode.commands.executeCommand<vscode.Hover[]>(
+      (await vscode.commands.executeCommand<Array<vscode.Hover>>(
         'vscode.executeHoverProvider',
         uri,
         position
@@ -54,7 +54,7 @@ async function hoverOn(identifier: string): Promise<string[]> {
     const md = markdownOf(hovers)
     const tsHover = md.find((part) => part.includes('const query'))
     const ours = md.find((part) => part.startsWith('```groq') || part === TRUNCATED_NOTICE)
-    if ((tsHover && ours) || Date.now() > deadline) return md
+    if ((tsHover && ours) || Date.now() > deadline) {return md}
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
 }
@@ -63,7 +63,7 @@ describe('GROQ in TypeScript 7.1 hovers (tsgo + groq-content-mapper)', function 
   this.timeout(200_000)
 
   before(function () {
-    if (!project) this.skip()
+    if (!project) {this.skip()}
   })
 
   it('runs against TypeScript 7.1 through the TypeScript 7 extension', async () => {
@@ -85,7 +85,7 @@ describe('GROQ in TypeScript 7.1 hovers (tsgo + groq-content-mapper)', function 
       'expected the mapper type'
     )
     assert.ok(
-      tsHover.includes('\\n'),
+      tsHover.includes(String.raw`\n`),
       'expected tsgo to print the query as an escaped one line string'
     )
 

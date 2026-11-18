@@ -1,7 +1,7 @@
-import * as vscode from 'vscode'
-import * as path from 'path'
-import os from 'os'
-import {promises as fs} from 'fs'
+import vscode from 'vscode'
+import path from 'node:path'
+import os from 'node:os'
+import {promises as fs} from 'node:fs'
 import osenv from 'osenv'
 import xdgBasedir from 'xdg-basedir'
 
@@ -57,7 +57,7 @@ function parseJson(content: string) {
 }
 
 function getGlobalConfigLocation() {
-  const user = (osenv.user() || 'user').replace(/\\/g, '')
+  const user = (osenv.user() || 'user').replaceAll('\\', '')
   const configDir = xdgBasedir.config || path.join(os.tmpdir(), user, '.config')
   return path.join(configDir, 'sanity', 'config.json')
 }

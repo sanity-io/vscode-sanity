@@ -1,8 +1,9 @@
-import * as path from 'path'
-import * as vscode from 'vscode'
-import {promises as fs, constants as fsconstants} from 'fs'
+import path from 'node:path'
+import vscode from 'vscode'
+import {promises as fs, constants as fsconstants} from 'node:fs'
 import {parse} from 'groq-js'
 import {Config} from './config/findConfig'
+import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
 
@@ -18,10 +19,10 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeConfiguration(() => readConfig())
 
   let resultPanel: vscode.WebviewPanel | undefined
-  let disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
+  const disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
     let config: Config
     let query: string = groqQuery
-    let params: Record<string, unknown> = {}
+    let params: QueryParams = {}
     try {
       config = await loadSanityConfig()
       if (config === null) {
@@ -49,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       vscode.window.setStatusBarMessage(
         `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10000
+        10_000
       )
 
       if (!openJSONFile && !resultPanel) {
@@ -78,15 +79,12 @@ export function activate(context: vscode.ExtensionContext) {
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
       }
-    } catch (err) {
-      vscode.window.showErrorMessage(getErrorMessage(err))
+    } catch (error) {
+      vscode.window.showErrorMessage(getErrorMessage(error))
       return
     }
   })
-  context.subscriptions.push(disposable)
-  context.subscriptions.push(
-    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider())
-  )
+  context.subscriptions.push(disposable, vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()))
 
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
@@ -148,6 +146,8 @@ async function loadSanityConfig() {
   const {registerTS} = await import('sucrase/dist/register')
   const revertTsHook = registerTS()
   try {
+    // sanity.cli.ts is a file the user wrote. It is loaded by path, so it cannot be a static import.
+    // oxlint-disable-next-line @typescript-eslint/no-require-imports
     const config = require(configFilePath)
     return config.default
   } finally {
@@ -167,10 +167,10 @@ async function loadGroqFromFile() {
 async function registerContentProvider(
   context: vscode.ExtensionContext,
   query: string,
-  params: Record<string, unknown>,
+  params: QueryParams,
   ms: number,
-  result: any
-): Promise<any> {
+  result: unknown
+) {
   // Imported here, not at the top, to keep React out of activation.
   const {GroqContentProvider} = await import('./providers/content-provider')
   const contentProvider = new GroqContentProvider(query, params, ms, result)
@@ -190,37 +190,40 @@ async function checkFileExists(file) {
     .catch(() => false)
 }
 
-function findVariablesInQuery(query: string): string[] {
+function findVariablesInQuery(query: string): Array<string> {
   return findVariables(parse(query), [])
 }
 
-function findVariables(node: any, found: string[]): string[] {
-  if (node && node.type === 'Parameter' && typeof node.name === 'string') {
-    return found.concat(node.name)
-  }
-
-  if (Array.isArray(node)) {
-    return node.reduce((acc, child) => findVariables(child, acc), found)
-  }
-
-  if (typeof node !== 'object') {
+function findVariables(node: unknown, found: Array<string>): Array<string> {
+  if (typeof node !== 'object' || node === null) {
     return found
   }
 
-  return Object.keys(node).reduce((acc, key) => findVariables(node[key], acc), found)
+  if (Array.isArray(node)) {
+    return node.reduce((acc: Array<string>, child: unknown) => findVariables(child, acc), found)
+  }
+
+  if ('type' in node && node.type === 'Parameter' && 'name' in node && typeof node.name === 'string') {
+    return found.concat(node.name)
+  }
+
+  return Object.values(node).reduce(
+    (acc: Array<string>, child: unknown) => findVariables(child, acc),
+    found
+  )
 }
 
-async function readParamsFile(): Promise<Record<string, unknown>> {
+async function readParamsFile(): Promise<QueryParams> {
   const activeFile = getActiveFileName()
   if (activeFile && activeFile !== '') {
-    var pos = activeFile.lastIndexOf('.')
-    const absoluteParamFile = activeFile.substring(0, pos < 0 ? activeFile.length : pos) + '.json'
+    const pos = activeFile.lastIndexOf('.')
+    const absoluteParamFile = activeFile.slice(0, pos < 0 ? activeFile.length : pos) + '.json'
     if (await checkFileExists(absoluteParamFile)) {
       try {
         const content = await fs.readFile(absoluteParamFile)
         return JSON.parse(content.toString())
-      } catch (err) {
-        vscode.window.showErrorMessage(`Failed to read parameter file: ${getErrorMessage(err)}`)
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to read parameter file: ${getErrorMessage(error)}`)
       }
     }
   }
@@ -228,8 +231,8 @@ async function readParamsFile(): Promise<Record<string, unknown>> {
   return {}
 }
 
-async function readParams(variables: string[]): Promise<Record<string, unknown>> {
-  const values: Record<string, unknown> = await readParamsFile()
+async function readParams(variables: Array<string>): Promise<QueryParams> {
+  const values: QueryParams = await readParamsFile()
   const missing = variables.filter((variable) => !values[variable])
   for (const variable of missing) {
     let value = await vscode.window.showInputBox({title: `value for "${variable}"`, value: ''})
@@ -248,7 +251,7 @@ async function readParams(variables: string[]): Promise<Record<string, unknown>>
   return values
 }
 
-async function openInUntitled(content: string, language?: string) {
+async function openInUntitled(content: unknown, language?: string) {
   const cs = JSON.stringify(content, null, 2)
   await vscode.workspace.openTextDocument({content: cs}).then((document) => {
     vscode.window.showTextDocument(document, {viewColumn: vscode.ViewColumn.Beside})

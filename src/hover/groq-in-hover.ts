@@ -33,7 +33,7 @@ const GROQ_COMMENT_MARKER = /\/\*\s*groq\s*\*\/\s*$/i
 const TRUNCATION_MARK = /\.\.\.\s*$/
 // A cut can land between a backslash and the character it escapes.
 const DANGLING_ESCAPE = /((?:^|[^\\])(?:\\\\)*)\\$/
-const SIMPLE_ESCAPES: Record<string, string> = {
+const SIMPLE_ESCAPES = {
   n: '\n',
   r: '\r',
   t: '\t',
@@ -41,7 +41,23 @@ const SIMPLE_ESCAPES: Record<string, string> = {
   f: '\f',
   v: '\v',
   '0': '\0',
+} as const
+
+function simpleEscape(char: string): string | undefined {
+  switch (char) {
+    case 'n':
+    case 'r':
+    case 't':
+    case 'b':
+    case 'f':
+    case 'v':
+    case '0':
+      return SIMPLE_ESCAPES[char]
+    default:
+      return undefined
+  }
 }
+
 const ESCAPE = /\\(?:u\{([0-9a-fA-F]+)\}|u([0-9a-fA-F]{4})|x([0-9a-fA-F]{2})|\r\n|([\s\S]))/g
 // An "everything" (`*`) reference followed by a filter, pipe, or the end of an expression.
 const EVERYTHING = /(?:^|[\s(,{:=|])\*\s*(?:\[|\||\)|$)/
@@ -54,15 +70,21 @@ const PARAMETER = /\$[A-Za-z_]\w*/g
  * (e.g. quick info prints `"*[_type == \"post\"]{\n  title\n}"`).
  */
 export function decodeEscapes(raw: string): string {
-  return raw.replace(ESCAPE, (_match, codePoint, unicode, hex, char) => {
+  return raw.replaceAll(ESCAPE, (_match, codePoint, unicode, hex, char) => {
     if (codePoint !== undefined) {
-      const value = parseInt(codePoint, 16)
-      return value <= 0x10ffff ? String.fromCodePoint(value) : ''
+      const value = Number.parseInt(codePoint, 16)
+      return value <= 0x10_ff_ff ? String.fromCodePoint(value) : ''
     }
-    if (unicode !== undefined) return String.fromCharCode(parseInt(unicode, 16))
-    if (hex !== undefined) return String.fromCharCode(parseInt(hex, 16))
-    if (char === undefined || char === '\n' || char === '\r') return ''
-    return SIMPLE_ESCAPES[char] ?? char
+    if (unicode !== undefined) {
+      return String.fromCharCode(Number.parseInt(unicode, 16))
+    }
+    if (hex !== undefined) {
+      return String.fromCharCode(Number.parseInt(hex, 16))
+    }
+    if (char === undefined || char === '\n' || char === '\r') {
+      return ''
+    }
+    return simpleEscape(char) ?? char
   })
 }
 
@@ -72,7 +94,7 @@ function looksLikeGroq(query: string, hasGroqMarker: boolean): boolean {
 
 export function isGroqQuery(candidate: string, hasGroqMarker = false): boolean {
   const query = candidate.trim()
-  if (!query || !looksLikeGroq(query, hasGroqMarker)) return false
+  if (!query || !looksLikeGroq(query, hasGroqMarker)) {return false}
 
   // groq-js evaluates constant slices while parsing, so give `[$start...$end]` numbers to chew on.
   const params = Object.fromEntries(
@@ -81,15 +103,15 @@ export function isGroqQuery(candidate: string, hasGroqMarker = false): boolean {
   try {
     parse(query, {params})
     return true
-  } catch (err) {
+  } catch (error) {
     // Only syntax errors say it is not GROQ. Anything else (such as a slice groq-js cannot fold)
     // is a query that parsed.
-    return err instanceof Error && err.name !== 'GroqSyntaxError'
+    return error instanceof Error && error.name !== 'GroqSyntaxError'
   }
 }
 
-function codeBlocks(markdown: string): {language: string; code: string}[] {
-  const blocks: {language: string; code: string}[] = []
+function codeBlocks(markdown: string): Array<{language: string; code: string}> {
+  const blocks: Array<{language: string; code: string}> = []
   FENCE.lastIndex = 0
   let match: RegExpExecArray | null
   while ((match = FENCE.exec(markdown)) !== null) {
@@ -102,8 +124,8 @@ function codeBlocks(markdown: string): {language: string; code: string}[] {
  * Finds the string and template literals in a code snippet. A quote that is still open at the end
  * of the snippet yields an unterminated literal, which is how a truncated hover looks.
  */
-function scanLiterals(code: string): Literal[] {
-  const literals: Literal[] = []
+function scanLiterals(code: string): Array<Literal> {
+  const literals: Array<Literal> = []
   let i = 0
   while (i < code.length) {
     const quote = code[i]
@@ -115,8 +137,8 @@ function scanLiterals(code: string): Literal[] {
     const start = i
     let end = i + 1
     while (end < code.length && code[end] !== quote) {
-      if (code[end] === '\\') end++
-      else if (code[end] === '\n' && quote !== '`') break
+      if (code[end] === '\\') {end++}
+      else if (code[end] === '\n' && quote !== '`') {break}
       end++
     }
     const terminated = code[end] === quote
@@ -137,9 +159,9 @@ function scanLiterals(code: string): Literal[] {
 }
 
 /** Finds GROQ queries inside string literals of one code snippet. */
-export function findGroqInCode(snippet: string): GroqInHover[] {
+export function findGroqInCode(snippet: string): Array<GroqInHover> {
   const code = snippet.trimEnd()
-  const found: GroqInHover[] = []
+  const found: Array<GroqInHover> = []
   for (const literal of scanLiterals(code)) {
     const hasMarker =
       literal.form === 'template' && GROQ_COMMENT_MARKER.test(code.slice(0, literal.start))
@@ -184,12 +206,12 @@ export function comparable(query: string): string {
  * a query as it is. When the type is cut off but the same query is also in such a block, the
  * block wins and no truncation is reported.
  */
-export function findGroqInHoverMarkdown(markdown: string): GroqInHover[] {
-  const found: GroqInHover[] = []
+export function findGroqInHoverMarkdown(markdown: string): Array<GroqInHover> {
+  const found: Array<GroqInHover> = []
   for (const {language, code} of codeBlocks(markdown)) {
     if (language === 'groq') {
       const query = code.trim()
-      if (query) found.push({kind: 'query', query, form: 'doc-block'})
+      if (query) {found.push({kind: 'query', query, form: 'doc-block'})}
     } else {
       found.push(...findGroqInCode(code))
     }

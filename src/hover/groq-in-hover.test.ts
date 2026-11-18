@@ -10,14 +10,14 @@ const QUERY = `*[_type == "post" && defined(slug.current)]{
 // Verbatim `displayParts` from TypeScript quick info for:
 //   type Q = /* groq */ `<QUERY>`
 const TS_QUICK_INFO =
-  'type Q = "*[_type == \\"post\\" && defined(slug.current)]{\\n  _id,\\n  \\"author\\": author->name\\n} | order(_createdAt desc)[0...10]"'
+  String.raw`type Q = "*[_type == \"post\" && defined(slug.current)]{\n  _id,\n  \"author\": author->name\n} | order(_createdAt desc)[0...10]"`
 
 const fence = (code: string, lang = 'typescript') => '```' + lang + '\n' + code + '\n```'
 
 describe('decodeEscapes', () => {
   it('decodes the escapes TypeScript prints', () => {
     assert.equal(
-      decodeEscapes('a\\nb\\t\\"c\\" \\\\ \\u0041 \\x42 \\u{1F600}'),
+      decodeEscapes(String.raw`a\nb\t\"c\" \\ \u0041 \x42 \u{1F600}`),
       'a\nb\t"c" \\ A B \u{1F600}'
     )
   })
@@ -52,14 +52,14 @@ describe('isGroqQuery', () => {
 // functions, prettified by groq-content-mapper: definitions first, then the query, `& ...` for the
 // elided result and params brands.
 const TSGO_WITH_FUNCTIONS =
-  '(alias) const query: "fn image::asset($asset) = $asset-> { url, metadata };\\nfn image::field($image) = $image { crop, hotspot, \\"asset\\": image::asset(asset) };\\n\\n// All published posts\\n*[_type == \\"post\\" && defined(slug.current)]\\n  | order(publishedAt desc)[$start...$end] {\\n  _id,\\n  \\"image\\": image::field(mainImage)\\n}" & ...'
+  String.raw`(alias) const query: "fn image::asset($asset) = $asset-> { url, metadata };\nfn image::field($image) = $image { crop, hotspot, \"asset\": image::asset(asset) };\n\n// All published posts\n*[_type == \"post\" && defined(slug.current)]\n  | order(publishedAt desc)[$start...$end] {\n  _id,\n  \"image\": image::field(mainImage)\n}" & ...`
 
 describe('findGroqInHoverMarkdown', () => {
   it('finds the escaped double-quoted form TypeScript shows', () => {
     const found = findGroqInHoverMarkdown(fence(TS_QUICK_INFO))
     assert.deepEqual(found, [{kind: 'query', query: QUERY, form: 'string'}])
     assert.ok(found[0].query.includes('\n'))
-    assert.ok(!found[0].query.includes('\\n'))
+    assert.ok(!found[0].query.includes(String.raw`\n`))
   })
 
   it('finds a minified one line query', () => {
@@ -129,7 +129,7 @@ describe('findGroqInHoverMarkdown', () => {
   })
 
   it('reports truncation when the cut lands in the middle of an escape', () => {
-    const found = findGroqInHoverMarkdown(fence('const query: "*[_type == \\"post\\"]{\\n  \\"...'))
+    const found = findGroqInHoverMarkdown(fence(String.raw`const query: "*[_type == \"post\"]{\n  \"...`))
     assert.deepEqual(
       found.map(({kind}) => kind),
       ['truncated']
@@ -139,7 +139,7 @@ describe('findGroqInHoverMarkdown', () => {
   it('does not report truncation for unrelated unterminated text', () => {
     assert.deepEqual(findGroqInHoverMarkdown(fence('const greeting: "hello world...')), [])
     assert.deepEqual(
-      findGroqInHoverMarkdown(fence('const query: "*[_type == \\"post\\"]{ _id }')),
+      findGroqInHoverMarkdown(fence(String.raw`const query: "*[_type == \"post\"]{ _id }`)),
       []
     )
   })
@@ -158,7 +158,7 @@ describe('findGroqInHoverMarkdown', () => {
 
   it('uses the doc block instead of reporting truncation when the type was cut off', () => {
     const query = '*[_type == "post"]{\n  title,\n  slug\n}'
-    const cut = '(alias) const query: "*[_type == \\"post\\"]{\\n  title,...'
+    const cut = String.raw`(alias) const query: "*[_type == \"post\"]{\n  title,...`
     assert.deepEqual(findGroqInHoverMarkdown(fence(cut) + '\n' + fence(query, 'groq')), [
       {kind: 'query', query, form: 'doc-block'},
     ])
@@ -166,14 +166,14 @@ describe('findGroqInHoverMarkdown', () => {
 
   it('matches the doc block when the cut lands between a backslash and what it escapes', () => {
     const query = '*[_type == "post"]{\n  "title": title,\n  slug\n}'
-    const cut = '(alias) const query: "*[_type == \\"post\\"]{\\n  \\...'
+    const cut = String.raw`(alias) const query: "*[_type == \"post\"]{\n  \...`
     assert.deepEqual(findGroqInHoverMarkdown(fence(cut) + '\n' + fence(query, 'groq')), [
       {kind: 'query', query, form: 'doc-block'},
     ])
   })
 
   it('still reports truncation when the doc block holds a different query', () => {
-    const cut = '(alias) const query: "*[_type == \\"post\\"]{\\n  title,...'
+    const cut = String.raw`(alias) const query: "*[_type == \"post\"]{\n  title,...`
     const found = findGroqInHoverMarkdown(fence(cut) + '\n' + fence('*[_type == "author"]', 'groq'))
     assert.deepEqual(
       found.map(({kind}) => kind),

@@ -1,5 +1,5 @@
-import {readFileSync} from 'fs'
-import * as path from 'path'
+import {readFileSync} from 'node:fs'
+import path from 'node:path'
 import {format, initWasm, WasmError} from '@sanity-labs/groq-wasm/lazy'
 
 export const DEFAULT_FORMAT_WIDTH = 80
@@ -22,7 +22,9 @@ export function formatGroq(query: string, width = DEFAULT_FORMAT_WIDTH): string 
   try {
     return format(query, {width}).trimEnd()
   } catch (error) {
-    if (error instanceof WasmError && error.code === 'PARSE_ERROR') return undefined
+    if (error instanceof WasmError && error.code === 'PARSE_ERROR') {
+      return undefined
+    }
     throw error
   }
 }

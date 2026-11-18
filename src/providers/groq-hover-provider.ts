@@ -1,4 +1,4 @@
-import * as vscode from 'vscode'
+import vscode from 'vscode'
 import {DEFAULT_FORMAT_WIDTH, formatGroq} from '../format'
 import {comparable, findGroqInHoverMarkdown} from '../hover/groq-in-hover'
 
@@ -10,8 +10,8 @@ export const TRUNCATED_NOTICE =
 type HoverContent = vscode.Hover['contents'][number]
 
 function markdownOf(content: HoverContent): string {
-  if (typeof content === 'string') return content
-  if ('language' in content) return '```' + content.language + '\n' + content.value + '\n```'
+  if (typeof content === 'string') {return content}
+  if ('language' in content) {return '```' + content.language + '\n' + content.value + '\n```'}
   return content.value
 }
 
@@ -34,19 +34,19 @@ export class GroqHoverProvider implements vscode.HoverProvider {
     token: vscode.CancellationToken
   ): Promise<vscode.Hover | undefined> {
     const settings = vscode.workspace.getConfiguration('sanity')
-    if (!settings.get('formatGroqInHover', true)) return undefined
+    if (!settings.get('formatGroqInHover', true)) {return undefined}
     const width = settings.get('formatGroqInHoverWidth', DEFAULT_FORMAT_WIDTH)
 
     // `executeHoverProvider` asks every provider, including this one.
     const key = `${document.uri.toString()}:${document.version}:${position.line}:${
       position.character
     }`
-    if (this.inFlight.has(key)) return undefined
+    if (this.inFlight.has(key)) {return undefined}
 
     this.inFlight.add(key)
-    let hovers: vscode.Hover[] | undefined
+    let hovers: Array<vscode.Hover> | undefined
     try {
-      hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
+      hovers = await vscode.commands.executeCommand<Array<vscode.Hover>>(
         'vscode.executeHoverProvider',
         document.uri,
         position
@@ -54,15 +54,15 @@ export class GroqHoverProvider implements vscode.HoverProvider {
     } finally {
       this.inFlight.delete(key)
     }
-    if (!hovers || token.isCancellationRequested) return undefined
+    if (!hovers || token.isCancellationRequested) {return undefined}
 
     const seen = new Set<string>()
-    const blocks: string[] = []
+    const blocks: Array<string> = []
     for (const hover of hovers) {
       for (const content of hover.contents) {
         for (const found of findGroqInHoverMarkdown(markdownOf(content))) {
           const key = comparable(found.kind === 'query' ? found.query : found.partial)
-          if (seen.has(key)) continue
+          if (seen.has(key)) {continue}
           seen.add(key)
 
           switch (found.kind) {
@@ -83,7 +83,7 @@ export class GroqHoverProvider implements vscode.HoverProvider {
         }
       }
     }
-    if (blocks.length === 0 || token.isCancellationRequested) return undefined
+    if (blocks.length === 0 || token.isCancellationRequested) {return undefined}
 
     return new vscode.Hover(new vscode.MarkdownString(blocks.join('\n\n')))
   }

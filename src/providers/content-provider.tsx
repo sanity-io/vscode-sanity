@@ -1,12 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/server'
-import {type TextDocumentContentProvider, type Uri, type ProviderResult} from 'vscode'
+import type {TextDocumentContentProvider, Uri, ProviderResult} from 'vscode'
+import type {QueryParams} from '../queryParams'
 import {ResultView} from '../resultView/ResultView'
 
 export class GroqContentProvider implements TextDocumentContentProvider {
   private html: string = ''
 
-  constructor(query: string, params: Record<string, unknown>, ms: number, data: any) {
+  constructor(query: string, params: QueryParams, ms: number, data: unknown) {
     this.html = `
     <html>
       <head>
@@ -31,7 +32,7 @@ export class GroqContentProvider implements TextDocumentContentProvider {
     })
   }
 
-  render(query: string, params: Record<string, unknown>, ms: number, result: any) {
+  render(query: string, params: QueryParams, ms: number, result: unknown) {
     return ReactDOM.renderToStaticMarkup(
       <>
         <ResultView query={query} params={params} ms={ms} result={result} />
