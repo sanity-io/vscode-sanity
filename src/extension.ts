@@ -2,6 +2,7 @@ import path from 'node:path'
 import vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'node:fs'
 import {parse} from 'groq-js'
+import {clearRequireCache} from './clearRequireCache'
 import {Config} from './config/findConfig'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
@@ -138,8 +139,8 @@ async function loadSanityConfig() {
     throw new Error('Could not resolve sanity.cli.ts configuration file')
   }
 
-  // clear require cache to ensure we get the latest version
-  delete require.cache[require.resolve(configFilePath)]
+  // Sucrase compiles local .ts imports too, and those stay cached after the hook is removed.
+  clearRequireCache(require.resolve(configFilePath))
 
   // The extension host is shared with other extensions, so only hook `.ts` while loading the config.
   // Sucrase is imported here, not at the top, to keep activation fast.
