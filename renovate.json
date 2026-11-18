@@ -2,5 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>sanity-io/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "@types/vscode must not be newer than engines.vscode, or vsce refuses to package. Only patch updates are allowed; bump both together by hand when raising the minimum supported VS Code version.",
+      "matchPackageNames": ["@types/vscode"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    }
   ]
 }
