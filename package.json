@@ -151,7 +151,7 @@
     "@sanity-labs/lint-core": "^1.0.1",
     "@semantic-release/github": "^12.0.6",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.19.27",
+    "@types/node": "^22.20.5",
     "@types/react": "^16.14.68",
     "@types/react-dom": "^16.9.25",
     "@types/vscode": "^1.107.0",
