@@ -228,8 +228,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-lsp':
-        specifier: ^1.0.10
-        version: 1.0.10(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+        specifier: ^1.0.11
+        version: 1.0.11(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/lint-core':
         specifier: ^1.0.1
         version: 1.0.1(supports-color@8.1.1)
@@ -1680,8 +1680,8 @@ packages:
     engines: {node: '>=22.3.0'}
     hasBin: true
 
-  '@sanity-labs/groq-lsp@1.0.10':
-    resolution: {integrity: sha512-ApR4PN6FUx2plEdw5haPHSg0sm/O6Kcvi8JEC4PsT4OVHX2vdODhR0X4LMfiDpSPNMHJjavmIokHgD87X3eb7g==}
+  '@sanity-labs/groq-lsp@1.0.11':
+    resolution: {integrity: sha512-m0TJBdEEhwJfV++wkOWXwI024iY/5gJZuK36DLa8lzHYbGgqs7ec4ZbA6YNicZ4N0UzT8qqpaFbKXmct9vkIdw==}
     engines: {node: '>=22.3.0'}
     hasBin: true
 
@@ -1697,12 +1697,6 @@ packages:
     peerDependenciesMeta:
       vitest:
         optional: true
-
-  '@sanity-labs/prettier-plugin-groq@1.0.9':
-    resolution: {integrity: sha512-XTEZlsNDaO5h0HIg3QHRPZ2X6io+Cyi92GU4pyayY4Mz8LCcQOW0ocAg5MkPwtckkZnXDg32M1G7SQ8xxbRsjQ==}
-    engines: {node: '>=22.3.0'}
-    peerDependencies:
-      prettier: ^3.0.0
 
   '@sanity/client@8.16.0':
     resolution: {integrity: sha512-x6VKopU1Rt2mp3YBQRBIyWE2ebzqc4sMwUbQJJzIzNS0TMnNURvHe/z1qo/bDIph37B5vYvfWIT7Js6SPAQkUQ==}
@@ -5335,13 +5329,12 @@ snapshots:
       - typescript
       - vitest
 
-  '@sanity-labs/groq-lsp@1.0.10(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+  '@sanity-labs/groq-lsp@1.0.11(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
     dependencies:
       '@sanity-labs/groq-lint': 1.0.8(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+      '@sanity-labs/groq-wasm': 1.2.1
       '@sanity-labs/lint-core': 1.0.1(supports-color@8.1.1)
-      '@sanity-labs/prettier-plugin-groq': 1.0.9(prettier@3.10.1)
       groq-js: 2.0.1
-      prettier: 3.10.1
       vscode-languageserver: 11.0.0
       vscode-languageserver-textdocument: 1.0.16
       vscode-uri: 3.2.0
@@ -5359,11 +5352,6 @@ snapshots:
       groq-js: 1.30.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
-
-  '@sanity-labs/prettier-plugin-groq@1.0.9(prettier@3.10.1)':
-    dependencies:
-      '@sanity-labs/groq-wasm': 1.2.1
-      prettier: 3.10.1
 
   '@sanity/client@8.16.0':
     dependencies:
