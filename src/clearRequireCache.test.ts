@@ -2,8 +2,10 @@ import assert from 'node:assert/strict'
 import {mkdirSync, mkdtempSync, writeFileSync} from 'node:fs'
 import {describe, it} from 'node:test'
 import {tmpdir} from 'node:os'
-import * as path from 'node:path'
+import path from 'node:path'
 import {clearRequireCache} from './clearRequireCache'
+
+// oxlint-disable @typescript-eslint/no-require-imports -- the test loads fixture files through require.cache
 
 describe('clearRequireCache', () => {
   it('reloads a nested local import and leaves node_modules cached', () => {

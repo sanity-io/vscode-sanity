@@ -1,4 +1,4 @@
-import * as path from 'path'
+import path from 'node:path'
 
 const NODE_MODULES = `${path.sep}node_modules${path.sep}`
 
@@ -13,11 +13,17 @@ export function clearRequireCache(moduleId: string) {
   const visited = new Set<string>()
 
   function clear(id: string) {
-    if (visited.has(id) || id.includes(NODE_MODULES)) return
+    if (visited.has(id) || id.includes(NODE_MODULES)) {
+      return
+    }
     visited.add(id)
     const mod = require.cache[id]
-    if (!mod) return
-    for (const child of mod.children.slice()) clear(child.id)
+    if (!mod) {
+      return
+    }
+    for (const child of mod.children.slice()) {
+      clear(child.id)
+    }
     delete require.cache[id]
   }
 
@@ -27,7 +33,9 @@ export function clearRequireCache(moduleId: string) {
   }
 
   for (const id of Object.keys(require.cache)) {
-    if (loadedBy(require.cache[id], moduleId)) clear(id)
+    if (loadedBy(require.cache[id], moduleId)) {
+      clear(id)
+    }
   }
 }
 
@@ -35,7 +43,9 @@ function loadedBy(mod: NodeJS.Module | undefined, moduleId: string) {
   const seen = new Set<NodeJS.Module>()
   let current = mod?.parent
   while (current && !seen.has(current)) {
-    if (current.id === moduleId) return true
+    if (current.id === moduleId) {
+      return true
+    }
     seen.add(current)
     current = current.parent ?? undefined
   }
