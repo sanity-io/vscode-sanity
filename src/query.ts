@@ -1,11 +1,12 @@
 import {createClient} from '@sanity/client'
-import * as vscode from 'vscode'
+import vscode from 'vscode'
+import type {QueryParams} from './queryParams'
 
 export async function executeGroq(options: {
   projectId: string
   dataset: string
   query: string
-  params: Record<string, unknown>
+  params: QueryParams
   useCdn: boolean
   token?: string
 }) {
@@ -13,12 +14,12 @@ export async function executeGroq(options: {
   const {token: _token, ...noTokenClientOptions} = clientOptions
   return createClient(clientOptions)
     .fetch(query, params, {filterResponse: false})
-    .catch((err) => {
-      if (err.statusCode === 401) {
-        vscode.window.showInformationMessage(err.message + '. Falling back to public dataset.')
+    .catch((error) => {
+      if (error.statusCode === 401) {
+        vscode.window.showInformationMessage(error.message + '. Falling back to public dataset.')
         return createClient(noTokenClientOptions).fetch(query, params, {filterResponse: false})
       }
 
-      throw err
+      throw error
     })
 }

@@ -1,4 +1,4 @@
-import {spawnSync} from 'child_process'
+import {spawnSync} from 'node:child_process'
 import {
   cpSync,
   createWriteStream,
@@ -7,10 +7,10 @@ import {
   readFileSync,
   rmSync,
   writeFileSync,
-} from 'fs'
-import {get} from 'https'
-import * as path from 'path'
-import {gunzipSync} from 'zlib'
+} from 'node:fs'
+import {get} from 'node:https'
+import path from 'node:path'
+import {gunzipSync} from 'node:zlib'
 import {
   downloadAndUnzipVSCode,
   resolveCliArgsFromVSCodeExecutablePath,
@@ -76,7 +76,7 @@ async function prepareTsgo(vscodeExecutablePath: string) {
     }
   )
   if (install.status !== 0)
-    throw new Error(`Installing ${NATIVE_PREVIEW.id} failed:\n${install.stdout}${install.stderr}`)
+    {throw new Error(`Installing ${NATIVE_PREVIEW.id} failed:\n${install.stdout}${install.stderr}`)}
 
   mkdirSync(path.join(userDataDir, 'User'), {recursive: true})
   writeFileSync(
@@ -115,7 +115,10 @@ async function main() {
   })
 }
 
-main().catch((err) => {
-  console.error(err)
+// This file is compiled to CommonJS and run directly, so it cannot use top-level await.
+// oxlint-disable-next-line unicorn/prefer-top-level-await
+main().catch((error) => {
+  // oxlint-disable-next-line no-console -- the integration runner has no other logger
+  console.error(error)
   process.exit(1)
 })

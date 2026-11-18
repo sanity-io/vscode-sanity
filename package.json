@@ -154,6 +154,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
+    "@nkzw/oxlint-config": "^3.0.0",
     "@sanity-labs/groq-content-mapper": "^0.7.0",
     "@sanity-labs/lint-core": "^1.0.1",
     "@types/mocha": "^10.0.10",
@@ -165,11 +166,12 @@
     "@vscode/vsce": "^4.1.1",
     "mocha": "^12.0.3",
     "ovsx": "^1.4.0",
-    "prettier": "^3.10.1",
-    "typescript": "^7.0.2",
-    "typescript-7": "npm:typescript@7.1.0-beta",
     "oxlint": "^1.94.0",
-    "tsdown": "^0.23.7"
+    "prettier": "^3.10.1",
+    "tsdown": "^0.23.7",
+    "tsrs": "0.25.0-ts7.1.0-beta",
+    "typescript": "^7.0.2",
+    "typescript-7": "npm:typescript@7.1.0-beta"
   },
   "scripts": {
     "lint": "oxlint",
