@@ -1,6 +1,4 @@
-# Change Log
-
-All notable changes will be documented in this file.
+# vscode-sanity
 
 ## 0.3.0 - 2026-04-15
 
