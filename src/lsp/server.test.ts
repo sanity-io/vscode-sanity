@@ -2,11 +2,13 @@ import {strict as assert} from 'node:assert'
 import {spawn, type ChildProcess} from 'node:child_process'
 import path from 'node:path'
 import {after, before, describe, it} from 'node:test'
+import {format as groqWasmFormat} from '@sanity-labs/groq-wasm'
 import {
   createProtocolConnection,
   StreamMessageReader,
   StreamMessageWriter,
   type Diagnostic,
+  type FormattingOptions,
   type ProtocolConnection,
   type TextEdit,
 } from 'vscode-languageserver-protocol/node'
@@ -49,11 +51,11 @@ void describe('bundled GROQ language server (dist/server.js)', () => {
     })
   }
 
-  function format(uri: string): Promise<Array<TextEdit>> {
-    return connection.sendRequest('textDocument/formatting', {
-      textDocument: {uri},
-      options: {tabSize: 2, insertSpaces: true},
-    })
+  function format(
+    uri: string,
+    options: FormattingOptions = {tabSize: 2, insertSpaces: true},
+  ): Promise<Array<TextEdit>> {
+    return connection.sendRequest('textDocument/formatting', {textDocument: {uri}, options})
   }
 
   before(async () => {
@@ -125,6 +127,48 @@ void describe('bundled GROQ language server (dist/server.js)', () => {
       tsEdits.map((edit) => edit.newText),
       ['*[_type == "post"] { title, body }'],
     )
+  })
+
+  void it('formats with groq-wasm, indented per the tab size and spaces or tabs', async () => {
+    const query = `*[_type == "post"]{title, "author": author->{name, "slug": slug.current}, "long": select(a == 1 => "one one one one one one", a == 2 => "two two two two two", "x")}`
+    const formatted = groqWasmFormat(query).trimEnd()
+    await open('file:///indent.groq', 'groq', `\n${query}\n`)
+    await open('file:///indent.ts', 'typescript', `const q = groq\`${query}\`\n`)
+
+    for (const [options, unit] of [
+      [{tabSize: 2, insertSpaces: true}, '  '],
+      [{tabSize: 4, insertSpaces: true}, '    '],
+      [{tabSize: 4, insertSpaces: false}, '\t'],
+    ] as const) {
+      const expected = formatted.replaceAll(/^(?: {2})+/gm, (indent) =>
+        unit.repeat(indent.length / 2),
+      )
+      assert.match(expected, /\n\t|\n {2}/)
+      for (const uri of ['file:///indent.groq', 'file:///indent.ts']) {
+        const edits = await format(uri, options)
+        assert.deepEqual(
+          edits.map((edit) => edit.newText),
+          [expected],
+          `${uri} ${JSON.stringify(options)}`,
+        )
+      }
+    }
+
+    const [groqEdit] = await format('file:///indent.groq')
+    assert.deepEqual(groqEdit.range, {
+      start: {line: 1, character: 0},
+      end: {line: 1, character: query.length},
+    })
+    const [tsEdit] = await format('file:///indent.ts')
+    assert.deepEqual(tsEdit.range, {
+      start: {line: 0, character: 'const q = groq`'.length},
+      end: {line: 0, character: 'const q = groq`'.length + query.length},
+    })
+  })
+
+  void it('leaves queries that do not parse alone', async () => {
+    await open('file:///broken.groq', 'groq', '*[_type == ]')
+    assert.deepEqual(await format('file:///broken.groq'), [])
   })
 
   void it('shows hover information for fields in .groq files', async () => {
