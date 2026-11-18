@@ -37,7 +37,8 @@
     "onLanguage:javascript",
     "onLanguage:javascriptreact",
     "onLanguage:typescript",
-    "onLanguage:typescriptreact"
+    "onLanguage:typescriptreact",
+    "onLanguage:astro"
   ],
   "main": "./dist/extension.js",
   "contributes": {

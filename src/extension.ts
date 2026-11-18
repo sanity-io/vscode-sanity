@@ -8,6 +8,7 @@ import {formatQuerySource} from './format'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
+import {EMBEDDED_GROQ_LANGUAGES} from './languages'
 import {registerGroqLanguageServer, stopGroqLanguageServer} from './lsp/client'
 import {findVariablesInQuery} from './variables'
 
@@ -155,10 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
       const provider = new GROQCodeLensProvider()
       codelens = vscode.Disposable.from(
         provider,
-        vscode.languages.registerCodeLensProvider(
-          ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-          provider
-        )
+        vscode.languages.registerCodeLensProvider([...EMBEDDED_GROQ_LANGUAGES, 'groq'], provider),
       )
 
       context.subscriptions.push(codelens)
