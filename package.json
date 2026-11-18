@@ -265,7 +265,7 @@
   "scripts": {
     "lint": "oxlint",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm run build && pnpm run compile && node --test \"out/*.test.js\" \"out/config/*.test.js\" \"out/hover/*.test.js\" \"out/lsp/*.test.js\" \"out/fragments/*.test.js\"",
+    "test": "pnpm run build && pnpm run compile && node --test \"out/*.test.js\" \"out/config/*.test.js\" \"out/hover/*.test.js\" \"out/lsp/*.test.js\" \"out/fragments/*.test.js\" \"out/resultView/*.test.js\"",
     "test:integration": "pnpm run build && pnpm run compile && node out/test/runTest.js",
     "test:integration:tsgo": "pnpm run build && pnpm run compile && node out/test/runTest.js --tsgo",
     "build": "tsdown",

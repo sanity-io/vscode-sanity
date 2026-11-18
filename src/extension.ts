@@ -87,7 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
           query,
           params,
           ms,
-          result || []
+          result
         )
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html

@@ -14,6 +14,7 @@ export default defineConfig({
         'src/format.test.ts',
         'src/fragments/resolve.test.ts',
         'src/hover/groq-in-hover.test.ts',
+        'src/resultView/ResultView.test.tsx',
       ],
       rules: {
         // node:test's it() and describe() return promises the runner already tracks.
