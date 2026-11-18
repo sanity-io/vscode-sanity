@@ -35,6 +35,31 @@ TypeScript 7 cuts long types off after about 5,000 characters, in the middle of 
 
 Turn the whole feature off with `sanity.formatGroqInHover`.
 
+### GROQ linting, completion and formatting
+
+The extension runs the GROQ language server from [`@sanity-labs/groq-lsp`](https://www.npmjs.com/package/@sanity-labs/groq-lsp) on `.groq` files and on `groq` tagged template literals in JavaScript and TypeScript files:
+
+- **Diagnostics**: syntax errors, and [groq-lint](https://www.npmjs.com/package/@sanity-labs/groq-lint) rules such as joins inside filters or `count()` on correlated subqueries.
+- **Completion** of system fields, functions and, when a schema is available, your document types and fields.
+- **Hover** information for fields and functions inside a query.
+- **Formatting**: `Format Document` formats `.groq` files. In JavaScript and TypeScript files, `Format Document` is left to your usual formatter; run **GROQ: Format GROQ Queries** to format the `groq` template literals in the file.
+
+For schema-aware completion and hovers, extract your schema with `npx sanity schema extract`. The server looks for `schema.json`, `sanity.schema.json`, `.sanity/schema.json` or `studio/schema.json` in the first workspace folder, or uses `groq.schemaPath`.
+
+| Setting                 | Default | Description                                                                   |
+| ----------------------- | ------- | ----------------------------------------------------------------------------- |
+| `groq.enable`           | `true`  | Run the language server.                                                      |
+| `groq.schemaPath`       | `""`    | Schema file, absolute or relative to the first workspace folder.              |
+| `groq.maxDiagnostics`   | `100`   | Maximum number of diagnostics per file.                                       |
+| `groq.enableFormatting` | `true`  | Enable GROQ formatting.                                                       |
+| `groq.trace.server`     | `"off"` | Log the communication with the server to the **GROQ Language Server** output. |
+
+**GROQ: Restart Language Server** and **GROQ: Show Language Server Output** are in the command palette.
+
+### GROQ snippets
+
+Snippets for common queries are available in `.groq` files (for example `type`, `typep`, `deref`, `orda`, `slice`) and in JavaScript and TypeScript files (for example `groq`, `groqp`, `groqslug`, `groqlist`, `constquery`).
+
 ## Usage
 
 Install the extension for [VSCode](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) or [Cursor](https://open-vsx.org/extension/sanity-io/vscode-sanity) by searching for `sanity`. This extension adds syntax highlighting for GROQ-files and `groq` tags.

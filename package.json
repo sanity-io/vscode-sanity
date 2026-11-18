@@ -4,7 +4,7 @@
   "version": "0.4.0",
   "private": true,
   "license": "MIT",
-  "description": "Developer tools for applications powered by Sanity.io",
+  "description": "Developer tools for applications powered by Sanity.io: GROQ query execution, linting, completion and formatting",
   "author": "Sanity.io <hello@sanity.io>",
   "publisher": "sanity-io",
   "engines": {
@@ -14,10 +14,14 @@
     "vscode",
     "visual studio code",
     "sanity",
-    "groq"
+    "groq",
+    "linter",
+    "formatter"
   ],
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Linters",
+    "Formatters"
   ],
   "repository": {
     "type": "git",
@@ -65,6 +69,37 @@
           "default": 80,
           "minimum": 20,
           "description": "Column width the GROQ queries shown in hovers are wrapped to."
+        },
+        "groq.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the GROQ language server: diagnostics, completion, hover and formatting in `.groq` files and groq`` template literals."
+        },
+        "groq.schemaPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Path to the schema file from `npx sanity schema extract`, absolute or relative to the first workspace folder. When empty, `schema.json`, `sanity.schema.json`, `.sanity/schema.json` and `studio/schema.json` in the first workspace folder are tried."
+        },
+        "groq.maxDiagnostics": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 0,
+          "description": "Maximum number of GROQ diagnostics reported per file."
+        },
+        "groq.enableFormatting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable GROQ formatting."
+        },
+        "groq.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the GROQ language server."
         }
       }
     },
@@ -72,6 +107,21 @@
       {
         "command": "sanity.executeGroq",
         "title": "Execute GROQ query"
+      },
+      {
+        "command": "groq.formatQueries",
+        "title": "Format GROQ Queries",
+        "category": "GROQ"
+      },
+      {
+        "command": "groq.restartServer",
+        "title": "Restart Language Server",
+        "category": "GROQ"
+      },
+      {
+        "command": "groq.showOutput",
+        "title": "Show Language Server Output",
+        "category": "GROQ"
       }
     ],
     "menus": {
@@ -79,6 +129,10 @@
         {
           "command": "sanity.executeGroq",
           "when": "editorLangId == groq || editorLangId == plaintext"
+        },
+        {
+          "command": "groq.formatQueries",
+          "when": "editorLangId =~ /^(groq|javascript|javascriptreact|typescript|typescriptreact)$/"
         }
       ]
     },
@@ -129,6 +183,28 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "groq",
+        "path": "./snippets/groq.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/groq-ts.json"
+      },
+      {
+        "language": "javascriptreact",
+        "path": "./snippets/groq-ts.json"
+      },
+      {
+        "language": "typescript",
+        "path": "./snippets/groq-ts.json"
+      },
+      {
+        "language": "typescriptreact",
+        "path": "./snippets/groq-ts.json"
+      }
+    ],
     "keybindings": [
       {
         "command": "sanity.executeGroq",
@@ -149,6 +225,7 @@
     "react-dom": "^19.3.1",
     "react-jason": "^1.1.2",
     "sucrase": "^3.35.1",
+    "vscode-languageclient": "^11.0.0",
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
@@ -156,6 +233,7 @@
     "@changesets/cli": "^3.0.3",
     "@nkzw/oxlint-config": "^3.0.0",
     "@sanity-labs/groq-content-mapper": "^0.7.0",
+    "@sanity-labs/groq-lsp": "^1.0.10",
     "@sanity-labs/lint-core": "^1.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.6.6",
@@ -171,12 +249,13 @@
     "tsdown": "^0.23.7",
     "tsrs": "0.25.0-ts7.1.0-beta",
     "typescript": "^7.0.2",
-    "typescript-7": "npm:typescript@7.1.0-beta"
+    "typescript-7": "npm:typescript@7.1.0-beta",
+    "vscode-languageserver-protocol": "^3.18.5"
   },
   "scripts": {
     "lint": "oxlint",
     "typecheck": "tsc --noEmit",
-    "test": "pnpm run build && pnpm run compile && node --test \"out/*.test.js\" \"out/hover/*.test.js\"",
+    "test": "pnpm run build && pnpm run compile && node --test \"out/*.test.js\" \"out/hover/*.test.js\" \"out/lsp/*.test.js\"",
     "test:integration": "pnpm run build && pnpm run compile && node out/test/runTest.js",
     "test:integration:tsgo": "pnpm run build && pnpm run compile && node out/test/runTest.js --tsgo",
     "build": "tsdown",

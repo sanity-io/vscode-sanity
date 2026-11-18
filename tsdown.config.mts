@@ -1,13 +1,34 @@
 import {createRequire} from 'node:module'
-import {defineConfig} from 'tsdown'
+import path from 'node:path'
+import {fileURLToPath} from 'node:url'
+import {defineConfig, type Plugin} from 'tsdown'
 
 const require = createRequire(import.meta.url)
+
+// groq-wasm finds its .wasm next to its package through `import.meta.url`. The language server is
+// bundled into dist/, so point that lookup at the copy in dist/ instead.
+const groqWasmPath: Plugin = {
+  name: 'groq-wasm-path',
+  transform(code, id) {
+    if (!/groq-wasm[\\/]dist[\\/]index\.js$/.test(id)) {
+      return
+    }
+    const replaced = code.replace('"../wasm/groq_wasm_bg.wasm"', '"./groq_wasm_bg.wasm"')
+    // The edit moves one string literal, so the map only needs to be present, not precise.
+    return {code: replaced, map: {version: 3, sources: [id], names: [], mappings: ''}}
+  },
+}
 
 // `entry` is a map on purpose: another entry, such as a language server, is one more key and is
 // emitted as dist/<key>.js, which .vscodeignore already ships.
 export default defineConfig({
   entry: {
     extension: 'src/extension.ts',
+    // The package only exports its library entry; the server is the sibling file it ships as `bin`.
+    server: path.join(
+      path.dirname(fileURLToPath(import.meta.resolve('@sanity-labs/groq-lsp'))),
+      'server.js',
+    ),
   },
   format: 'cjs',
   platform: 'node',
@@ -24,6 +45,9 @@ export default defineConfig({
     neverBundle: ['vscode'],
     onlyBundle: false,
   },
+  // Lets the bundled server use `import.meta.url` and `require` as the CJS output does not provide them.
+  shims: true,
+  plugins: [groqWasmPath],
   outputOptions: {
     entryFileNames: '[name].js',
     chunkFileNames: 'chunks/[name]-[hash].js',
