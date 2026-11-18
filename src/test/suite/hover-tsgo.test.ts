@@ -53,7 +53,7 @@ async function hoverOn(identifier: string): Promise<string[]> {
       )) ?? []
     const md = markdownOf(hovers)
     const tsHover = md.find((part) => part.includes('const query'))
-    const ours = md.find((part) => part.includes('```groq') || part === TRUNCATED_NOTICE)
+    const ours = md.find((part) => part.startsWith('```groq') || part === TRUNCATED_NOTICE)
     if ((tsHover && ours) || Date.now() > deadline) return md
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }

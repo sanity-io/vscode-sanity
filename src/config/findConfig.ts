@@ -51,7 +51,7 @@ async function hasConfig(dir: string): Promise<boolean> {
 function parseJson(content: string) {
   try {
     return JSON.parse(content)
-  } catch (err) {
+  } catch {
     return false
   }
 }

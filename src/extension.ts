@@ -2,17 +2,11 @@ import * as path from 'path'
 import * as vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'fs'
 import {parse} from 'groq-js'
-import {register as registerTsNode} from 'ts-node'
 import {Config} from './config/findConfig'
-import {GroqContentProvider} from './providers/content-provider'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
-import {executeGroq} from './query'
 
 export function activate(context: vscode.ExtensionContext) {
-  // needed to load sanity.cli.ts
-  registerTsNode()
-
   // Assigned by `readConfig()`
   let codelens: vscode.Disposable | undefined
   let useCodelens
@@ -43,6 +37,8 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       vscode.window.showInformationMessage(`Executing GROQ query: ${query}`)
+      // Imported here, not at the top, to keep activation fast: @sanity/client alone takes ~100ms to load.
+      const {executeGroq} = await import('./query')
       // FIXME: Throw error object in webview?
       const {ms, result} = await executeGroq({
         ...config.api,
@@ -147,8 +143,16 @@ async function loadSanityConfig() {
   // clear require cache to ensure we get the latest version
   delete require.cache[require.resolve(configFilePath)]
 
-  const config = require(configFilePath)
-  return config.default
+  // The extension host is shared with other extensions, so only hook `.ts` while loading the config.
+  // Sucrase is imported here, not at the top, to keep activation fast.
+  const {registerTS} = await import('sucrase/dist/register')
+  const revertTsHook = registerTS()
+  try {
+    const config = require(configFilePath)
+    return config.default
+  } finally {
+    revertTsHook()
+  }
 }
 
 async function loadGroqFromFile() {
@@ -167,6 +171,8 @@ async function registerContentProvider(
   ms: number,
   result: any
 ): Promise<any> {
+  // Imported here, not at the top, to keep React out of activation.
+  const {GroqContentProvider} = await import('./providers/content-provider')
   const contentProvider = new GroqContentProvider(query, params, ms, result)
   const registration = vscode.workspace.registerTextDocumentContentProvider('groq', contentProvider)
   context.subscriptions.push(registration)
@@ -233,8 +239,8 @@ async function readParams(variables: string[]): Promise<Record<string, unknown>>
 
     try {
       value = JSON.parse(value)
-    } catch (err) {
-      // noop
+    } catch {
+      // The value is kept as the raw string when it is not JSON.
     }
     values[variable] = value
   }

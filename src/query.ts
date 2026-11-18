@@ -10,7 +10,7 @@ export async function executeGroq(options: {
   token?: string
 }) {
   const {query, params, ...clientOptions} = options
-  const {token, ...noTokenClientOptions} = clientOptions
+  const {token: _token, ...noTokenClientOptions} = clientOptions
   return createClient(clientOptions)
     .fetch(query, params, {filterResponse: false})
     .catch((err) => {

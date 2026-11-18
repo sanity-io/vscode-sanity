@@ -29,9 +29,13 @@
   "homepage": "https://github.com/sanity-io/vscode-sanity/blob/main/README.md",
   "icon": "images/icon.png",
   "activationEvents": [
-    "*"
+    "onLanguage:groq",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
       "title": "Sanity",
@@ -95,7 +99,7 @@
       {
         "language": "groq",
         "scopeName": "source.groq",
-        "path": "./node_modules/@sanity/textmate-groq/syntaxes/groq.tmLanguage.json"
+        "path": "./dist/textmate/groq.tmLanguage.json"
       },
       {
         "injectTo": [
@@ -109,14 +113,14 @@
           "source.astro"
         ],
         "scopeName": "groq-injection.js",
-        "path": "./node_modules/@sanity/textmate-groq/injections/javascript.tmLanguage.json",
+        "path": "./dist/textmate/javascript.tmLanguage.json",
         "embeddedLanguages": {
           "meta.embedded.block.groq": "groq"
         }
       },
       {
         "scopeName": "groq-injection.markdown",
-        "path": "./node_modules/@sanity/textmate-groq/injections/markdown.tmLanguage.json",
+        "path": "./dist/textmate/markdown.tmLanguage.json",
         "injectTo": [
           "text.html.markdown"
         ],
@@ -136,50 +140,56 @@
   },
   "dependencies": {
     "@sanity-labs/groq-wasm": "^1.2.1",
-    "@sanity/client": "^7.20.0",
-    "@sanity/textmate-groq": "^1.1.1",
-    "groq-js": "^1.29.0",
+    "@sanity/client": "^8.16.0",
+    "@sanity/textmate-groq": "^1.1.2",
+    "groq-js": "^2.0.1",
     "line-number": "^0.1.0",
     "osenv": "^0.1.5",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-jason": "^1.1.2",
-    "ts-node": "^10.9.2",
+    "sucrase": "^3.35.1",
     "xdg-basedir": "^4.0.0"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
-    "@sanity-labs/groq-content-mapper": "^0.6.2",
+    "@sanity-labs/groq-content-mapper": "^0.7.0",
     "@sanity-labs/lint-core": "^1.0.1",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.19.27",
-    "@types/react": "^16.14.68",
-    "@types/react-dom": "^16.9.25",
-    "@types/vscode": "^1.107.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/vscode": "~1.107.0",
     "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^4.1.1",
-    "mocha": "^10.8.2",
+    "mocha": "^12.0.3",
     "ovsx": "^1.4.0",
-    "prettier": "^2.8.8",
-    "typescript": "5.9.3",
-    "typescript-7": "npm:typescript@^7.1.0-beta"
+    "prettier": "^3.10.1",
+    "typescript": "^7.0.2",
+    "typescript-7": "npm:typescript@7.1.0-beta",
+    "oxlint": "^1.94.0",
+    "tsdown": "^0.23.7"
   },
   "scripts": {
-    "lint": "tsc --noEmit",
-    "test": "npm run compile && node --test \"out/*.test.js\" \"out/hover/*.test.js\"",
-    "test:integration": "npm run compile && node out/test/runTest.js",
-    "test:integration:tsgo": "npm run compile && node out/test/runTest.js --tsgo",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm run build && pnpm run compile && node --test \"out/*.test.js\" \"out/hover/*.test.js\"",
+    "test:integration": "pnpm run build && pnpm run compile && node out/test/runTest.js",
+    "test:integration:tsgo": "pnpm run build && pnpm run compile && node out/test/runTest.js --tsgo",
+    "build": "tsdown",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "watch": "tsdown --watch",
+    "vscode:prepublish": "tsdown",
     "env:source": "export $(cat .envrc | xargs)",
-    "package": "npm run compile && vsce package --allow-star-activation",
+    "package": "vsce package --no-dependencies",
     "changeset": "changeset",
-    "changeset:version": "changeset version && npm install --package-lock-only",
+    "changeset:version": "changeset version && pnpm install --lockfile-only",
     "release": "bash scripts/release.sh",
-    "upgrade-interactive": "npx npm-check -u"
+    "upgrade-interactive": "pnpm update --interactive"
   },
   "volta": {
     "node": "22.21.1"
-  }
+  },
+  "packageManager": "pnpm@12.22.0"
 }

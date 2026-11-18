@@ -42,7 +42,7 @@ Install the extension for [VSCode](https://marketplace.visualstudio.com/items?it
 ## Development
 
 1.  Clone the repository - https://github.com/sanity-io/vscode-sanity
-2.  `npm install`
+2.  `pnpm install`
 3.  Open it in VSCode
 4.  Go to the debugging section and run the launch program "Extension"
 5.  This will open another VSCode instance with extension enabled
@@ -51,21 +51,21 @@ Install the extension for [VSCode](https://marketplace.visualstudio.com/items?it
 
 > We follow semantic versioning. Whether a change is a patch, minor or major release, and what the changelog says about it, comes from the changeset added with the change (see [Publishing](#publishing)).
 
-Run `npm test` for the unit tests. `npm run test:integration` downloads VS Code and checks the hover end to end against the built-in TypeScript extension. `npm run test:integration:tsgo` does the same with the TypeScript 7 extension (`TypeScriptTeam.native-preview`, downloaded from the Marketplace) running TypeScript 7.1 and `@sanity-labs/groq-content-mapper` on the `.groq` files in `fixtures/hover-project`. On Linux without a display, run either with `xvfb-run -a`.
+Run `pnpm test` for the unit tests. `pnpm run test:integration` downloads VS Code and checks the hover end to end against the built-in TypeScript extension. `pnpm run test:integration:tsgo` does the same with the TypeScript 7 extension (`TypeScriptTeam.native-preview`, downloaded from the Marketplace) running TypeScript 7.1 and `@sanity-labs/groq-content-mapper` on the `.groq` files in `fixtures/hover-project`. On Linux without a display, run either with `xvfb-run -a`.
 
-If you want to build/inspect the vsix file, you can do `npm run package`. It can then be "installed from location" in either Cursor or VS Code.
+If you want to build/inspect the vsix file, you can do `pnpm run package`. It can then be "installed from location" in either Cursor or VS Code.
 
 ## Publishing
 
 Releases are managed with [Changesets](https://github.com/changesets/changesets). Add a changeset to any PR that should be released, describing the change for the changelog:
 
 ```sh
-npx changeset
+pnpm changeset
 ```
 
 When changesets land on `main`, the release workflow opens (or updates) a "Version Packages" PR that bumps the version in `package.json` and writes `CHANGELOG.md`. Merging that PR packages the vsix, publishes it to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) and the [Open VSX registry](https://open-vsx.org/extension/sanity-io/vscode-sanity), and then tags the version and creates the GitHub release. If a publish fails nothing is tagged, so re-running the workflow retries it.
 
-Run `npx changeset status` to see what the next release will contain.
+Run `pnpm changeset status` to see what the next release will contain.
 
 > ⚠️ Publishing only works in CI: the workflow authenticates to both registries with GitHub OIDC trusted publishing, so there are no access tokens to publish with locally.
 
