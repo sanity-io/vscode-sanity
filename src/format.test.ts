@@ -92,6 +92,22 @@ describe('formatQuerySource', () => {
     )
   })
 
+  it('indents every continuation line to the line the query starts on', () => {
+    assert.equal(
+      formatQuerySource(
+        '\n  *[_type == "post"]{title,"author":author->{name,"avatar":avatar.asset->url}}\n',
+      ),
+      [
+        '',
+        '  *[_type == "post"] {',
+        '    title,',
+        '    "author": author-> { name, "avatar": avatar.asset->url }',
+        '  }',
+        '',
+      ].join('\n'),
+    )
+  })
+
   it('returns undefined for blank text and text that is not GROQ', () => {
     assert.equal(formatQuerySource('  \n'), undefined)
     assert.equal(formatQuerySource('*[_type == ]'), undefined)
