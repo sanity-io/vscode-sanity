@@ -5,8 +5,9 @@ const apiHost: string | undefined = process.env.SANITY_TEST_API_HOST
 
 export default defineCliConfig({
   api: {
-    projectId: 'abc123',
-    dataset: 'production',
+    // The .env file tests set these through .env files. The other tests use the defaults.
+    projectId: process.env.SANITY_STUDIO_PROJECT_ID ?? 'abc123',
+    dataset: process.env.SANITY_STUDIO_DATASET ?? 'production',
     ...(apiHost ? {apiHost, useProjectHostname: false} : {}),
   },
 })

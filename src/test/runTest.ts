@@ -157,7 +157,12 @@ async function main() {
     // sanity.cli.ts is in the workspace too. lsp-workspace stays first.
     const workspaceDir = path.join(cacheDir, 'lsp-workspace')
     mkdirSync(workspaceDir, {recursive: true})
-    launchArgs.push(workspaceDir, path.join(root, 'fixtures', 'execute-project'))
+    // A copy, because the .env file tests write .env files next to its sanity.cli.ts.
+    const executeProject = path.join(cacheDir, 'execute-project')
+    rmSync(executeProject, {recursive: true, force: true})
+    cpSync(path.join(root, 'fixtures', 'execute-project'), executeProject, {recursive: true})
+    launchArgs.push(workspaceDir, executeProject)
+    extensionTestsEnv.SANITY_TEST_EXECUTE_PROJECT = executeProject
   }
 
   let extensionDevelopmentPath = root
