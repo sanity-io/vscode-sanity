@@ -42,7 +42,7 @@ The extension runs the GROQ language server from [`@sanity-labs/groq-lsp`](https
 - **Diagnostics**: syntax errors, and [groq-lint](https://www.npmjs.com/package/@sanity-labs/groq-lint) rules such as joins inside filters or `count()` on correlated subqueries.
 - **Completion** of system fields, functions and, when a schema is available, your document types and fields.
 - **Hover** information for fields and functions inside a query.
-- **Formatting**: `Format Document` formats `.groq` files. In JavaScript and TypeScript files, `Format Document` is left to your usual formatter; run **GROQ: Format GROQ Queries** to format the `groq` template literals in the file.
+- **Formatting**: `Format Document` formats `.groq` files. In JavaScript and TypeScript files, `Format Document` is left to your usual formatter; run **GROQ: Format GROQ Queries** to format the `groq` template literals in the file. To format one query, click the **Format Query** code lens above it. It works on `groq` and `defineQuery` template literals and `.groq` files, without the language server. It is not shown for queries with `${}` interpolations or backslash escapes.
 
 For schema-aware completion and hovers, extract your schema with `npx sanity schema extract`. The server looks for `schema.json`, `sanity.schema.json`, `.sanity/schema.json` or `studio/schema.json` in the first workspace folder, or uses `groq.schemaPath`.
 

@@ -28,3 +28,30 @@ export function formatGroq(query: string, width = DEFAULT_FORMAT_WIDTH): string 
     throw error
   }
 }
+
+/**
+ * Whether a query spelled as `source` in a JavaScript or TypeScript template literal can be
+ * rewritten in place: with `${}` interpolations it is not GROQ yet, and with backslashes the source
+ * text differs from the query string, so the formatter would see a different query.
+ */
+export function canFormatInSource(source: string): boolean {
+  return !source.includes('${') && !source.includes('\\')
+}
+
+/**
+ * Formats the query in `source` and keeps the whitespace around it, so a query on its own lines
+ * inside a template literal, or a `.groq` file's final newline, stay where they were. Returns
+ * `undefined` if the query cannot be parsed.
+ */
+export function formatQuerySource(source: string): string | undefined {
+  const query = source.trim()
+  if (!query) {
+    return undefined
+  }
+  const formatted = formatGroq(query)
+  if (formatted === undefined) {
+    return undefined
+  }
+  const start = source.indexOf(query)
+  return source.slice(0, start) + formatted + source.slice(start + query.length)
+}
