@@ -1,6 +1,5 @@
 import * as vscode from 'vscode'
 import {DEFAULT_FORMAT_WIDTH, formatGroq} from '../format'
-import {formatQueryForHover} from '../hover/format-hover-query'
 import {comparable, findGroqInHoverMarkdown} from '../hover/groq-in-hover'
 
 export const HOVER_LANGUAGES = ['typescript', 'typescriptreact', 'javascript', 'javascriptreact']
@@ -68,7 +67,7 @@ export class GroqHoverProvider implements vscode.HoverProvider {
 
           switch (found.kind) {
             case 'query': {
-              const formatted = formatQueryForHover(found.query, formatGroq, width)
+              const formatted = formatGroq(found.query, width) ?? found.query
               const fence = fenceFor(formatted)
               blocks.push(`${fence}groq\n${formatted}\n${fence}`)
               break

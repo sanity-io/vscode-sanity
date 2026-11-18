@@ -6,13 +6,13 @@ import {TRUNCATED_NOTICE} from '../../providers/groq-hover-provider'
 
 const project = process.env.SANITY_TEST_TSGO
 
-// groq-format at 80 columns. The custom functions and the leading comment are as authored, as
-// the mapper prepends them.
+// groq-format at 80 columns, run over the whole string the mapper produces: the prepended custom
+// functions, the leading comment and the query.
 const LONG_QUERY_FORMATTED = [
-  'fn image::asset($asset) = $asset->{url, metadata};',
-  'fn image::field($image) = $image{crop, hotspot, "asset": image::asset(asset)};',
-  '// All published posts with their author, categories and related posts',
+  'fn image::asset($asset) = $asset-> { url, metadata };',
+  'fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };',
   '',
+  '// All published posts with their author, categories and related posts',
   '*[_type == "post" && defined(slug.current) && publishedAt < now()]',
   '  | order(publishedAt desc)[$start...$end] {',
   '  _id,',
