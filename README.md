@@ -1,99 +1,87 @@
-# vscode-sanity
+# Sanity.io for VS Code and Cursor
 
-Extension for [Visual Studio Code](https://code.visualstudio.com/) / [Cursor](https://cursor.com/) that makes developing applications for [Sanity.io](https://www.sanity.io/) that much more awesome.
+Write, check and run [GROQ](https://www.sanity.io/docs/groq) queries without leaving your editor. This extension adds GROQ support to [Visual Studio Code](https://code.visualstudio.com/) and [Cursor](https://cursor.com/) for [Sanity](https://www.sanity.io/) projects.
 
-## Features
+- **Run queries from your editor.** Click **Execute Query** above any GROQ query and see the result as JSON next to your code.
+- **Catch mistakes as you type.** Syntax errors and common performance problems are flagged in the editor.
+- **Autocomplete GROQ.** Get suggestions for functions, system fields and, with your schema, your document types and fields.
+- **Format queries.** Tidy a query with one click, or a whole `.groq` file with **Format Document**.
+- **Syntax highlighting** for GROQ in `.groq` files, JavaScript and TypeScript template literals, and Markdown.
 
-### GROQ syntax highlighting
+![A GROQ query in a TypeScript file with the Execute Query code lens, and its JSON result in a panel beside it](media/execute-query.png)
 
-Syntax highlighting for the GROQ query language is available in the following situations:
+## Requirements
 
-- Files with the `.groq` extension
-- Fenced code blocks in Markdown with the `groq` tag
-- Tagged template literals with the `groq` tag
-- Queries using the `defineQuery` method
-- Template literals prefixed with the `/* groq */` comment
-- Template literals starting with a `// groq` comment
+- Visual Studio Code 1.107 or newer, or a recent version of Cursor.
+- To execute queries: a `sanity.cli.ts` file in your workspace, with the `projectId` and `dataset` of the project to query.
 
-### Execute GROQ-queries
+## Execute queries
 
-When GROQ-queries are detected, the extension will allow you to run the query and displays the result as JSON in a separate tab.
+Open a `.groq` file, or a JavaScript or TypeScript file with a GROQ query, and click **Execute Query** above the query. The result opens in a **GROQ Execution Result** panel beside the editor, together with how long the query took. In a `.groq` file you can also run **Execute GROQ query** from the command palette, or press `Ctrl+Shift+G` in the editor.
 
-The project ID and dataset used is determined by finding `sanity.cli.ts` in the workspace. If multiple files are found, the extension will prompt you to select one.
+- **Project and dataset.** They are read from `sanity.cli.ts` in your workspace. If the workspace has several, you are asked which one to use. If the file sets an API `token`, it is used to query private datasets.
+- **Query parameters.** If the query uses variables such as `$slug`, you are asked for a JSON file with the values. A file with the same name as the current file and a `.json` extension is suggested when it exists.
 
-If the GROQ file/query has any variables, then extension asks for a relative filename of a JSON-file containing an object of key-value mappings. It autofills the param filename based on the current file with a `.json` extension, if it exists.
+## GROQ language support
 
-![Execute GROQ](https://raw.githubusercontent.com/sanity-io/vscode-sanity/main/screenshots/previewofquery.png)
+The extension checks and completes GROQ in `.groq` files and in `groq` template literals in JavaScript and TypeScript.
+
+![A GROQ query with a warning about a join inside a filter](media/diagnostics.png)
+
+- **Diagnostics** for syntax errors and [lint rules](https://www.npmjs.com/package/@sanity-labs/groq-lint), such as joins inside filters or `count()` on correlated subqueries.
+- **Completion and hover** for system fields and functions. With a schema, they also cover your document types and fields.
+- **Snippets** for common queries, for example `type`, `deref`, `orda` and `slice` in `.groq` files, and `groq` and `groqslug` in JavaScript and TypeScript.
+
+### Use your schema
+
+For completion and hover that know your document types, extract your schema:
+
+```sh
+npx sanity schema extract
+```
+
+The extension picks up `schema.json`, `sanity.schema.json`, `.sanity/schema.json` or `studio/schema.json` in the first workspace folder. For a schema stored elsewhere, set `groq.schemaPath`.
+
+### Format queries
+
+- In `.groq` files, use **Format Document**.
+- In JavaScript and TypeScript files, click **Format Query** above a query to format just that one. It works for `groq` and `defineQuery` template literals, but not for queries that contain `${}` interpolations or backslash escapes.
+- To format every GROQ query in a JavaScript or TypeScript file, run **GROQ: Format GROQ Queries** from the command palette. Your usual formatter keeps handling the rest of the file.
 
 ### GROQ in TypeScript hovers
 
-TypeScript prints the type of a GROQ query (for example a `.groq` import typed as `/* groq */` template literal) as a single double-quoted string with `\n` escapes. When you hover such a type, or a value of that type, the extension adds a second section to the hover with the query formatted onto real lines and syntax highlighted as GROQ. VS Code cannot hide the language server's own section, so both are shown.
+When TypeScript shows the type of a GROQ query, for example for a `defineQuery` result, hovering it also shows the query formatted over multiple lines and highlighted as GROQ. Turn this off with `sanity.formatGroqInHover`.
 
-Detection works on the hover text itself: a string or template literal in a code block that parses as GROQ and references the dataset (`*[...]`) is picked up, as is a fenced `groq` block from the query's documentation (groq-content-mapper adds one with the query as authored). The mapper's prettify option is not needed: the extension formats the query with [groq-format](https://github.com/atombender/groq-format) (through [`@sanity-labs/groq-wasm`](https://github.com/sanity-labs/sanity-lint/tree/main/packages/groq-wasm)), wrapped to 80 columns by default (`sanity.formatGroqInHoverWidth`). The whole string is formatted together, including prepended custom function definitions (`fn image::asset($asset) = ...;`) and comments, which are kept. A query that cannot be parsed is shown as it is.
+## Syntax highlighting
 
-TypeScript 7 cuts long types off after about 5,000 characters, in the middle of the query. If the hover also has the query's documentation block, that full copy is formatted instead. Otherwise the extension does not format half a query: it says the hover was truncated, and the full query is in the `.groq` file.
+GROQ is highlighted in:
 
-Turn the whole feature off with `sanity.formatGroqInHover`.
+- Files with the `.groq` extension
+- Fenced code blocks in Markdown tagged `groq`
+- Template literals tagged with `groq`
+- Queries wrapped in `defineQuery`
+- Template literals that start with a `/* groq */` or `// groq` comment
 
-### GROQ linting, completion and formatting
+## Settings
 
-The extension runs the GROQ language server from [`@sanity-labs/groq-lsp`](https://www.npmjs.com/package/@sanity-labs/groq-lsp) on `.groq` files and on `groq` tagged template literals in JavaScript and TypeScript files:
+Find these in **Settings** by searching for `sanity` or `groq`.
 
-- **Diagnostics**: syntax errors, and [groq-lint](https://www.npmjs.com/package/@sanity-labs/groq-lint) rules such as joins inside filters or `count()` on correlated subqueries.
-- **Completion** of system fields, functions and, when a schema is available, your document types and fields.
-- **Hover** information for fields and functions inside a query.
-- **Formatting**: `Format Document` formats `.groq` files. In JavaScript and TypeScript files, `Format Document` is left to your usual formatter; run **GROQ: Format GROQ Queries** to format the `groq` template literals in the file. To format one query, click the **Format Query** code lens above it. It works on `groq` and `defineQuery` template literals and `.groq` files, without the language server. It is not shown for queries with `${}` interpolations or backslash escapes.
+| Setting                         | Default | Description                                                                          |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------ |
+| `sanity.useCodelens`            | `true`  | Show **Execute Query** and **Format Query** above queries.                           |
+| `sanity.useCDN`                 | `false` | Use the Sanity API CDN when executing queries.                                       |
+| `sanity.openJSONFile`           | `false` | Open query results as an editable JSON file instead of the result panel.             |
+| `sanity.formatGroqInHover`      | `true`  | Show GROQ queries in TypeScript hovers formatted and highlighted.                    |
+| `sanity.formatGroqInHoverWidth` | `80`    | Column width that queries in hovers are wrapped to.                                  |
+| `groq.enable`                   | `true`  | Turn on diagnostics, completion, hover and formatting.                               |
+| `groq.schemaPath`               | `""`    | Schema file from `npx sanity schema extract`, absolute or relative to the workspace. |
+| `groq.maxDiagnostics`           | `100`   | Maximum number of diagnostics per file.                                              |
+| `groq.enableFormatting`         | `true`  | Turn on GROQ formatting.                                                             |
 
-For schema-aware completion and hovers, extract your schema with `npx sanity schema extract`. The server looks for `schema.json`, `sanity.schema.json`, `.sanity/schema.json` or `studio/schema.json` in the first workspace folder, or uses `groq.schemaPath`.
+If GROQ support stops responding, run **GROQ: Restart Language Server** from the command palette. **GROQ: Show Language Server Output** shows its log.
 
-| Setting                 | Default | Description                                                                   |
-| ----------------------- | ------- | ----------------------------------------------------------------------------- |
-| `groq.enable`           | `true`  | Run the language server.                                                      |
-| `groq.schemaPath`       | `""`    | Schema file, absolute or relative to the first workspace folder.              |
-| `groq.maxDiagnostics`   | `100`   | Maximum number of diagnostics per file.                                       |
-| `groq.enableFormatting` | `true`  | Enable GROQ formatting.                                                       |
-| `groq.trace.server`     | `"off"` | Log the communication with the server to the **GROQ Language Server** output. |
+## Feedback
 
-**GROQ: Restart Language Server** and **GROQ: Show Language Server Output** are in the command palette.
+Found a bug or have an idea? [Open an issue](https://github.com/sanity-io/vscode-sanity/issues). To work on the extension yourself, see [CONTRIBUTING.md](https://github.com/sanity-io/vscode-sanity/blob/main/CONTRIBUTING.md).
 
-### GROQ snippets
-
-Snippets for common queries are available in `.groq` files (for example `type`, `typep`, `deref`, `orda`, `slice`) and in JavaScript and TypeScript files (for example `groq`, `groqp`, `groqslug`, `groqlist`, `constquery`).
-
-## Usage
-
-Install the extension for [VSCode](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) or [Cursor](https://open-vsx.org/extension/sanity-io/vscode-sanity) by searching for `sanity`. This extension adds syntax highlighting for GROQ-files and `groq` tags.
-
-## Development
-
-1.  Clone the repository - https://github.com/sanity-io/vscode-sanity
-2.  `pnpm install`
-3.  Open it in VSCode
-4.  Go to the debugging section and run the launch program "Extension"
-5.  This will open another VSCode instance with extension enabled
-6.  Open a file that should be syntax highlighted
-7.  Make changes to the extension code, then press (`Ctrl+R` or `Cmd+R` on Mac) in the syntax highlighted file to test the changes
-
-> We follow semantic versioning. Whether a change is a patch, minor or major release, and what the changelog says about it, comes from the changeset added with the change (see [Publishing](#publishing)).
-
-Run `pnpm test` for the unit tests. `pnpm run test:integration` downloads VS Code and checks the hover end to end against the built-in TypeScript extension. `pnpm run test:integration:tsgo` does the same with the TypeScript 7 extension (`TypeScriptTeam.native-preview`, downloaded from the Marketplace) running TypeScript 7.1 and `@sanity-labs/groq-content-mapper` on the `.groq` files in `fixtures/hover-project`. On Linux without a display, run either with `xvfb-run -a`.
-
-If you want to build/inspect the vsix file, you can do `pnpm run package`. It can then be "installed from location" in either Cursor or VS Code.
-
-## Publishing
-
-Releases are managed with [Changesets](https://github.com/changesets/changesets). Add a changeset to any PR that should be released, describing the change for the changelog:
-
-```sh
-pnpm changeset
-```
-
-When changesets land on `main`, the release workflow opens (or updates) a "Version Packages" PR that bumps the version in `package.json` and writes `CHANGELOG.md`. Merging that PR packages the vsix, publishes it to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sanity-io.vscode-sanity) and the [Open VSX registry](https://open-vsx.org/extension/sanity-io/vscode-sanity), and then tags the version and creates the GitHub release. If a publish fails nothing is tagged, so re-running the workflow retries it.
-
-Run `pnpm changeset status` to see what the next release will contain.
-
-> ⚠️ Publishing only works in CI: the workflow authenticates to both registries with GitHub OIDC trusted publishing, so there are no access tokens to publish with locally.
-
-## License
-
-MIT
+Using Cursor? The extension is also available on [Open VSX](https://open-vsx.org/extension/sanity-io/vscode-sanity).
