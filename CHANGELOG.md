@@ -1,5 +1,19 @@
 # vscode-sanity
 
+## 0.7.0
+
+### Minor Changes
+
+- [#84](https://github.com/sanity-io/vscode-sanity/pull/84) [`e897a21`](https://github.com/sanity-io/vscode-sanity/commit/e897a21cbdd51c3f0271c261d8932b0f033c8254) Thanks [@torjusb](https://github.com/torjusb)! - Copy GROQ queries to the clipboard. Every detected query gets a "Copy Query" CodeLens next to "Execute Query", and the "Copy GROQ query" command copies the selection, or the whole file when nothing is selected.
+
+- [#69](https://github.com/sanity-io/vscode-sanity/pull/69) [`216bc1d`](https://github.com/sanity-io/vscode-sanity/commit/216bc1d91fac6710a4e3d386b3aa522e3eeb8eac) Thanks [@msafi](https://github.com/msafi)! - The query result view shows how many results an array query returned, as in "Query result (3)". Queries that return `0`, `null` or another non-array value are now shown as that value instead of an empty array.
+
+### Patch Changes
+
+- [#73](https://github.com/sanity-io/vscode-sanity/pull/73) [`73631b0`](https://github.com/sanity-io/vscode-sanity/commit/73631b09508ff2d99be2d0ef5e4e345c22db0110) Thanks [@stipsan](https://github.com/stipsan)! - GROQ queries in `.astro` files now get the Execute Query codelens and formatted GROQ in hovers, and opening an `.astro` file activates the extension. The README explains how to point Execute Query at a project in an Astro project that uses `@sanity/astro`.
+
+- [#68](https://github.com/sanity-io/vscode-sanity/pull/68) [`2500dc8`](https://github.com/sanity-io/vscode-sanity/commit/2500dc835a758c81489ceb920845cb815e1023c4) Thanks [@stipsan](https://github.com/stipsan)! - Execute GROQ query now loads the `.env` files next to `sanity.cli.ts` the way the Sanity CLI does, so a `projectId` or `dataset` that comes from an environment variable such as `SANITY_STUDIO_PROJECT_ID` is found. `.env`, `.env.local`, `.env.<mode>` and `.env.<mode>.local` are read, where the mode is `SANITY_ACTIVE_ENV` or `development`, and variables that are already set take priority.
+
 ## 0.6.0
 
 ### Minor Changes
