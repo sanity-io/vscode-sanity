@@ -11,16 +11,16 @@ version="$(node -p "require('./package.json').version")"
 if git rev-parse -q --verify "refs/tags/v${version}" >/dev/null; then
   echo "v${version} is already released"
 else
-  npm run package
+  pnpm run package
   vsix="vscode-sanity-${version}.vsix"
 
   failed=0
-  npx vsce publish --oidc --packagePath "$vsix" --skip-duplicate || failed=1
-  npx ovsx publish --packagePath "$vsix" --trusted-publishing --skip-duplicate || failed=1
+  pnpm exec vsce publish --oidc --packagePath "$vsix" --skip-duplicate || failed=1
+  pnpm exec ovsx publish --packagePath "$vsix" --trusted-publishing --skip-duplicate || failed=1
   if [ "$failed" -ne 0 ]; then
     echo "Publishing v${version} failed, not tagging it so the next run retries" >&2
     exit 1
   fi
 fi
 
-npx changeset publish
+pnpm exec changeset publish

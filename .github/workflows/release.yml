@@ -37,19 +37,21 @@ jobs:
         run: |
           git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
           git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com'
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
-          cache: npm
+          cache: pnpm
           node-version: 22.21.1
-      - run: npm ci
-      - run: npm run lint
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run typecheck
       - name: Create Release Pull Request or Publish to the registries
         id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          version-script: npm run changeset:version
-          publish-script: npm run release
+          version-script: pnpm run changeset:version
+          publish-script: pnpm run release
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Attach the vsix to the GitHub release

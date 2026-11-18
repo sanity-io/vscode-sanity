@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "module": "node20",
+    "module": "commonjs",
+    "moduleResolution": "bundler",
     "target": "ES2022",
     "outDir": "out",
     "lib": ["ES2022", "esnext", "dom"],
     "sourceMap": true,
     "rootDir": "src",
+    "types": ["node", "mocha"],
+    "skipLibCheck": true,
     /* Strict Type-Checking Option */
     "strict": true /* enable all strict type-checking options */,
     /* Additional Checks */

@@ -1,0 +1,9 @@
+# pnpm 12 reads project settings from here, including for a single package.
+# vsce publish shells out to this signer, whose postinstall copies the platform binary into place.
+allowBuilds:
+  '@vscode/vsce-sign': true
+
+# pnpm's default supply-chain policy refuses versions published in the last day. These are this
+# org's own packages, and the extension cannot install without the current ones.
+minimumReleaseAgeExclude:
+  - '@sanity-labs/*'
