@@ -1,5 +1,23 @@
 # vscode-sanity
 
+## 0.6.0
+
+### Minor Changes
+
+- [#67](https://github.com/sanity-io/vscode-sanity/pull/67) [`8b7bb85`](https://github.com/sanity-io/vscode-sanity/commit/8b7bb859a1587305c3e01a85567699fb04aea564) Thanks [@stipsan](https://github.com/stipsan)! - Add the `sanity.apiVersion` setting for the API version used by Execute GROQ query. It takes a date such as `v2025-02-19`, `v1` or `vX`, and is checked when you edit it in settings. It defaults to `v2025-02-19`, so newer GROQ functions like `pt::text()` work without configuration. Executing a query no longer fails with "Invalid API version" because no version was set.
+
+- [#70](https://github.com/sanity-io/vscode-sanity/pull/70) [`4f9a56a`](https://github.com/sanity-io/vscode-sanity/commit/4f9a56a30cc9427f0563929e9ef5f44cce7b0ea3) Thanks [@torjusb](https://github.com/torjusb)! - Execute Query now works on queries that interpolate fragments, such as ``groq`*[_type == "post"]{${fragment}}` `` and `defineQuery()` calls with a template literal. The fragment is inlined before the query runs, whether it is declared in the same file or imported from another one, through relative paths or tsconfig `paths`. Fragments can be `groq` templates, `defineQuery()` calls, plain strings, concatenations of those, or `.groq` files. Anything that cannot be resolved is left as written.
+
+### Patch Changes
+
+- [#81](https://github.com/sanity-io/vscode-sanity/pull/81) [`11ffce3`](https://github.com/sanity-io/vscode-sanity/commit/11ffce307c3df055b963dad81b796c5d8b3e1459) Thanks [@stipsan](https://github.com/stipsan)! - **Format Query** keeps the indent of the line a query starts on. Continuation lines of a formatted `groq` or `defineQuery` template no longer jump back to column 0.
+
+- [#76](https://github.com/sanity-io/vscode-sanity/pull/76) [`75cfe31`](https://github.com/sanity-io/vscode-sanity/commit/75cfe315aa1e9b6699b70869ff99c4c36088c331) Thanks [@stipsan](https://github.com/stipsan)! - GROQ formatting (`Format Document` in `.groq` files and **GROQ: Format GROQ Queries**) now uses groq-format through `@sanity-labs/groq-wasm`, the formatter GROQ hovers already use, instead of Prettier. Formatted queries are indented with the editor's tab size, and with tabs when the editor indents with tabs. The language server no longer bundles Prettier, so the extension is smaller.
+
+- [#74](https://github.com/sanity-io/vscode-sanity/pull/74) [`12ae8e5`](https://github.com/sanity-io/vscode-sanity/commit/12ae8e55c008ec3e8896ecd147cad41134919b76) Thanks [@stipsan](https://github.com/stipsan)! - Execute GROQ query works with `sanity.cli.ts` files that import `defineCliConfig` from `sanity/cli` in Sanity v3. It used to fail with "does not provide an export named 'defineCliConfig'", and every later attempt failed with "Unexpected module status 0. Cannot require() ES Module".
+
+- [#82](https://github.com/sanity-io/vscode-sanity/pull/82) [`b63a760`](https://github.com/sanity-io/vscode-sanity/commit/b63a760e29719ec92e099b3aea66420c667ef3a7) Thanks [@stipsan](https://github.com/stipsan)! - Rewrite the Marketplace README around what the extension does: running queries, diagnostics, completion and formatting. It now includes screenshots and a settings reference.
+
 ## 0.5.0
 
 ### Minor Changes
