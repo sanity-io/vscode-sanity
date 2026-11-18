@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import {describe, it} from 'node:test'
-import {formatGroq} from './format'
+import {canFormatInSource, formatGroq, formatQuerySource} from './format'
 
 const QUERY =
   '*[_type=="post"&&defined(slug.current)]{_id,title,"author":author->{name,"avatar":avatar.asset->url},"categories":categories[]->{title,"slug":slug.current}}|order(_createdAt desc)[0...10]'
@@ -18,9 +18,11 @@ describe('formatGroq', () => {
         '  "categories": categories[]-> { title, "slug": slug.current }',
         '}',
         '  | order(_createdAt desc)[0...10]',
-      ].join('\n')
+      ].join('\n'),
     )
-    for (const line of formatted!.split('\n')) {assert.ok(line.length <= 80, line)}
+    for (const line of formatted!.split('\n')) {
+      assert.ok(line.length <= 80, line)
+    }
   })
 
   it('wraps to a narrower width when asked', () => {
@@ -32,7 +34,7 @@ describe('formatGroq', () => {
   it('keeps comments', () => {
     assert.equal(
       formatGroq('*[_type == "post"]{_id, // the id\ntitle}'),
-      '*[_type == "post"] {\n  _id, // the id\n  title\n}'
+      '*[_type == "post"] {\n  _id, // the id\n  title\n}',
     )
   })
 
@@ -50,7 +52,7 @@ describe('formatGroq', () => {
         '',
         '// All published posts',
         '*[_type == "post"] { _id, "image": image::field(mainImage) }',
-      ].join('\n')
+      ].join('\n'),
     )
   })
 
@@ -64,7 +66,7 @@ describe('formatGroq', () => {
         'fn a::d($y) = $y { e };',
         '',
         '*[] { "d": a::b(@) }',
-      ].join('\n')
+      ].join('\n'),
     )
   })
 
@@ -72,12 +74,34 @@ describe('formatGroq', () => {
     const query = 'fn a::b($x) = $x{aaaaaaaaaa, bbbbbbbbbb, cccccccccc, dddddddddd};\n*[]'
     assert.equal(
       formatGroq(query, 80)!.split('\n')[0],
-      'fn a::b($x) = $x { aaaaaaaaaa, bbbbbbbbbb, cccccccccc, dddddddddd };'
+      'fn a::b($x) = $x { aaaaaaaaaa, bbbbbbbbbb, cccccccccc, dddddddddd };',
     )
     assert.ok(formatGroq(query, 30)!.split('\n').length > 3)
   })
 
   it('returns undefined for text that is not GROQ', () => {
     assert.equal(formatGroq('*[_type == '), undefined)
+  })
+})
+
+describe('formatQuerySource', () => {
+  it('formats a query and keeps the whitespace around it', () => {
+    assert.equal(
+      formatQuerySource('\n  *[_type == "post"]{  title,body}\n'),
+      '\n  *[_type == "post"] { title, body }\n',
+    )
+  })
+
+  it('returns undefined for blank text and text that is not GROQ', () => {
+    assert.equal(formatQuerySource('  \n'), undefined)
+    assert.equal(formatQuerySource('*[_type == ]'), undefined)
+  })
+})
+
+describe('canFormatInSource', () => {
+  it('rejects template literals with interpolations or escapes', () => {
+    assert.equal(canFormatInSource('*[_type == "post"]'), true)
+    assert.equal(canFormatInSource('*[_type == "${type}"]'), false)
+    assert.equal(canFormatInSource(String.raw`*[title == "a\"b"]`), false)
   })
 })

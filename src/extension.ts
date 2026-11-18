@@ -3,6 +3,7 @@ import vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'node:fs'
 import {clearRequireCache} from './clearRequireCache'
 import {Config} from './config/findConfig'
+import {formatQuerySource} from './format'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
@@ -88,6 +89,33 @@ export function activate(context: vscode.ExtensionContext) {
   })
   context.subscriptions.push(
     disposable,
+    vscode.commands.registerCommand(
+      'sanity.formatQuery',
+      async (uri: vscode.Uri, start: number, source: string) => {
+        const document = await vscode.workspace.openTextDocument(uri)
+        const range = new vscode.Range(
+          document.positionAt(start),
+          document.positionAt(start + source.length),
+        )
+        if (document.getText(range) !== source) {
+          vscode.window.showWarningMessage(
+            'The GROQ query changed before it could be formatted. Try again.',
+          )
+          return
+        }
+        const formatted = formatQuerySource(source)
+        if (formatted === undefined) {
+          vscode.window.showWarningMessage('Could not format the GROQ query: it does not parse.')
+          return
+        }
+        if (formatted === source) {
+          return
+        }
+        const edit = new vscode.WorkspaceEdit()
+        edit.replace(uri, range, formatted)
+        await vscode.workspace.applyEdit(edit)
+      },
+    ),
     vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()),
   )
   registerGroqLanguageServer(context)
@@ -99,9 +127,13 @@ export function activate(context: vscode.ExtensionContext) {
     useCDN = settings.get('useCDN', false)
 
     if (useCodelens && !codelens) {
-      codelens = vscode.languages.registerCodeLensProvider(
-        ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-        new GROQCodeLensProvider(),
+      const provider = new GROQCodeLensProvider()
+      codelens = vscode.Disposable.from(
+        provider,
+        vscode.languages.registerCodeLensProvider(
+          ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
+          provider,
+        ),
       )
 
       context.subscriptions.push(codelens)
