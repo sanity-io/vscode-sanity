@@ -1,12 +1,13 @@
 import path from 'node:path'
 import vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'node:fs'
-import {parse} from 'groq-js'
 import {clearRequireCache} from './clearRequireCache'
 import {Config} from './config/findConfig'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
+import {registerGroqLanguageServer, stopGroqLanguageServer} from './lsp/client'
+import {findVariablesInQuery} from './variables'
 
 export function activate(context: vscode.ExtensionContext) {
   // Assigned by `readConfig()`
@@ -51,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       vscode.window.setStatusBarMessage(
         `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10_000
+        10_000,
       )
 
       if (!openJSONFile && !resultPanel) {
@@ -59,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
           'executionResultsWebView',
           'GROQ Execution Result',
           vscode.ViewColumn.Beside,
-          {}
+          {},
         )
 
         resultPanel.onDidDispose(() => {
@@ -75,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
           query,
           params,
           ms,
-          result || []
+          result || [],
         )
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
@@ -85,7 +86,11 @@ export function activate(context: vscode.ExtensionContext) {
       return
     }
   })
-  context.subscriptions.push(disposable, vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()))
+  context.subscriptions.push(
+    disposable,
+    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()),
+  )
+  registerGroqLanguageServer(context)
 
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
@@ -96,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (useCodelens && !codelens) {
       codelens = vscode.languages.registerCodeLensProvider(
         ['javascript', 'typescript', 'javascriptreact', 'typescriptreact', 'groq'],
-        new GROQCodeLensProvider()
+        new GROQCodeLensProvider(),
       )
 
       context.subscriptions.push(codelens)
@@ -107,6 +112,10 @@ export function activate(context: vscode.ExtensionContext) {
       codelens = undefined
     }
   }
+}
+
+export function deactivate(): Promise<void> {
+  return stopGroqLanguageServer()
 }
 
 async function loadSanityConfig() {
@@ -170,7 +179,7 @@ async function registerContentProvider(
   query: string,
   params: QueryParams,
   ms: number,
-  result: unknown
+  result: unknown,
 ) {
   // Imported here, not at the top, to keep React out of activation.
   const {GroqContentProvider} = await import('./providers/content-provider')
@@ -189,29 +198,6 @@ async function checkFileExists(file) {
     .access(file, fsconstants.F_OK)
     .then(() => true)
     .catch(() => false)
-}
-
-function findVariablesInQuery(query: string): Array<string> {
-  return findVariables(parse(query), [])
-}
-
-function findVariables(node: unknown, found: Array<string>): Array<string> {
-  if (typeof node !== 'object' || node === null) {
-    return found
-  }
-
-  if (Array.isArray(node)) {
-    return node.reduce((acc: Array<string>, child: unknown) => findVariables(child, acc), found)
-  }
-
-  if ('type' in node && node.type === 'Parameter' && 'name' in node && typeof node.name === 'string') {
-    return found.concat(node.name)
-  }
-
-  return Object.values(node).reduce(
-    (acc: Array<string>, child: unknown) => findVariables(child, acc),
-    found
-  )
 }
 
 async function readParamsFile(): Promise<QueryParams> {

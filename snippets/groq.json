@@ -1,0 +1,132 @@
+{
+  "All documents": {
+    "prefix": "all",
+    "body": "*",
+    "description": "Select all documents"
+  },
+  "Filter by type": {
+    "prefix": "type",
+    "body": "*[_type == \"${1:documentType}\"]",
+    "description": "Filter documents by type"
+  },
+  "Filter by type with projection": {
+    "prefix": "typep",
+    "body": "*[_type == \"${1:documentType}\"]{\n  ${2:_id},\n  ${3:title}\n}",
+    "description": "Filter by type with field projection"
+  },
+  "Filter by ID": {
+    "prefix": "id",
+    "body": "*[_id == \"${1:documentId}\"][0]",
+    "description": "Get document by ID"
+  },
+  "Filter with references": {
+    "prefix": "refs",
+    "body": "*[references(\"${1:documentId}\")]",
+    "description": "Find documents referencing another document"
+  },
+  "Projection": {
+    "prefix": "proj",
+    "body": "{\n  ${1:field1},\n  ${2:field2}\n}",
+    "description": "Field projection"
+  },
+  "Projection with alias": {
+    "prefix": "alias",
+    "body": "\"${1:aliasName}\": ${2:expression}",
+    "description": "Aliased field in projection"
+  },
+  "Dereference": {
+    "prefix": "deref",
+    "body": "${1:reference}->",
+    "description": "Dereference a reference"
+  },
+  "Dereference with projection": {
+    "prefix": "derefp",
+    "body": "${1:reference}->{\n  ${2:_id},\n  ${3:title}\n}",
+    "description": "Dereference with projection"
+  },
+  "Order ascending": {
+    "prefix": "orda",
+    "body": " | order(${1:field} asc)",
+    "description": "Order results ascending"
+  },
+  "Order descending": {
+    "prefix": "ordd",
+    "body": " | order(${1:field} desc)",
+    "description": "Order results descending"
+  },
+  "Slice": {
+    "prefix": "slice",
+    "body": "[${1:0}...${2:10}]",
+    "description": "Slice array results"
+  },
+  "First result": {
+    "prefix": "first",
+    "body": "[0]",
+    "description": "Get first result"
+  },
+  "Count": {
+    "prefix": "count",
+    "body": "count(${1:array})",
+    "description": "Count array items"
+  },
+  "Coalesce": {
+    "prefix": "coal",
+    "body": "coalesce(${1:value}, ${2:fallback})",
+    "description": "Return first non-null value"
+  },
+  "Select": {
+    "prefix": "sel",
+    "body": "select(\n  ${1:condition1} => ${2:value1},\n  ${3:defaultValue}\n)",
+    "description": "Conditional select"
+  },
+  "Defined check": {
+    "prefix": "def",
+    "body": "defined(${1:field})",
+    "description": "Check if field is defined"
+  },
+  "Match text": {
+    "prefix": "match",
+    "body": "${1:field} match text::query(\"${2:searchTerm}\")",
+    "description": "Text search with match"
+  },
+  "Portable Text to plain text": {
+    "prefix": "pttext",
+    "body": "pt::text(${1:body})",
+    "description": "Extract plain text from Portable Text"
+  },
+  "Array unique": {
+    "prefix": "unique",
+    "body": "array::unique(${1:array})",
+    "description": "Get unique array items"
+  },
+  "Array compact": {
+    "prefix": "compact",
+    "body": "array::compact(${1:array})",
+    "description": "Remove null values from array"
+  },
+  "Math sum": {
+    "prefix": "sum",
+    "body": "math::sum(${1:array})",
+    "description": "Sum of array numbers"
+  },
+  "Slug current": {
+    "prefix": "slug",
+    "body": "slug.current",
+    "description": "Access slug current value"
+  },
+  "Image asset": {
+    "prefix": "img",
+    "body": "\"${1:imageUrl}\": ${2:image}.asset->url",
+    "description": "Get image URL from asset"
+  },
+  "Full document query": {
+    "prefix": "doc",
+    "body": "*[_type == \"${1:documentType}\" && slug.current == $${2:slug}][0]{\n  ${3:_id},\n  ${4:title},\n  ${5:body}\n}",
+    "description": "Full document query by slug"
+  },
+  "List query with pagination": {
+    "prefix": "list",
+    "body": "*[_type == \"${1:documentType}\"] | order(${2:_createdAt} desc)[$${3:start}...$${4:end}]{\n  ${5:_id},\n  ${6:title}\n}",
+    "description": "List query with ordering and pagination"
+  }
+}

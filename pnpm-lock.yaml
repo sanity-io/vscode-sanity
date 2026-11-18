@@ -205,6 +205,9 @@ importers:
       sucrase:
         specifier: ^3.35.1
         version: 3.35.1
+      vscode-languageclient:
+        specifier: ^11.0.0
+        version: 11.0.0
       xdg-basedir:
         specifier: ^4.0.0
         version: 4.0.0
@@ -221,6 +224,9 @@ importers:
       '@sanity-labs/groq-content-mapper':
         specifier: ^0.7.0
         version: 0.7.0(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+      '@sanity-labs/groq-lsp':
+        specifier: ^1.0.10
+        version: 1.0.10(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/lint-core':
         specifier: ^1.0.1
         version: 1.0.1(supports-color@8.1.1)
@@ -269,6 +275,9 @@ importers:
       typescript-7:
         specifier: npm:typescript@7.1.0-beta
         version: typescript@7.1.0-beta
+      vscode-languageserver-protocol:
+        specifier: ^3.18.5
+        version: 3.18.5
 
 packages:
 
@@ -1654,6 +1663,16 @@ packages:
     resolution: {integrity: sha512-6LvUMgk3ZqHgtfy85hZE5/Wk0IUoixXqk2vUgnsHSLkdEp2UiOUPA9nU/t8GVYpCHK3/GgNniOdVRO2KvwJDyg==}
     engines: {node: ^22.18.0 || >=24.11.0}
 
+  '@sanity-labs/groq-lint@1.0.8':
+    resolution: {integrity: sha512-6/gAvz4owLlWqXq94DGPmyJhOCyZUVP3oDlXoPT9vA1/jhG5mhyuJSkcWdm5swFx1WsZoe9hrtB+7kRmUAm/cA==}
+    engines: {node: '>=22.3.0'}
+    hasBin: true
+
+  '@sanity-labs/groq-lsp@1.0.10':
+    resolution: {integrity: sha512-ApR4PN6FUx2plEdw5haPHSg0sm/O6Kcvi8JEC4PsT4OVHX2vdODhR0X4LMfiDpSPNMHJjavmIokHgD87X3eb7g==}
+    engines: {node: '>=22.3.0'}
+    hasBin: true
+
   '@sanity-labs/groq-wasm@1.2.1':
     resolution: {integrity: sha512-EKR4UCk05+RrmRF9eoZyXSnMjyv9da3IVrJ9Y1spBfvvTeec20fSAenqB2CLrjlRAPkqFP4rAbKwqsFToN0g2g==}
     engines: {node: '>=22.3.0'}
@@ -1666,6 +1685,12 @@ packages:
     peerDependenciesMeta:
       vitest:
         optional: true
+
+  '@sanity-labs/prettier-plugin-groq@1.0.9':
+    resolution: {integrity: sha512-XTEZlsNDaO5h0HIg3QHRPZ2X6io+Cyi92GU4pyayY4Mz8LCcQOW0ocAg5MkPwtckkZnXDg32M1G7SQ8xxbRsjQ==}
+    engines: {node: '>=22.3.0'}
+    peerDependencies:
+      prettier: ^3.0.0
 
   '@sanity/client@8.16.0':
     resolution: {integrity: sha512-x6VKopU1Rt2mp3YBQRBIyWE2ebzqc4sMwUbQJJzIzNS0TMnNURvHe/z1qo/bDIph37B5vYvfWIT7Js6SPAQkUQ==}
@@ -3673,6 +3698,30 @@ packages:
     resolution: {integrity: sha512-Ck0EJbAGxHwprkzFO966t4/5QkRuzh+/I1RxhLgUKKwEn+Cd8NwM60mE3AqBZg5gYODoXW0EFsQvbZjRlvdqbg==}
     engines: {node: '>=4'}
 
+  vscode-jsonrpc@10.0.0:
+    resolution: {integrity: sha512-USSfxg0vDIpTQqlQBGxF3mBARyoS8cU7LHLpbYNh6dOJt32dlskxPWB0Irrh5TllTmyf7oNLAvqDqzklbwwnpA==}
+    engines: {node: '>=14.17.0'}
+
+  vscode-languageclient@11.0.0:
+    resolution: {integrity: sha512-kVyeGLfyd1M74PbMNPfFkgRnhMYgnt6YGc5uXr/tNMzCpfZ0wFtfiqmqX1M05kkdNgV0HSozEUPvgggJbyIAYw==}
+    engines: {vscode: ^1.91.0}
+
+  vscode-languageserver-protocol@3.18.5:
+    resolution: {integrity: sha512-FW4fBMzZ99N8xeob4py0l050wgCoRgTpEq5Xcsb9lM1bc29UKGR/wSV+4knaqFxssFHajy7OzNiKP/m3U1ZEuA==}
+
+  vscode-languageserver-textdocument@1.0.16:
+    resolution: {integrity: sha512-qeNEuOi9a3qkqRf7Gfez2WL2VwlBTLCNekHBGO9kxPVUp9XuY15yfTJ9jwvOwKI0I2MhUUfZq95NSp+LK1CLQg==}
+
+  vscode-languageserver-types@3.18.5:
+    resolution: {integrity: sha512-kPd6+JQNz3HMJvjKlqUxERSlZHAntl/aGpsk7ImwIh0ewDKDcjgAEyVSYciPiOJD3ftbK9IrfiqUeTZLSbCizw==}
+
+  vscode-languageserver@11.0.0:
+    resolution: {integrity: sha512-dOyMIyq0PNVJhTkj+FZoi3H8N3WffNSZEepfbQT+x2E16x1ONPacSx00DoVRqyVKO7PN35ixj/l2RQwQmStkNg==}
+    hasBin: true
+
+  vscode-uri@3.2.0:
+    resolution: {integrity: sha512-m2gXo3bn0G1kT9InzMf07fTbqMbGtyckj3bH5ktLO+1Ssv+yiATZ4dhwaQv9UZWxJh6E9IFGnQyjgWVDWVBDrg==}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -5253,6 +5302,36 @@ snapshots:
       - supports-color
       - typescript
 
+  '@sanity-labs/groq-lint@1.0.8(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+    dependencies:
+      '@sanity-labs/groq-wasm': 1.2.1
+      '@sanity-labs/lint-core': 1.0.1(supports-color@8.1.1)
+      '@sanity/codegen': 8.3.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+      groq-js: 2.0.1
+    transitivePeerDependencies:
+      - oxfmt
+      - react
+      - supports-color
+      - typescript
+      - vitest
+
+  '@sanity-labs/groq-lsp@1.0.10(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+    dependencies:
+      '@sanity-labs/groq-lint': 1.0.8(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+      '@sanity-labs/lint-core': 1.0.1(supports-color@8.1.1)
+      '@sanity-labs/prettier-plugin-groq': 1.0.9(prettier@3.10.1)
+      groq-js: 2.0.1
+      prettier: 3.10.1
+      vscode-languageserver: 11.0.0
+      vscode-languageserver-textdocument: 1.0.16
+      vscode-uri: 3.2.0
+    transitivePeerDependencies:
+      - oxfmt
+      - react
+      - supports-color
+      - typescript
+      - vitest
+
   '@sanity-labs/groq-wasm@1.2.1': {}
 
   '@sanity-labs/lint-core@1.0.1(supports-color@8.1.1)':
@@ -5260,6 +5339,11 @@ snapshots:
       groq-js: 1.30.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - supports-color
+
+  '@sanity-labs/prettier-plugin-groq@1.0.9(prettier@3.10.1)':
+    dependencies:
+      '@sanity-labs/groq-wasm': 1.2.1
+      prettier: 3.10.1
 
   '@sanity/client@8.16.0':
     dependencies:
@@ -7113,6 +7197,30 @@ snapshots:
   verkit@0.5.0: {}
 
   version-range@4.15.0: {}
+
+  vscode-jsonrpc@10.0.0: {}
+
+  vscode-languageclient@11.0.0:
+    dependencies:
+      minimatch: 10.2.6
+      semver: 7.8.6
+      vscode-languageserver-protocol: 3.18.5
+      vscode-languageserver-textdocument: 1.0.16
+
+  vscode-languageserver-protocol@3.18.5:
+    dependencies:
+      vscode-jsonrpc: 10.0.0
+      vscode-languageserver-types: 3.18.5
+
+  vscode-languageserver-textdocument@1.0.16: {}
+
+  vscode-languageserver-types@3.18.5: {}
+
+  vscode-languageserver@11.0.0:
+    dependencies:
+      vscode-languageserver-protocol: 3.18.5
+
+  vscode-uri@3.2.0: {}
 
   which@2.0.2:
     dependencies:

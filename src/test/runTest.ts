@@ -45,7 +45,7 @@ async function prepareTsgo(vscodeExecutablePath: string) {
   const [, publisher, name] = /^(.+)\.(.+)$/.exec(NATIVE_PREVIEW.id) ?? []
   const vsix = path.join(
     cacheDir,
-    `${NATIVE_PREVIEW.id}-${NATIVE_PREVIEW.version}-${process.platform}-${process.arch}.vsix`
+    `${NATIVE_PREVIEW.id}-${NATIVE_PREVIEW.version}-${process.platform}-${process.arch}.vsix`,
   )
   if (!existsSync(vsix)) {
     const target = `${process.platform}-${process.arch}`
@@ -73,10 +73,11 @@ async function prepareTsgo(vscodeExecutablePath: string) {
     {
       encoding: 'utf8',
       shell: process.platform === 'win32',
-    }
+    },
   )
-  if (install.status !== 0)
-    {throw new Error(`Installing ${NATIVE_PREVIEW.id} failed:\n${install.stdout}${install.stderr}`)}
+  if (install.status !== 0) {
+    throw new Error(`Installing ${NATIVE_PREVIEW.id} failed:\n${install.stdout}${install.stderr}`)
+  }
 
   mkdirSync(path.join(userDataDir, 'User'), {recursive: true})
   writeFileSync(
@@ -85,7 +86,7 @@ async function prepareTsgo(vscodeExecutablePath: string) {
       'js/ts.experimental.useTsgo': true,
       'js/ts.tsdk.path': path.join(root, 'node_modules', 'typescript-7'),
       'window.restoreWindows': 'none',
-    })
+    }),
   )
 
   const project = path.join(cacheDir, 'hover-project')
@@ -104,6 +105,12 @@ async function main() {
     const {extensionsDir, userDataDir, project} = await prepareTsgo(vscodeExecutablePath)
     launchArgs.push(`--extensions-dir=${extensionsDir}`, `--user-data-dir=${userDataDir}`, project)
     extensionTestsEnv.SANITY_TEST_TSGO = project
+  } else {
+    // A workspace folder that is not the process cwd, so a relative schema path only resolves if
+    // the client joins it to the folder.
+    const workspaceDir = path.join(cacheDir, 'lsp-workspace')
+    mkdirSync(workspaceDir, {recursive: true})
+    launchArgs.push(workspaceDir)
   }
 
   await runTests({

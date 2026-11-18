@@ -5,6 +5,7 @@
 !LICENSE
 !images/icon.png
 !language/language-configuration.json
+!snippets/*.json
 !dist/**/*.js
 !dist/**/*.wasm
 !dist/textmate/*.json

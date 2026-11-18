@@ -1,0 +1,67 @@
+{
+  "GROQ query": {
+    "prefix": "groq",
+    "body": "groq`${1:*[_type == \"${2:type}\"]}`",
+    "description": "GROQ tagged template literal"
+  },
+  "GROQ query with projection": {
+    "prefix": "groqp",
+    "body": "groq`\n  *[_type == \"${1:documentType}\"]{\n    ${2:_id},\n    ${3:title}\n  }\n`",
+    "description": "GROQ query with projection"
+  },
+  "GROQ query by ID": {
+    "prefix": "groqid",
+    "body": "groq`*[_id == $${1:id}][0]`",
+    "description": "GROQ query by document ID"
+  },
+  "GROQ query by slug": {
+    "prefix": "groqslug",
+    "body": "groq`\n  *[_type == \"${1:documentType}\" && slug.current == $${2:slug}][0]{\n    ${3:_id},\n    ${4:title},\n    ${5:body}\n  }\n`",
+    "description": "GROQ query by slug"
+  },
+  "GROQ list query": {
+    "prefix": "groqlist",
+    "body": "groq`\n  *[_type == \"${1:documentType}\"] | order(${2:_createdAt} desc)[$${3:start}...$${4:end}]{\n    ${5:_id},\n    ${6:title},\n    \"slug\": slug.current\n  }\n`",
+    "description": "GROQ list query with pagination"
+  },
+  "GROQ count query": {
+    "prefix": "groqcount",
+    "body": "groq`count(*[_type == \"${1:documentType}\"])`",
+    "description": "GROQ count query"
+  },
+  "GROQ with references": {
+    "prefix": "groqrefs",
+    "body": "groq`\n  *[_type == \"${1:documentType}\" && references($${2:refId})]{\n    ${3:_id},\n    ${4:title}\n  }\n`",
+    "description": "GROQ query with references filter"
+  },
+  "GROQ with dereference": {
+    "prefix": "groqderef",
+    "body": "groq`\n  *[_type == \"${1:documentType}\"]{\n    ${2:_id},\n    ${3:title},\n    \"${4:author}\": ${5:author}->{\n      ${6:name}\n    }\n  }\n`",
+    "description": "GROQ query with dereferenced relation"
+  },
+  "GROQ text search": {
+    "prefix": "groqsearch",
+    "body": "groq`\n  *[_type == \"${1:documentType}\" && ${2:title} match text::query($${3:query})]{\n    ${4:_id},\n    ${5:title}\n  }\n`",
+    "description": "GROQ text search query"
+  },
+  "GROQ import": {
+    "prefix": "impgroq",
+    "body": "import { groq } from 'next-sanity'",
+    "description": "Import groq from next-sanity"
+  },
+  "Sanity client query": {
+    "prefix": "sanityquery",
+    "body": "const ${1:result} = await client.fetch(\n  groq`\n    *[_type == \"${2:documentType}\"]{\n      ${3:_id},\n      ${4:title}\n    }\n  `,\n  { ${5:/* params */} }\n)",
+    "description": "Sanity client fetch with GROQ"
+  },
+  "Define query constant": {
+    "prefix": "constquery",
+    "body": "const ${1:queryName} = groq`\n  *[_type == \"${2:documentType}\"]{\n    ${3:_id},\n    ${4:title}\n  }\n`",
+    "description": "Define a GROQ query constant"
+  },
+  "GROQ import groq package": {
+    "prefix": "impgroqpkg",
+    "body": "import groq from 'groq'",
+    "description": "Import groq from the groq package"
+  }
+}
