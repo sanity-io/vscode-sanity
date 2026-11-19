@@ -1,5 +1,11 @@
 # vscode-sanity
 
+## 0.9.2
+
+### Patch Changes
+
+- [#97](https://github.com/sanity-io/vscode-sanity/pull/97) [`e98de58`](https://github.com/sanity-io/vscode-sanity/commit/e98de58fabb2fefc3c58b9f62856e7996a43875c) Thanks [@stipsan](https://github.com/stipsan)! - Hover over a field in a GROQ query shows the type the schema gives that field, such as `title: string`, instead of the type of the whole query. `_type` shows the document type the query filters to, such as `post`. This comes from `@sanity-labs/groq-lsp` 1.2.2.
+
 ## 0.9.1
 
 ### Patch Changes
