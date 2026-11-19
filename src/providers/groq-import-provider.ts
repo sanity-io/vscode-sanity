@@ -50,7 +50,9 @@ export class GroqImportDefinitionProvider implements vscode.DefinitionProvider {
       return undefined
     }
     const resolved = await resolveAt(document, hit.specifier)
-    return resolved ? targetOf(resolved.file) : undefined
+    // A path that is not on disk is not a definition. `baseUrl` otherwise turns every unmatched
+    // specifier, including a package import, into a file that does not exist.
+    return resolved?.exists ? targetOf(resolved.file) : undefined
   }
 }
 

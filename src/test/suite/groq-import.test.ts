@@ -8,6 +8,9 @@ const SOURCE = [
   "import slugPageQuery from '#queries/slugPage.groq'",
   "import missing from '#queries/missing.groq'",
   "import local from './local.groq'",
+  "import present from 'lib/present.groq'",
+  "import pkg from 'some-package/query.groq'",
+  "import unmapped from '#other/query.groq'",
   '',
 ].join('\n')
 
@@ -20,10 +23,14 @@ describe('.groq imports', () => {
     mkdirSync(path.join(dir, 'src', 'queries'), {recursive: true})
     writeFileSync(
       path.join(dir, 'tsconfig.json'),
-      JSON.stringify({compilerOptions: {paths: {'#queries/*': ['./src/queries/*']}}}),
+      JSON.stringify({
+        compilerOptions: {baseUrl: '.', paths: {'#queries/*': ['./src/queries/*']}},
+      }),
     )
     writeFileSync(path.join(dir, 'src', 'queries', 'slugPage.groq'), '*[_type == "page"]')
     writeFileSync(path.join(dir, 'src', 'local.groq'), '*')
+    mkdirSync(path.join(dir, 'lib'))
+    writeFileSync(path.join(dir, 'lib', 'present.groq'), '*')
     const file = path.join(dir, 'src', 'page.ts')
     writeFileSync(file, SOURCE)
     doc = await vscode.workspace.openTextDocument(vscode.Uri.file(file))
@@ -59,14 +66,24 @@ describe('.groq imports', () => {
     )
   })
 
-  it('points at the path a missing file would have', async () => {
-    const locations = await definitionsAt('#queries/missing.groq')
+  it('still jumps to a file that exists under baseUrl', async () => {
+    const locations = await definitionsAt('lib/present.groq')
     assert.ok(
-      locations.some(
-        (location) => location.uri.fsPath === path.join(dir, 'src/queries/missing.groq'),
-      ),
+      locations.some((location) => location.uri.fsPath === path.join(dir, 'lib/present.groq')),
       JSON.stringify(locations),
     )
+  })
+
+  it('does not define a missing package import or unmapped alias when baseUrl is set', async () => {
+    for (const specifier of ['some-package/query.groq', '#other/query.groq']) {
+      const locations = await definitionsAt(specifier)
+      assert.deepStrictEqual(locations, [], specifier)
+    }
+  })
+
+  it('does not define a mapped import whose file is missing', async () => {
+    const locations = await definitionsAt('#queries/missing.groq')
+    assert.deepStrictEqual(locations, [])
   })
 
   it('links the specifiers of files that exist', async () => {
