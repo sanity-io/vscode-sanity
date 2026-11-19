@@ -1,5 +1,17 @@
 # vscode-sanity
 
+## 0.8.0
+
+### Minor Changes
+
+- [#88](https://github.com/sanity-io/vscode-sanity/pull/88) [`50364aa`](https://github.com/sanity-io/vscode-sanity/commit/50364aa32e7e1acb2963eee40ba44805153b25b6) Thanks [@stipsan](https://github.com/stipsan)! - The GROQ language server reads groq-content-mapper's settings from the nearest `tsconfig.json`. When `groq.schemaPath` is empty and no well-known schema file is found, the mapper's `schema` or `schemas` gives the schema. Queries in `.groq` files that call shared custom functions from the mapper's `functions` option are linted with those definitions prepended, instead of reporting a parse error.
+
+- [#86](https://github.com/sanity-io/vscode-sanity/pull/86) [`7b0e7df`](https://github.com/sanity-io/vscode-sanity/commit/7b0e7df57862918015c358a88d95415b9e993d47) Thanks [@stipsan](https://github.com/stipsan)! - Go to Definition, and Cmd/Ctrl+click, on a `.groq` import such as `import query from '#queries/slugPage.groq'` now opens the file. Relative paths and the `paths` and `baseUrl` of the nearest `tsconfig.json` are followed, which TypeScript does not do for `.groq` files.
+
+### Patch Changes
+
+- [#89](https://github.com/sanity-io/vscode-sanity/pull/89) [`66eeccb`](https://github.com/sanity-io/vscode-sanity/commit/66eeccbecd7695d8772c60a1d907407f86551910) Thanks [@stipsan](https://github.com/stipsan)! - Update `@sanity-labs/groq-lsp` to 1.0.11 for GROQ formatting, `defineQuery` linting, and schema file watching fixes.
+
 ## 0.7.0
 
 ### Minor Changes
