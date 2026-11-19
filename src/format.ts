@@ -4,6 +4,12 @@ import {format, initWasm, WasmError} from '@sanity-labs/groq-wasm/lazy'
 
 export const DEFAULT_FORMAT_WIDTH = 80
 
+/**
+ * Hovers are narrower than the editor: a line that fits 80 columns is soft-wrapped mid-expression by
+ * the tooltip, so hovers wrap queries to fewer columns and break on GROQ boundaries instead.
+ */
+export const DEFAULT_HOVER_FORMAT_WIDTH = 40
+
 // scripts/build.mjs copies the wasm into dist/. Resolving it from the extension root lets both the
 // bundle (dist/extension.js) and the unit tests compiled by tsc (out/format.js) find it.
 const WASM_PATH = path.join(__dirname, '..', 'dist', 'groq_wasm_bg.wasm')

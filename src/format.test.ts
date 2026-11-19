@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import {describe, it} from 'node:test'
-import {canFormatInSource, formatGroq, formatQuerySource} from './format'
+import {
+  canFormatInSource,
+  DEFAULT_HOVER_FORMAT_WIDTH,
+  formatGroq,
+  formatQuerySource,
+} from './format'
 
 const QUERY =
   '*[_type=="post"&&defined(slug.current)]{_id,title,"author":author->{name,"avatar":avatar.asset->url},"categories":categories[]->{title,"slug":slug.current}}|order(_createdAt desc)[0...10]'
@@ -29,6 +34,18 @@ describe('formatGroq', () => {
     const formatted = formatGroq(QUERY, 40)!
     assert.ok(formatted.split('\n').length > formatGroq(QUERY)!.split('\n').length)
     assert.ok(formatted.includes('"author": author-> {\n    name,'), formatted)
+  })
+
+  it('wraps hovers narrower than the editor, on GROQ boundaries', () => {
+    assert.equal(DEFAULT_HOVER_FORMAT_WIDTH, 40)
+    const formatted = formatGroq(
+      '*[_type == $type && defined(slug.current)] { "slug": slug.current }',
+      DEFAULT_HOVER_FORMAT_WIDTH,
+    )!
+    assert.equal(formatted, '*[_type == $type\n  && defined(slug.current)] {\n  "slug": slug.current\n}')
+    for (const line of formatted.split('\n')) {
+      assert.ok(line.length <= DEFAULT_HOVER_FORMAT_WIDTH, line)
+    }
   })
 
   it('keeps comments', () => {

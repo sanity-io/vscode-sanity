@@ -53,6 +53,9 @@ describe('GROQ in TypeScript hovers', () => {
   let doc: vscode.TextDocument
 
   before(async () => {
+    await vscode.workspace
+      .getConfiguration('sanity')
+      .update('formatGroqInHoverWidth', 80, vscode.ConfigurationTarget.Global)
     const dir = mkdtempSync(path.join(tmpdir(), 'vscode-sanity-hover-'))
     writeFileSync(path.join(dir, 'tsconfig.json'), '{"compilerOptions":{"strict":true}}')
     const file = path.join(dir, 'query.ts')
@@ -60,6 +63,12 @@ describe('GROQ in TypeScript hovers', () => {
     uri = vscode.Uri.file(file)
     doc = await vscode.workspace.openTextDocument(uri)
     await vscode.window.showTextDocument(doc)
+  })
+
+  after(async () => {
+    await vscode.workspace
+      .getConfiguration('sanity')
+      .update('formatGroqInHoverWidth', undefined, vscode.ConfigurationTarget.Global)
   })
 
   it('shows a formatted, highlighted copy next to the one line TypeScript hover', async () => {

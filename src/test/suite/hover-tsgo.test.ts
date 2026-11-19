@@ -62,8 +62,17 @@ async function hoverOn(identifier: string): Promise<Array<string>> {
 describe('GROQ in TypeScript 7.1 hovers (tsgo + groq-content-mapper)', function () {
   this.timeout(200_000)
 
-  before(function () {
+  before(async function () {
     if (!project) {this.skip()}
+    await vscode.workspace
+      .getConfiguration('sanity')
+      .update('formatGroqInHoverWidth', 80, vscode.ConfigurationTarget.Global)
+  })
+
+  after(async () => {
+    await vscode.workspace
+      .getConfiguration('sanity')
+      .update('formatGroqInHoverWidth', undefined, vscode.ConfigurationTarget.Global)
   })
 
   it('runs against TypeScript 7.1 through the TypeScript 7 extension', async () => {
