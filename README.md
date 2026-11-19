@@ -54,6 +54,13 @@ npx sanity schema extract
 
 The extension picks up `schema.json`, `sanity.schema.json`, `.sanity/schema.json` or `studio/schema.json` in the first workspace folder. For a schema stored elsewhere, set `groq.schemaPath`.
 
+### Use your groq-content-mapper settings
+
+If your project uses [groq-content-mapper](https://github.com/sanity-labs/groq-content-mapper), the extension reads its settings from the `tsconfig.json` nearest each file:
+
+- **Schema.** When `groq.schemaPath` is not set and none of the files above exists, the extension uses the schema the mapper is configured with: its `schema` option, or the `schemas` entry whose folder holds the file. A project set up for the mapper needs no setting.
+- **Custom functions.** In `.groq` files, queries that call the shared [custom GROQ functions](https://www.sanity.io/docs/content-lake/custom-groq-functions) in the mapper's `functions` option are checked and hovered with those functions' definitions, as the mapper adds them, instead of failing to parse.
+
 ### Format queries
 
 - In `.groq` files, use **Format Document**.

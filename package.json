@@ -86,7 +86,7 @@
         "groq.schemaPath": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Path to the schema file from `npx sanity schema extract`, absolute or relative to the first workspace folder. When empty, `schema.json`, `sanity.schema.json`, `.sanity/schema.json` and `studio/schema.json` in the first workspace folder are tried."
+          "markdownDescription": "Path to the schema file from `npx sanity schema extract`, absolute or relative to the first workspace folder. When empty, `schema.json`, `sanity.schema.json`, `.sanity/schema.json` and `studio/schema.json` in the first workspace folder are tried, then the `schema` or `schemas` that `@sanity-labs/groq-content-mapper` is configured with in the nearest `tsconfig.json`."
         },
         "groq.maxDiagnostics": {
           "type": "integer",
@@ -250,7 +250,7 @@
     "@changesets/cli": "^3.0.3",
     "@nkzw/oxlint-config": "^3.0.0",
     "@sanity-labs/groq-content-mapper": "^0.7.0",
-    "@sanity-labs/groq-lsp": "^1.0.11",
+    "@sanity-labs/groq-lsp": "^1.1.0",
     "@sanity-labs/lint-core": "^1.0.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.6.6",
