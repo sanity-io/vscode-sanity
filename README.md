@@ -22,6 +22,7 @@ Open a `.groq` file, or a JavaScript, TypeScript or Astro file with a GROQ query
 - **Project and dataset.** They are read from `sanity.cli.ts` in your workspace. If the workspace has several, you are asked which one to use. If the file sets an API `token`, it is used to query private datasets.
 - **API version.** Queries use the API version in `sanity.apiVersion`, `v2025-02-19` by default. Set a date such as `v2021-03-25`, or `v1` or `vX` (experimental). Newer GROQ features, such as `pt::text()`, need a recent version. An invalid value is ignored with a warning, and the default is used.
 - **Query parameters.** If the query uses variables such as `$slug`, you are asked for a JSON file with the values. A file with the same name as the current file and a `.json` extension is suggested when it exists.
+- **Fragments.** `${}` interpolations are filled in before the query runs, from fragments in the same file or imported from other files, `tsconfig.json` `paths`, workspace packages in `node_modules`, and `.groq` files. A `${}` the extension cannot follow, such as a function call, is sent as written.
 - **Copy instead.** Click **Copy Query** next to **Execute Query** to copy the query to the clipboard, with the same `${}` fragments filled in that Execute Query uses. In a `.groq` file, **Copy GROQ query** in the command palette copies the selection, or the whole file when nothing is selected.
 
 `@sanity/astro` sets the project in `astro.config.mjs`, which this extension does not read. Add a `sanity.cli.ts` next to it:
@@ -41,6 +42,7 @@ The extension checks and completes GROQ in `.groq` files and in `groq` template 
 ![A GROQ query with a warning about a join inside a filter](media/diagnostics.png)
 
 - **Diagnostics** for syntax errors and [lint rules](https://www.npmjs.com/package/@sanity-labs/groq-lint), such as joins inside filters or `count()` on correlated subqueries.
+- **Fragments.** Queries with `${}` interpolations are checked with their fragments filled in, as Execute Query runs them. Editing an open fragment re-checks the queries that use it. Queries with a `${}` the extension cannot follow are not checked.
 - **Completion and hover** for system fields and functions. With a schema, they also cover your document types and fields.
 - **Snippets** for common queries, for example `type`, `deref`, `orda` and `slice` in `.groq` files, and `groq` and `groqslug` in JavaScript and TypeScript.
 

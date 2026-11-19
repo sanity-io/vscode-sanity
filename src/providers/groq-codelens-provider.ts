@@ -1,4 +1,4 @@
-import {readFile} from 'node:fs/promises'
+import {readFile, realpath} from 'node:fs/promises'
 import {
   type CodeLensProvider,
   type TextDocument,
@@ -11,8 +11,7 @@ import {
   workspace,
 } from 'vscode'
 import {canFormatInSource} from '../format'
-import {extractQueries} from '../fragments/resolve'
-import type {FragmentHost} from '../fragments/types'
+import {resolveEmbeddedQueries, type FragmentHost} from '@sanity-labs/groq-lsp/fragments'
 
 interface ExtractedQuery {
   content: string
@@ -46,6 +45,7 @@ const fragmentHost: FragmentHost = {
       return undefined
     }
   },
+  realpath: (file) => realpath(file),
 }
 
 function extractAllTemplateLiterals(document: TextDocument): Array<ExtractedQuery> {
@@ -114,7 +114,7 @@ async function resolvedQueries(document: TextDocument): Promise<Map<number, stri
   if (!text.includes('groq') && !text.includes('defineQuery')) {
     return new Map()
   }
-  const queries = await extractQueries(text, document.uri.fsPath, fragmentHost)
+  const queries = await resolveEmbeddedQueries(text, document.uri.fsPath, fragmentHost)
   return new Map(queries.map((query) => [query.offset, query.content]))
 }
 

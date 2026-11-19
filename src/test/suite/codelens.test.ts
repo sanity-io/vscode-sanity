@@ -1,5 +1,5 @@
 import assert from 'node:assert'
-import {mkdirSync, mkdtempSync, writeFileSync} from 'node:fs'
+import {mkdirSync, mkdtempSync, symlinkSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
 import vscode from 'vscode'
@@ -89,6 +89,38 @@ describe('GROQ codelens', () => {
 
     for (const command of ['sanity.executeGroq', 'sanity.copyGroq']) {
       assert.deepStrictEqual(queriesOf(lenses, command), EXPECTED, command)
+    }
+  })
+
+  it('resolves fragments imported from a workspace package', async () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'vscode-sanity-codelens-workspace-'))
+    const pkg = path.join(dir, 'packages', 'queries')
+    mkdirSync(path.join(pkg, 'src'), {recursive: true})
+    writeFileSync(
+      path.join(pkg, 'package.json'),
+      JSON.stringify({name: '@repo/queries', exports: {'.': {source: './src/index.ts'}}}),
+    )
+    writeFileSync(
+      path.join(pkg, 'src', 'index.ts'),
+      'export const author = defineQuery(`{ name }`)\n',
+    )
+    mkdirSync(path.join(dir, 'apps', 'web', 'node_modules', '@repo'), {recursive: true})
+    symlinkSync(pkg, path.join(dir, 'apps', 'web', 'node_modules', '@repo', 'queries'), 'dir')
+    const file = path.join(dir, 'apps', 'web', 'query.ts')
+    writeFileSync(
+      file,
+      "import {author} from '@repo/queries'\ndefineQuery(`*[_type == \"article\"]{ author->${author} }`)\n",
+    )
+
+    const provider = new GROQCodeLensProvider()
+    const tokens = new vscode.CancellationTokenSource()
+    try {
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(file))
+      const lenses = await provider.provideCodeLenses(document, tokens.token)
+      assert.deepStrictEqual(queriesOf(lenses), ['*[_type == "article"]{ author->{ name } }'])
+    } finally {
+      tokens.dispose()
+      provider.dispose()
     }
   })
 
