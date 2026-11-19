@@ -15,6 +15,15 @@ import {
 const SERVER = path.join(__dirname, '..', '..', 'dist', 'server.js')
 const PROJECT = path.join(__dirname, '..', '..', 'fixtures', 'hover-project')
 
+const read = (file: string) => readFileSync(path.join(PROJECT, file), 'utf8')
+const positionOf = (text: string, needle: string) => {
+  const before = text.slice(0, text.indexOf(needle))
+  return {
+    line: before.split('\n').length - 1,
+    character: before.length - before.lastIndexOf('\n') - 1,
+  }
+}
+
 // fixtures/hover-project/tsconfig.json configures @sanity-labs/groq-content-mapper with
 // `schema: ./schema.json` and `functions: ["groq/*.groq"]`. No workspace folder or
 // `groq.schemaPath` is given, so both come from the tsconfig.
@@ -112,5 +121,57 @@ void describe('bundled GROQ language server with groq-content-mapper settings', 
 
     const typeName = await hoverAt(query.indexOf('_type') + 1)
     assert.match(typeName?.contents.value ?? '', /_type: post/, JSON.stringify(typeName))
+  })
+
+  void it('goes from a custom function call to its definition in another .groq file', async () => {
+    const text = read('queries/slugPage.groq')
+    const uri = open('queries/slugPage.groq', 'groq', text)
+    const links = await connection.sendRequest<
+      Array<{targetUri: string; targetSelectionRange: {start: {line: number; character: number}}}>
+    >('textDocument/definition', {
+      textDocument: {uri},
+      position: positionOf(text, 'richText'),
+    })
+    assert.equal(links.length, 1)
+    assert.equal(
+      links[0].targetUri,
+      pathToFileURL(path.join(PROJECT, 'groq/richText.groq')).toString(),
+    )
+    assert.deepEqual(
+      links[0].targetSelectionRange.start,
+      positionOf(read('groq/richText.groq'), 'image::richText'),
+    )
+  })
+
+  void it('finds the calls of a custom function in function files and queries', async () => {
+    const text = read('groq/image.groq')
+    const uri = open('groq/image.groq', 'groq', text)
+    const locations = await connection.sendRequest<
+      Array<{uri: string; range: {start: {line: number; character: number}}}>
+    >('textDocument/references', {
+      textDocument: {uri},
+      position: positionOf(text, 'field('),
+      context: {includeDeclaration: false},
+    })
+    const longQueryCalls = read('src/longQuery.groq').split('image::field(').length - 1
+    assert.ok(longQueryCalls > 0)
+    assert.deepEqual(
+      locations.map((location) => path.relative(PROJECT, new URL(location.uri).pathname)),
+      ['groq/richText.groq', ...Array.from({length: longQueryCalls}, () => 'src/longQuery.groq')],
+    )
+    assert.deepEqual(
+      locations[0].range.start,
+      positionOf(read('groq/richText.groq'), 'image::field(image)'),
+    )
+
+    const calls = await connection.sendRequest<Array<{uri: string}>>('textDocument/references', {
+      textDocument: {uri},
+      position: positionOf(text, 'asset('),
+      context: {includeDeclaration: true},
+    })
+    assert.deepEqual(
+      calls.map((location) => path.relative(PROJECT, new URL(location.uri).pathname)),
+      ['groq/image.groq', 'groq/image.groq', 'groq/richText.groq'],
+    )
   })
 })

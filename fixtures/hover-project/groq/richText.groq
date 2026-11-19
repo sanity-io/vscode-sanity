@@ -1,0 +1,15 @@
+// Portable Text with images, including those in timeline milestones.
+fn image::richText($blocks) = $blocks[]{
+  ...,
+  _type == "image" => {_key, _type, alt, caption, crop, hotspot, "asset": image::asset(asset)},
+  _type == "timeline" => {
+    ...,
+    items[]{
+      ...,
+      milestones[]{
+        ...,
+        "image": image::field(image)
+      }
+    }
+  }
+};

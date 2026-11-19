@@ -1,16 +1,22 @@
+import {readFileSync} from 'node:fs'
 import {basename, extname} from 'node:path'
 import {
   computeDocumentDiagnostics,
+  contentMapperGroqFiles,
   ContentMapperConfigs,
   extractQueries,
   findQueryAtOffset,
   FragmentFiles,
   getCompletionTriggerCharacters,
   getCompletions,
+  getFunctionDefinition,
+  getFunctionReferences,
   getHoverInfo,
   offsetToQueryPosition,
   SchemaFileCache,
   SchemaLoader,
+  type FileSpan,
+  type FunctionNavigationContext,
   type GroqFunction,
   type GroqQuery,
 } from '@sanity-labs/groq-lsp'
@@ -24,6 +30,8 @@ import {
   TextDocuments,
   TextDocumentSyncKind,
   type InitializeResult,
+  type Location,
+  type LocationLink,
   type Position,
 } from 'vscode-languageserver/node'
 import {TextDocument} from 'vscode-languageserver-textdocument'
@@ -69,6 +77,8 @@ connection.onInitialize((params) => {
       },
       hoverProvider: true,
       documentFormattingProvider: true,
+      definitionProvider: true,
+      referencesProvider: true,
     },
   }
   if (params.capabilities.workspace?.workspaceFolders) {
@@ -272,6 +282,79 @@ connection.onDocumentFormatting((params) => {
     return []
   }
   return formatGroqDocument(document, params.options)
+})
+
+// An open document's text, else the file's on disk.
+function readText(file: string): string | undefined {
+  const open = documents.all().find((document) => filePath(document.uri) === file)
+  if (open) {
+    return open.getText()
+  }
+  try {
+    return readFileSync(file, 'utf8')
+  } catch {
+    return undefined
+  }
+}
+
+function navigationContext(uri: string): FunctionNavigationContext | undefined {
+  const document = documents.get(uri)
+  const file = filePath(uri)
+  if (!document || !file) {
+    return undefined
+  }
+  const config = contentMapperConfigs.forFile(file)
+  return {
+    file,
+    text: document.getText(),
+    languageId: document.languageId,
+    functions: contextFor(uri).functions,
+    read: readText,
+    groqFiles: () => (config ? contentMapperGroqFiles(config) : []),
+  }
+}
+
+function spanRange(span: FileSpan, start = span.start, end = span.end) {
+  const document = TextDocument.create(
+    URI.file(span.file).toString(),
+    'groq',
+    0,
+    readText(span.file) ?? '',
+  )
+  return {start: document.positionAt(start), end: document.positionAt(end)}
+}
+
+// Custom functions: from a call to its definition, here or in groq-content-mapper's functions
+// files, and from a definition or call to every call in the .groq files the mapper handles.
+connection.onDefinition((params): Array<LocationLink> => {
+  const context = navigationContext(params.textDocument.uri)
+  const document = documents.get(params.textDocument.uri)
+  const found =
+    context && document && getFunctionDefinition(context, document.offsetAt(params.position))
+  if (!found) {
+    return []
+  }
+  return [
+    {
+      originSelectionRange: spanRange(found.origin),
+      targetUri: URI.file(found.target.file).toString(),
+      targetRange: spanRange(found.target),
+      targetSelectionRange: spanRange(found.target, found.target.nameStart, found.target.nameEnd),
+    },
+  ]
+})
+
+connection.onReferences((params): Array<Location> => {
+  const context = navigationContext(params.textDocument.uri)
+  const document = documents.get(params.textDocument.uri)
+  if (!context || !document) {
+    return []
+  }
+  return getFunctionReferences(
+    context,
+    document.offsetAt(params.position),
+    params.context.includeDeclaration,
+  ).map((span) => ({uri: URI.file(span.file).toString(), range: spanRange(span)}))
 })
 
 documents.listen(connection)

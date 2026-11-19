@@ -108,6 +108,56 @@ describe('formatQuerySource', () => {
     )
   })
 
+  it('formats a file of only custom function definitions, which has no query', () => {
+    const source = [
+      '// Image helpers',
+      '// shared by the page queries',
+      'fn image::asset($asset) = $asset->{url, metadata{lqip, dimensions}};',
+      'fn image::field($image) = $image{crop, hotspot, "asset": image::asset(asset)};',
+      'fn image::richText($blocks) = $blocks[]{',
+      '  ...,',
+      '  _type == "image" => {_key, _type, alt, caption, crop, hotspot, "asset": image::asset(asset)},',
+      '  _type == "timeline" => {',
+      '    ...,',
+      '    items[]{',
+      '      ...,',
+      '      milestones[]{',
+      '        ...,',
+      '        "image": image::field(image)',
+      '      }',
+      '    }',
+      '  }',
+      '};',
+      '',
+    ].join('\n')
+    assert.equal(
+      formatQuerySource(source),
+      [
+        '// Image helpers',
+        '// shared by the page queries',
+        'fn image::asset($asset) = $asset-> { url, metadata { lqip, dimensions } };',
+        'fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };',
+        'fn image::richText($blocks) = $blocks[] {',
+        '  ...,',
+        '  _type == "image" => {',
+        '    _key,',
+        '    _type,',
+        '    alt,',
+        '    caption,',
+        '    crop,',
+        '    hotspot,',
+        '    "asset": image::asset(asset)',
+        '  },',
+        '  _type == "timeline" => {',
+        '    ...,',
+        '    items[] { ..., milestones[] { ..., "image": image::field(image) } }',
+        '  }',
+        '};',
+        '',
+      ].join('\n'),
+    )
+  })
+
   it('returns undefined for blank text and text that is not GROQ', () => {
     assert.equal(formatQuerySource('  \n'), undefined)
     assert.equal(formatQuerySource('*[_type == ]'), undefined)

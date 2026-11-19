@@ -5,6 +5,7 @@ import {resolveApiVersion} from './apiVersion'
 import {Config} from './config/findConfig'
 import {loadConfigFile} from './config/loadConfigFile'
 import {formatQuerySource} from './format'
+import {invalidateCustomFunctions, withCustomFunctions} from './groq-functions'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
@@ -20,6 +21,7 @@ import {findVariablesInQuery} from './variables'
 export function activate(context: vscode.ExtensionContext) {
   // Assigned by `readConfig()`
   let codelens: vscode.Disposable | undefined
+  let codelensProvider: GROQCodeLensProvider | undefined
   let useCodelens
   let openJSONFile
   let useCDN
@@ -155,6 +157,20 @@ export function activate(context: vscode.ExtensionContext) {
   )
   registerGroqLanguageServer(context)
 
+  // Like the language server, read groq-content-mapper's settings again when a tsconfig.json or a
+  // .groq file, which a `functions` glob may match, is created, changed or deleted.
+  const mapperFiles = vscode.workspace.createFileSystemWatcher('**/{tsconfig.json,*.groq}')
+  const mapperChanged = () => {
+    invalidateCustomFunctions()
+    codelensProvider?.refresh()
+  }
+  context.subscriptions.push(
+    mapperFiles,
+    mapperFiles.onDidCreate(mapperChanged),
+    mapperFiles.onDidChange(mapperChanged),
+    mapperFiles.onDidDelete(mapperChanged)
+  )
+
   function readConfig() {
     const settings = vscode.workspace.getConfiguration('sanity')
     openJSONFile = settings.get('openJSONFile', false)
@@ -164,6 +180,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (useCodelens && !codelens) {
       const provider = new GROQCodeLensProvider()
+      codelensProvider = provider
       codelens = vscode.Disposable.from(
         provider,
         vscode.languages.registerCodeLensProvider([...EMBEDDED_GROQ_LANGUAGES, 'groq'], provider),
@@ -175,6 +192,7 @@ export function activate(context: vscode.ExtensionContext) {
       context.subscriptions.splice(subIndex, 1)
       codelens.dispose()
       codelens = undefined
+      codelensProvider = undefined
     }
   }
 }
@@ -216,13 +234,17 @@ async function loadSanityConfig() {
   return loadConfigFile(configFilePath)
 }
 
+function activeFilePath(editor: vscode.TextEditor): string | undefined {
+  return editor.document.uri.scheme === 'file' ? editor.document.uri.fsPath : undefined
+}
+
 async function loadGroqFromFile() {
   const activeTextEditor = vscode.window.activeTextEditor
   if (!activeTextEditor) {
     throw new Error('Nothing to execute')
   }
 
-  return activeTextEditor.document.getText()
+  return withCustomFunctions(activeTextEditor.document.getText(), activeFilePath(activeTextEditor))
 }
 
 function loadGroqFromSelectionOrFile(): string | undefined {
@@ -231,7 +253,8 @@ function loadGroqFromSelectionOrFile(): string | undefined {
     return undefined
   }
 
-  return editor.document.getText(editor.selection.isEmpty ? undefined : editor.selection)
+  const text = editor.document.getText(editor.selection.isEmpty ? undefined : editor.selection)
+  return text.trim() ? withCustomFunctions(text, activeFilePath(editor)) : text
 }
 
 async function registerContentProvider(
