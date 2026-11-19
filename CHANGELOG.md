@@ -1,5 +1,13 @@
 # vscode-sanity
 
+## 0.10.1
+
+### Patch Changes
+
+- [#106](https://github.com/sanity-io/vscode-sanity/pull/106) [`7278ffb`](https://github.com/sanity-io/vscode-sanity/commit/7278ffb64fc15fb14623a0f9d2265e2557970926) Thanks [@stipsan](https://github.com/stipsan)! - GROQ hovers are more accurate, via `@sanity-labs/groq-lsp` 1.4.0 (`@sanity-labs/groq-lint` 1.3.0). A field inside a filter `[]` hovers as the type it has before the filter is applied, so `_type` in `*[_type == "post"]` shows every document type while `_type` in the projection is still narrowed to `"post"`. Fields inside `...@-> { … }` spreads and other `->` projections resolve against the dereferenced document type, query parameters such as `$slug` hover as the type the query uses them as, and string literals and quoted projection keys no longer hover as the type of the whole query. `invalid-type-filter` now also checks the names in `_type in [...]`.
+
+- [#104](https://github.com/sanity-io/vscode-sanity/pull/104) [`3323cb1`](https://github.com/sanity-io/vscode-sanity/commit/3323cb123b1c040734806e8d5193bd8d230c73cb) Thanks [@stipsan](https://github.com/stipsan)! - GROQ queries in TypeScript hovers are formatted to 40 columns by default instead of 80, so a long line no longer gets cut mid-expression by the narrow tooltip and the query breaks at `&&`, `{` and other GROQ boundaries instead. Set `sanity.formatGroqInHoverWidth` to `80` to get the previous width back. Format Query and the file formatter still use 80 columns. Thanks to Cody Olsen for reporting this.
+
 ## 0.10.0
 
 ### Minor Changes
