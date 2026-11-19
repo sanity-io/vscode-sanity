@@ -11,6 +11,7 @@ export interface Config {
     dataset: string
     token?: string
   }
+  schemaExtraction?: {path?: string}
 }
 
 export async function loadConfig(basePath: string): Promise<Config | false> {

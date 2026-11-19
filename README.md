@@ -70,6 +70,12 @@ If your project uses [groq-content-mapper](https://github.com/sanity-labs/groq-c
 - To format every GROQ query in a JavaScript or TypeScript file, run **GROQ: Format GROQ Queries** from the command palette. Your usual formatter keeps handling the rest of the file.
 - **Format Document** and **GROQ: Format GROQ Queries** indent with the editor's tab size, and with tabs when the editor uses tabs.
 
+#### Suggested parameter values
+
+When a parameter is compared to a field whose values are known from your schema, the prompt for it lists those values instead of an empty input. `*[_type == $type]` suggests the document type names, and `*[_type == "post" && status == $status]` suggests the literals of `status` when it is an enum or a list of string options. Any other text can still be typed. Parameters compared to open fields (a plain `string`, a function result, ...), or used anywhere else in the query, get the plain input.
+
+The schema is the one your project already points at: the `schema` (or the matching `schemas` entry for the file, by folder) in the `@sanity-labs/groq-content-mapper` options of the nearest `tsconfig.json` to the file you run, `extends` included. Without a mapper config it is the file `sanity schema extract` writes for `sanity.cli.ts` (`schemaExtraction.path`, `./schema.json` by default).
+
 ### GROQ in TypeScript hovers
 
 When TypeScript shows the type of a GROQ query, for example for a `defineQuery` result, hovering it also shows the query formatted over multiple lines and highlighted as GROQ. Turn this off with `sanity.formatGroqInHover`.
