@@ -17,6 +17,10 @@ import {
 import {EMBEDDED_GROQ_LANGUAGES} from './languages'
 import {registerGroqLanguageServer, stopGroqLanguageServer} from './lsp/client'
 import {findVariablesInQuery} from './variables'
+import {askParam} from './params/ask-param'
+import {findKnownParamValues} from './params/known-values'
+import {readMissingParams} from './params/read-params'
+import {loadProjectSchema} from './params/schema'
 
 export function activate(context: vscode.ExtensionContext) {
   // Assigned by `readConfig()`
@@ -33,27 +37,30 @@ export function activate(context: vscode.ExtensionContext) {
 
   let resultPanel: vscode.WebviewPanel | undefined
   const disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
-    let config: Config | null
+    let config: Config
+    let configDir: string
     let query: string = groqQuery
     let params: QueryParams = {}
     try {
-      config = await loadSanityConfig()
-      if (config === null) {
+      const loaded = await loadSanityConfig()
+      if (loaded === null) {
         return
       }
+      config = loaded.config
+      configDir = loaded.dir
 
       if (!query) {
         query = await loadGroqFromFile()
       }
       const variables = findVariablesInQuery(query)
       if (variables.length > 0) {
-        params = await readParams(variables)
+        params = await readParams(query, variables, config, configDir)
       }
 
       const resolvedApiVersion = resolveApiVersion(apiVersion)
       if (resolvedApiVersion.invalid !== undefined) {
         vscode.window.showWarningMessage(
-          `Ignoring invalid sanity.apiVersion "${resolvedApiVersion.invalid}". Using ${resolvedApiVersion.apiVersion}.`
+          `Ignoring invalid sanity.apiVersion "${resolvedApiVersion.invalid}". Using ${resolvedApiVersion.apiVersion}.`,
         )
       }
 
@@ -71,7 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       vscode.window.setStatusBarMessage(
         `Query took ${ms}ms` + (useCDN ? ' with cdn' : ' without cdn'),
-        10_000
+        10_000,
       )
 
       if (!openJSONFile && !resultPanel) {
@@ -79,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
           'executionResultsWebView',
           'GROQ Execution Result',
           vscode.ViewColumn.Beside,
-          {}
+          {},
         )
 
         resultPanel.onDidDispose(() => {
@@ -90,13 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (openJSONFile) {
         await openInUntitled(result, 'json')
       } else if (resultPanel) {
-        const contentProvider = await registerContentProvider(
-          context,
-          query,
-          params,
-          ms,
-          result
-        )
+        const contentProvider = await registerContentProvider(context, query, params, ms, result)
         const html = await contentProvider.getCurrentHTML()
         resultPanel.webview.html = html
       }
@@ -127,11 +128,11 @@ export function activate(context: vscode.ExtensionContext) {
         const document = await vscode.workspace.openTextDocument(uri)
         const range = new vscode.Range(
           document.positionAt(start),
-          document.positionAt(start + source.length)
+          document.positionAt(start + source.length),
         )
         if (document.getText(range) !== source) {
           vscode.window.showWarningMessage(
-            'The GROQ query changed before it could be formatted. Try again.'
+            'The GROQ query changed before it could be formatted. Try again.',
           )
           return
         }
@@ -146,14 +147,17 @@ export function activate(context: vscode.ExtensionContext) {
         const edit = new vscode.WorkspaceEdit()
         edit.replace(uri, range, formatted)
         await vscode.workspace.applyEdit(edit)
-      }
+      },
     ),
     vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()),
     vscode.languages.registerDefinitionProvider(
       GROQ_IMPORT_LANGUAGES,
-      new GroqImportDefinitionProvider()
+      new GroqImportDefinitionProvider(),
     ),
-    vscode.languages.registerDocumentLinkProvider(GROQ_IMPORT_LANGUAGES, new GroqImportLinkProvider())
+    vscode.languages.registerDocumentLinkProvider(
+      GROQ_IMPORT_LANGUAGES,
+      new GroqImportLinkProvider(),
+    ),
   )
   registerGroqLanguageServer(context)
 
@@ -231,7 +235,7 @@ async function loadSanityConfig() {
     throw new Error('Could not resolve sanity.cli.ts configuration file')
   }
 
-  return loadConfigFile(configFilePath)
+  return {config: await loadConfigFile(configFilePath), dir: path.dirname(configFilePath)}
 }
 
 function activeFilePath(editor: vscode.TextEditor): string | undefined {
@@ -262,7 +266,7 @@ async function registerContentProvider(
   query: string,
   params: QueryParams,
   ms: number,
-  result: unknown
+  result: unknown,
 ) {
   // Imported here, not at the top, to keep React out of activation.
   const {GroqContentProvider} = await import('./providers/content-provider')
@@ -301,24 +305,24 @@ async function readParamsFile(): Promise<QueryParams> {
   return {}
 }
 
-async function readParams(variables: Array<string>): Promise<QueryParams> {
+async function findKnownValues(query: string, config: Config, configDir: string) {
+  const schema = await loadProjectSchema({
+    file: getActiveFileName() || undefined,
+    configDir,
+    schemaExtraction: config.schemaExtraction,
+  })
+  return schema ? findKnownParamValues(query, schema) : new Map()
+}
+
+async function readParams(
+  query: string,
+  variables: Array<string>,
+  config: Config,
+  configDir: string,
+): Promise<QueryParams> {
   const values: QueryParams = await readParamsFile()
-  const missing = variables.filter((variable) => !values[variable])
-  for (const variable of missing) {
-    let value = await vscode.window.showInputBox({title: `value for "${variable}"`, value: ''})
-    if (!value) {
-      continue
-    }
-
-    try {
-      value = JSON.parse(value)
-    } catch {
-      // The value is kept as the raw string when it is not JSON.
-    }
-    values[variable] = value
-  }
-
-  return values
+  const known = await findKnownValues(query, config, configDir)
+  return readMissingParams(variables, values, known, askParam)
 }
 
 async function openInUntitled(content: unknown, language?: string) {
