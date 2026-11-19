@@ -171,6 +171,17 @@ void describe('bundled GROQ language server (dist/server.js)', () => {
     assert.deepEqual(await format('file:///broken.groq'), [])
   })
 
+  void it('reports duplicate projection keys', async () => {
+    await open('file:///dup.groq', 'groq', '*[_type == "post"]{"body": title, body}')
+    const found = await diagnosticsFor('file:///dup.groq', (d) =>
+      d.some((diag) => diag.code === 'duplicate-projection-key'),
+    )
+    assert.ok(
+      found.some((d) => d.code === 'duplicate-projection-key'),
+      JSON.stringify(found),
+    )
+  })
+
   void it('shows hover information for fields in .groq files', async () => {
     const hover = await connection.sendRequest<{contents: {value: string}} | null>(
       'textDocument/hover',

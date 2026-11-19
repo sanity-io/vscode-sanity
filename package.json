@@ -250,7 +250,7 @@
     "@changesets/cli": "^3.0.3",
     "@nkzw/oxlint-config": "^3.0.0",
     "@sanity-labs/groq-content-mapper": "^0.7.0",
-    "@sanity-labs/groq-lsp": "^1.2.2",
+    "@sanity-labs/groq-lsp": "^1.2.3",
     "@sanity-labs/lint-core": "^1.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.6.6",
