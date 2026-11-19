@@ -82,7 +82,7 @@ When TypeScript shows the type of a GROQ query, for example for a `defineQuery` 
 
 ### Go to Definition for `.groq` imports
 
-Go to Definition, and Cmd/Ctrl+click, on a `.groq` import such as `import query from '#queries/slugPage.groq'` opens the file. Relative paths and the `paths` and `baseUrl` of the nearest `tsconfig.json` or `jsconfig.json` are followed. A `tsconfig.json` that gets its `paths` from `extends` is not read.
+Go to Definition, and Cmd/Ctrl+click, on a `.groq` import such as `import query from '#queries/slugPage.groq'` opens the file when it exists. Relative paths and the `paths` and `baseUrl` of the nearest `tsconfig.json` or `jsconfig.json` are followed. A `tsconfig.json` that gets its `paths` from `extends` is not read.
 
 ## Syntax highlighting
 
