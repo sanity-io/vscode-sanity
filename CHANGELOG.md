@@ -1,5 +1,15 @@
 # vscode-sanity
 
+## 0.10.2
+
+### Patch Changes
+
+- [#108](https://github.com/sanity-io/vscode-sanity/pull/108) [`21215f8`](https://github.com/sanity-io/vscode-sanity/commit/21215f80487e3374fb9247e6817af4f597e60711) Thanks [@stipsan](https://github.com/stipsan)! - Go to Definition on a `.groq` import only opens the file when it exists. With `baseUrl` set, a missing package import or unmapped alias is no longer a jump target.
+
+- [#109](https://github.com/sanity-io/vscode-sanity/pull/109) [`010dd7f`](https://github.com/sanity-io/vscode-sanity/commit/010dd7fd41a543fedb64eadf08688e9e1629ed81) Thanks [@stipsan](https://github.com/stipsan)! - GROQ hovers use `groq-js` 2.0.2 and `@sanity/codegen` 8.3.2. A field the schema makes nullable now hovers as non-null under a `defined(field)` or `field != null` filter even when the filter has terms that cannot be decided, such as `_type == $type`, and `defined(path.to.field)` narrows a path through a named type.
+
+- [#111](https://github.com/sanity-io/vscode-sanity/pull/111) [`7d134a6`](https://github.com/sanity-io/vscode-sanity/commit/7d134a6a0f988bb7a8935f0fa7306506eb758a60) Thanks [@stipsan](https://github.com/stipsan)! - GROQ hovers show the type the generated types give more of a query, via `@sanity-labs/groq-lsp` 1.4.1 (`@sanity-labs/groq-lint` 1.3.1 and `@sanity-labs/lint-core` 1.0.3). A call to a built-in such as `count(…)`, `defined(…)`, `coalesce(…)`, `select(…)` or `pt::text(…)` shows what the call returns next to the function's documentation, and a pipe function such as `| order(…)` shows the array it returns. The start of a chain that continues after it shows its type: `slug` in `*[_type == "post"].slug.current` or `showcaseProjects[]->slug.current`, `order` in `*[…] | order(…) {…}`, and `tags` in `{tags[0]}` or `{tags[]}`. String and number literals print the way the generated types do, so `'It\'s'` shows `"It's"` and `2.50` shows `2.5`. A query parameter hovers as the `QueryParams` type the content mapper generates for it, including a parameter in a query whose root is an object, the bounds of `x in $min..$max`, an arithmetic operand, and a comparison with a literal. A field read through `^` in a filter over an array of strings or numbers, such as `tags` in `tags[@ in ^.tags]`, shows its type. Field, projection key and custom function call hovers follow the query's syntax tree, so they match `QueryResponse` on queries whose root is an object, after a `//` comment, and inside `select()` and conditional attributes. A missing field hovers as `null`, `true`, `false` and `null` hover as literals, and types print as `sanity typegen` does (`never` for an empty union, quoted names, `_key` on arrays of named types).
+
 ## 0.10.1
 
 ### Patch Changes
