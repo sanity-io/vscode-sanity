@@ -110,6 +110,38 @@ describe('GROQ language server', () => {
     assert.equal(error.range.start.line, 3)
   })
 
+  it('lints queries with their interpolated fragments inlined', async () => {
+    const fragmentPath = path.join(dir, 'author.ts')
+    const queryPath = path.join(dir, 'article.ts')
+    writeFileSync(fragmentPath, 'export const author = defineQuery(`{ name }`)\n')
+    writeFileSync(
+      queryPath,
+      [
+        "import {author} from './author'",
+        'export const query = defineQuery(`*[_type == "article"]{ author->${author} }`)',
+        '',
+      ].join('\n'),
+    )
+    const query = await workspace.openTextDocument(queryPath)
+    const fragment = await workspace.openTextDocument(fragmentPath)
+    const groqDiagnostics = () =>
+      languages.getDiagnostics(query.uri).filter((d) => d.source === 'groq')
+    // Diagnostics are published, empty, once the server has linted the document.
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    assert.deepEqual(groqDiagnostics(), [])
+
+    const edit = new WorkspaceEdit()
+    const start = fragment.getText().indexOf('name')
+    edit.insert(fragment.uri, fragment.positionAt(start + 'name'.length), ',,')
+    await workspace.applyEdit(edit)
+    const diagnostics = await eventually(
+      groqDiagnostics,
+      (d) => d.some((diagnostic) => /Parse error/.test(String(diagnostic.message))),
+      'a parse error from the edited fragment',
+    )
+    assert.equal(diagnostics[0]?.range.start.line, 1)
+  })
+
   it('completes fields in .groq files and in template literals', async () => {
     const inGroq = await eventually(
       () => completionLabels(groqDoc.uri, new Position(0, 2)),

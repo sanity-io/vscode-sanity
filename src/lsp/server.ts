@@ -4,6 +4,7 @@ import {
   ContentMapperConfigs,
   extractQueries,
   findQueryAtOffset,
+  FragmentFiles,
   getCompletionTriggerCharacters,
   getCompletions,
   getHoverInfo,
@@ -83,7 +84,7 @@ connection.onInitialized(() => {
   watchGlobs(['**/tsconfig.json', '**/*.groq'])
   schemaLoader.startWatching((schema) => {
     connection.console.log(`Schema ${schema ? 'reloaded' : 'cleared'}`)
-    documents.all().forEach(validateDocument)
+    documents.all().forEach((document) => void validateDocument(document))
   })
   connection.console.log('GROQ Language Server initialized')
 })
@@ -93,7 +94,7 @@ connection.onDidChangeConfiguration((change) => {
   if (settings.schemaPath) {
     schemaLoader.loadFromPath(settings.schemaPath)
   }
-  documents.all().forEach(validateDocument)
+  documents.all().forEach((document) => void validateDocument(document))
 })
 
 connection.onDidChangeWatchedFiles((params) => {
@@ -115,7 +116,7 @@ connection.onDidChangeWatchedFiles((params) => {
     contentMapperConfigs.invalidate()
     contentMapperSchemas.clear()
     reportedProblems.clear()
-    documents.all().forEach(validateDocument)
+    documents.all().forEach((document) => void validateDocument(document))
   }
 })
 
@@ -170,23 +171,70 @@ function contextFor(uri: string): DocumentContext {
   }
 }
 
-documents.onDidChangeContent((change) => validateDocument(change.document))
-documents.onDidClose((event) => documentQueries.delete(event.document.uri))
+// Fragments interpolated into queries are read from open documents first, so unsaved edits to
+// them are used.
+const fragmentFiles = new FragmentFiles(
+  (file) => documents.all().find((document) => filePath(document.uri) === file)?.getText(),
+)
+
+function filePath(uri: string) {
+  const parsed = URI.parse(uri)
+  return parsed.scheme === 'file' ? parsed.fsPath : undefined
+}
+
+// Re-validates the open documents whose queries use fragments from the document at `uri`.
+function validateDependents(uri: string) {
+  const file = filePath(uri)
+  for (const dependent of file ? fragmentFiles.dependents(file) : []) {
+    const document = documents.all().find((each) => filePath(each.uri) === dependent)
+    if (document && document.uri !== uri) {
+      void validateDocument(document)
+    }
+  }
+}
+
+documents.onDidChangeContent((change) => {
+  void validateDocument(change.document)
+  validateDependents(change.document.uri)
+})
+documents.onDidClose((event) => {
+  documentQueries.delete(event.document.uri)
+  const file = filePath(event.document.uri)
+  if (file) {
+    fragmentFiles.forget(file)
+  }
+  // Their fragments are read from disk now, without the closed document's unsaved edits.
+  validateDependents(event.document.uri)
+})
 
 function isNodeModulesPath(uri: string) {
   return uri.includes('/node_modules/') || uri.includes('\\node_modules\\')
 }
 
-function validateDocument(document: TextDocument) {
+async function validateDocument(document: TextDocument) {
   const {uri} = document
   if (isNodeModulesPath(uri)) {
     void connection.sendDiagnostics({uri, diagnostics: []})
     return
   }
-  const {queries} = extractQueries(document.getText(), document.languageId)
+  const content = document.getText()
+  const {queries} = extractQueries(content, document.languageId)
   documentQueries.set(uri, queries)
+  // Interpolated queries are linted with their `${}` fragments inlined. Hover and completion keep
+  // working on the template as written.
+  const file = filePath(uri)
+  let linted = queries
+  try {
+    linted = file ? await fragmentFiles.resolve(file, content, queries) : queries
+  } catch (error) {
+    connection.console.warn(`Could not resolve GROQ fragments in ${uri}: ${String(error)}`)
+  }
+  if (documents.get(uri)?.version !== document.version) {
+    // The document changed or closed while its fragments were read.
+    return
+  }
   const diagnostics =
-    queries.length === 0 ? [] : computeDocumentDiagnostics(queries, contextFor(uri))
+    linted.length === 0 ? [] : computeDocumentDiagnostics(linted, contextFor(uri))
   void connection.sendDiagnostics({
     uri,
     diagnostics: diagnostics.slice(0, settings.maxDiagnostics ?? 100),
