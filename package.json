@@ -74,7 +74,7 @@
         },
         "sanity.formatGroqInHoverWidth": {
           "type": "integer",
-          "default": 80,
+          "default": 40,
           "minimum": 20,
           "description": "Column width the GROQ queries shown in hovers are wrapped to."
         },

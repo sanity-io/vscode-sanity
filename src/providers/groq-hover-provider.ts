@@ -1,5 +1,5 @@
 import vscode from 'vscode'
-import {DEFAULT_FORMAT_WIDTH, formatGroq} from '../format'
+import {DEFAULT_HOVER_FORMAT_WIDTH, formatGroq} from '../format'
 import {comparable, findGroqInHoverMarkdown} from '../hover/groq-in-hover'
 import {EMBEDDED_GROQ_LANGUAGES} from '../languages'
 
@@ -36,7 +36,7 @@ export class GroqHoverProvider implements vscode.HoverProvider {
   ): Promise<vscode.Hover | undefined> {
     const settings = vscode.workspace.getConfiguration('sanity')
     if (!settings.get('formatGroqInHover', true)) {return undefined}
-    const width = settings.get('formatGroqInHoverWidth', DEFAULT_FORMAT_WIDTH)
+    const width = settings.get('formatGroqInHoverWidth', DEFAULT_HOVER_FORMAT_WIDTH)
 
     // `executeHoverProvider` asks every provider, including this one.
     const key = `${document.uri.toString()}:${document.version}:${position.line}:${

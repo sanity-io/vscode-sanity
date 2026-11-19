@@ -105,7 +105,7 @@ Find these in **Settings** by searching for `sanity` or `groq`.
 | `sanity.apiVersion`             | `v2025-02-19` | API version used when executing queries: a date, `v1` or `vX`.                       |
 | `sanity.openJSONFile`           | `false`       | Open query results as an editable JSON file instead of the result panel.             |
 | `sanity.formatGroqInHover`      | `true`        | Show GROQ queries in TypeScript hovers formatted and highlighted.                    |
-| `sanity.formatGroqInHoverWidth` | `80`          | Column width that queries in hovers are wrapped to.                                  |
+| `sanity.formatGroqInHoverWidth` | `40`          | Column width that queries in hovers are wrapped to.                                  |
 | `groq.enable`                   | `true`        | Turn on diagnostics, completion, hover and formatting.                               |
 | `groq.schemaPath`               | `""`          | Schema file from `npx sanity schema extract`, absolute or relative to the workspace. |
 | `groq.maxDiagnostics`           | `100`         | Maximum number of diagnostics per file.                                              |
