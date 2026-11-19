@@ -1,7 +1,7 @@
 {
   "name": "vscode-sanity",
   "displayName": "Sanity.io",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "private": true,
   "license": "MIT",
   "description": "Developer tools for applications powered by Sanity.io: GROQ query execution, linting, completion and formatting",
