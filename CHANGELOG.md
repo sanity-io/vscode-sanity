@@ -1,5 +1,11 @@
 # vscode-sanity
 
+## 0.9.0
+
+### Minor Changes
+
+- [#91](https://github.com/sanity-io/vscode-sanity/pull/91) [`66666e4`](https://github.com/sanity-io/vscode-sanity/commit/66666e436f1e34c14ee8f75d73dfab022c347c44) Thanks [@torjusb](https://github.com/torjusb)! - Queries that interpolate fragments, such as ``defineQuery(`*[_type == "article"]{ author->${author} }`)``, are linted with the fragments inlined instead of reporting a parse error, and editing an open fragment re-lints the queries that use it. Execute Query, Copy Query and the linter now also follow fragments imported from workspace packages in `node_modules`. Fragment resolution comes from `@sanity-labs/groq-lsp` 1.2.
+
 ## 0.8.0
 
 ### Minor Changes
