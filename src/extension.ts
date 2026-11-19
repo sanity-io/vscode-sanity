@@ -8,6 +8,11 @@ import {formatQuerySource} from './format'
 import type {QueryParams} from './queryParams'
 import {GROQCodeLensProvider} from './providers/groq-codelens-provider'
 import {GroqHoverProvider, HOVER_LANGUAGES} from './providers/groq-hover-provider'
+import {
+  GROQ_IMPORT_LANGUAGES,
+  GroqImportDefinitionProvider,
+  GroqImportLinkProvider,
+} from './providers/groq-import-provider'
 import {EMBEDDED_GROQ_LANGUAGES} from './languages'
 import {registerGroqLanguageServer, stopGroqLanguageServer} from './lsp/client'
 import {findVariablesInQuery} from './variables'
@@ -141,7 +146,12 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.workspace.applyEdit(edit)
       }
     ),
-    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider())
+    vscode.languages.registerHoverProvider(HOVER_LANGUAGES, new GroqHoverProvider()),
+    vscode.languages.registerDefinitionProvider(
+      GROQ_IMPORT_LANGUAGES,
+      new GroqImportDefinitionProvider()
+    ),
+    vscode.languages.registerDocumentLinkProvider(GROQ_IMPORT_LANGUAGES, new GroqImportLinkProvider())
   )
   registerGroqLanguageServer(context)
 
