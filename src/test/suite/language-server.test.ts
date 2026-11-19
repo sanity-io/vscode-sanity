@@ -13,6 +13,8 @@ import {
   type CodeLens,
   type CompletionList,
   type Diagnostic,
+  type Location,
+  type LocationLink,
   type TextDocument,
   type TextEdit,
   type Uri,
@@ -96,6 +98,82 @@ describe('GROQ language server', () => {
     const join = diagnostics.find((d) => d.code === 'join-in-filter')
     assert.ok(join)
     assert.equal(groqDoc.getText(join.range), 'author->')
+  })
+
+  it('goes to the definition of a custom function and finds its calls in other .groq files', async () => {
+    const project = mkdtempSync(path.join(tmpdir(), 'vscode-sanity-lsp-functions-'))
+    mkdirSync(path.join(project, 'groq'))
+    mkdirSync(path.join(project, 'queries'))
+    writeFileSync(
+      path.join(project, 'tsconfig.json'),
+      JSON.stringify({
+        contentMappers: [
+          {
+            package: '@sanity-labs/groq-content-mapper',
+            extensions: ['.groq'],
+            options: {functions: ['groq/*.groq']},
+          },
+        ],
+      }),
+    )
+    writeFileSync(
+      path.join(project, 'groq', 'image.groq'),
+      'fn image::asset($asset) = $asset->{url};\nfn image::field($image) = $image{crop, "asset": image::asset(asset)};\nfn image::richText($blocks) = $blocks[]{..., _type == "image" => image::field(@)};\n',
+    )
+    writeFileSync(
+      path.join(project, 'queries', 'slugPage.groq'),
+      '*[_type == "page" && slug.current == $slug][0]{_id, "body": image::richText(body)}\n',
+    )
+    const query = await workspace.openTextDocument(path.join(project, 'queries', 'slugPage.groq'))
+    const functions = await workspace.openTextDocument(path.join(project, 'groq', 'image.groq'))
+    await window.showTextDocument(query)
+
+    const call = query.positionAt(query.getText().indexOf('richText'))
+    const definitions = await eventually(
+      async () =>
+        await commands.executeCommand<Array<Location | LocationLink>>(
+          'vscode.executeDefinitionProvider',
+          query.uri,
+          call,
+        ),
+      (found) => found.length > 0,
+      'the definition of image::richText',
+    )
+    const [definition] = definitions
+    const target = 'targetUri' in definition ? definition.targetUri : definition.uri
+    const range =
+      'targetUri' in definition
+        ? (definition.targetSelectionRange ?? definition.targetRange)
+        : definition.range
+    assert.equal(target.fsPath, functions.uri.fsPath)
+    assert.equal(functions.getText(range), 'image::richText')
+
+    const field = functions.positionAt(functions.getText().indexOf('field(') + 1)
+    const references = await commands.executeCommand<Array<Location>>(
+      'vscode.executeReferenceProvider',
+      functions.uri,
+      field,
+    )
+    assert.deepEqual(
+      references.map((reference) => [
+        path.relative(project, reference.uri.fsPath),
+        reference.range.start.line,
+      ]),
+      [
+        [path.join('groq', 'image.groq'), 1],
+        [path.join('groq', 'image.groq'), 2],
+      ],
+    )
+
+    const richText = await commands.executeCommand<Array<Location>>(
+      'vscode.executeReferenceProvider',
+      functions.uri,
+      functions.positionAt(functions.getText().indexOf('richText')),
+    )
+    assert.ok(
+      richText.some((reference) => reference.uri.fsPath === query.uri.fsPath),
+      JSON.stringify(richText),
+    )
   })
 
   it('reports errors in groq`` template literals in TypeScript', async () => {

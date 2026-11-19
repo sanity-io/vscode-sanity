@@ -1,4 +1,5 @@
 import {readFile, realpath} from 'node:fs/promises'
+import path from 'node:path'
 import {
   type CodeLensProvider,
   type TextDocument,
@@ -11,7 +12,9 @@ import {
   workspace,
 } from 'vscode'
 import {canFormatInSource} from '../format'
+import {invalidateCustomFunctions, withCustomFunctions} from '../groq-functions'
 import {resolveEmbeddedQueries, type FragmentHost} from '@sanity-labs/groq-lsp/fragments'
+import {isDefinitionsOnly, leadingDefinitions} from '@sanity-labs/groq-lsp/functions'
 
 interface ExtractedQuery {
   content: string
@@ -101,6 +104,21 @@ function queryLenses(range: Range, query: string): Array<CodeLens> {
   ]
 }
 
+function findReferencesLenses(document: TextDocument): Array<CodeLens> {
+  return leadingDefinitions(document.getText()).map((definition) => {
+    const position = document.positionAt(definition.nameStart)
+    return new CodeLens(new Range(position.line, 0, position.line, 0), {
+      title: 'Find References',
+      command: 'editor.action.findReferences',
+      arguments: [document.uri, position],
+    })
+  })
+}
+
+function filePathOf(document: TextDocument): string | undefined {
+  return document.uri.scheme === 'file' ? document.uri.fsPath : undefined
+}
+
 function formatLens(range: Range, document: TextDocument, query: ExtractedQuery) {
   return new CodeLens(range, {
     title: 'Format Query',
@@ -130,12 +148,23 @@ export class GROQCodeLensProvider implements CodeLensProvider, Disposable {
       this.changed.fire()
     }
   })
+  // A saved .groq file or tsconfig.json may change the custom functions Execute Query and Copy
+  // Query prepend.
   private readonly fragmentSaveListener = workspace.onDidSaveTextDocument((document) => {
-    if (fragmentFiles.has(document.uri.fsPath)) {
+    const mapperFile =
+      document.languageId === 'groq' || path.basename(document.uri.fsPath) === 'tsconfig.json'
+    if (mapperFile) {
+      invalidateCustomFunctions()
+    }
+    if (mapperFile || fragmentFiles.has(document.uri.fsPath)) {
       this.changed.fire()
     }
   })
   public readonly onDidChangeCodeLenses = this.changed.event
+
+  public refresh(): void {
+    this.changed.fire()
+  }
 
   public dispose(): void {
     this.configListener.dispose()
@@ -153,8 +182,12 @@ export class GROQCodeLensProvider implements CodeLensProvider, Disposable {
     if (document.languageId === 'groq') {
       const range = new Range(new Position(0, 0), new Position(0, 0))
       const content = document.getText()
+      // A file of shared custom functions has no query to execute or copy.
+      const functionsOnly = isDefinitionsOnly(content)
       return [
-        ...queryLenses(range, content),
+        ...(functionsOnly
+          ? []
+          : queryLenses(range, withCustomFunctions(content, filePathOf(document)))),
         ...(formatting && content.trim()
           ? [
               formatLens(range, document, {
@@ -166,6 +199,7 @@ export class GROQCodeLensProvider implements CodeLensProvider, Disposable {
               }),
             ]
           : []),
+        ...findReferencesLenses(document),
       ]
     }
 
@@ -183,7 +217,10 @@ export class GROQCodeLensProvider implements CodeLensProvider, Disposable {
         new Position(def.position.line, 0),
       )
       // A query the resolver does not see keeps the text it had, which is what ran before.
-      const lenses = queryLenses(range, resolved.get(def.anchor) ?? def.content)
+      const lenses = queryLenses(
+        range,
+        withCustomFunctions(resolved.get(def.anchor) ?? def.content, filePathOf(document)),
+      )
       return formatting && def.formattable ? [...lenses, formatLens(range, document, def)] : lenses
     })
   }
