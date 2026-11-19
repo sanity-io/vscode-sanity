@@ -176,8 +176,8 @@ importers:
   .:
     dependencies:
       '@sanity-labs/groq-wasm':
-        specifier: ^1.2.2
-        version: 1.2.2
+        specifier: ^1.2.3
+        version: 1.2.3
       '@sanity/client':
         specifier: ^8.16.0
         version: 8.16.0
@@ -228,11 +228,11 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-lsp':
-        specifier: ^1.2.0
-        version: 1.2.0(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+        specifier: ^1.2.1
+        version: 1.2.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/lint-core':
-        specifier: ^1.0.1
-        version: 1.0.1(supports-color@8.1.1)
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/mocha':
         specifier: ^10.0.10
         version: 10.0.10
@@ -1675,22 +1675,22 @@ packages:
     resolution: {integrity: sha512-6LvUMgk3ZqHgtfy85hZE5/Wk0IUoixXqk2vUgnsHSLkdEp2UiOUPA9nU/t8GVYpCHK3/GgNniOdVRO2KvwJDyg==}
     engines: {node: ^22.18.0 || >=24.11.0}
 
-  '@sanity-labs/groq-lint@1.0.10':
-    resolution: {integrity: sha512-WE/HHVJuRT+V+DLqB0AAZqt0GAItqyhsNnHUTNJ0X64fE+mkQeG2FyKGmaNE1uM+ORyJddv4aLY9xJxM94dARw==}
+  '@sanity-labs/groq-lint@1.0.11':
+    resolution: {integrity: sha512-4I6D5/ICJcyo6Zk2RQjNTuGZdQg2xj9/JFmrSL1ugq57ZSA9VJtwbHHyhgjLAiF3ZE2ci3DX738K8qh/0Ffj6w==}
     engines: {node: '>=22.3.0'}
     hasBin: true
 
-  '@sanity-labs/groq-lsp@1.2.0':
-    resolution: {integrity: sha512-HIAvOdc8ueGAKZtMXmrC5yviv/u5A9zZys8b5bKpFt3HcizHoeGmxj0VyaZQHchatE0hzgYnZf+0lEhDne20wg==}
+  '@sanity-labs/groq-lsp@1.2.1':
+    resolution: {integrity: sha512-MmCN9HE7nZoI3+Xu+17HqyGrX5KcW43jEcBwA7Ulu1/Qd0/Uw9yj50m/2mgMRAPrBqybGaNBbJJXIwQsu9tScA==}
     engines: {node: '>=22.3.0'}
     hasBin: true
 
-  '@sanity-labs/groq-wasm@1.2.2':
-    resolution: {integrity: sha512-7eXwFuMaa4xZxQ0qI82wllUXfaR/cJsZiSEuSmPyqnGwKbCjGAjiq/yED/Tp8TlRlYuEc5gVraUK1sMjOUr1+w==}
+  '@sanity-labs/groq-wasm@1.2.3':
+    resolution: {integrity: sha512-Fv7a/vN6tLglBNr884D7BMXVX8WrgNfdqQQLRhyK7Zv0cYBHKWDPXBGRHzYcSoPKFdYcJLSA0upEl5nrAEcKmg==}
     engines: {node: '>=22.3.0'}
 
-  '@sanity-labs/lint-core@1.0.1':
-    resolution: {integrity: sha512-DRmiDA0xptpDTzJnwZs0wNwQ3nfp4o0CEejl2XZarqJXDHTm8Zx1LngwiljlYesL6PVI61lYcVES6SbARa4BKA==}
+  '@sanity-labs/lint-core@1.0.2':
+    resolution: {integrity: sha512-jJ3PAE9E3n2bs2oP3o3l61Xz6pt3cmEbwI2BEZsCWzZwZNGuCkarXNd8B0INp3iO6UgnnDXJ6l9esruCcEz+Ag==}
     engines: {node: '>=22.3.0'}
     peerDependencies:
       vitest: '>=2.0.0'
@@ -2727,10 +2727,6 @@ packages:
 
   graceful-fs@4.2.12:
     resolution: {integrity: sha512-iuyGF2E4oafQfPsRrG2wtY2ILupMhvtdrhzrxB+0VcjsPpSPttpfYdjnGFGsTi5MaJFjI1jOKHPQ6UTbTj9TAw==}
-
-  groq-js@1.30.3:
-    resolution: {integrity: sha512-X3Zppy8KO/mDLSu5RylcO9zON+IwxV6y6aeIWsfNNBz0PaRboUmsTVgk3Zndqp9TgWCTFvCk+Z2W0uu0R3i5DA==}
-    engines: {node: '>= 14'}
 
   groq-js@2.0.1:
     resolution: {integrity: sha512-v4GZDlS8T2hNQqnBRisdpMI8GnN7HMQ6bxfpEdz11rNbBUzyhM3aT8fwKbvl1gYVm+Lb1RN0phYdHh1liUzdGA==}
@@ -5288,10 +5284,10 @@ snapshots:
       - supports-color
       - typescript
 
-  '@sanity-labs/groq-lint@1.0.10(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+  '@sanity-labs/groq-lint@1.0.11(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
     dependencies:
-      '@sanity-labs/groq-wasm': 1.2.2
-      '@sanity-labs/lint-core': 1.0.1(supports-color@8.1.1)
+      '@sanity-labs/groq-wasm': 1.2.3
+      '@sanity-labs/lint-core': 1.0.2
       '@sanity/codegen': 8.3.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       groq-js: 2.0.1
     transitivePeerDependencies:
@@ -5301,11 +5297,11 @@ snapshots:
       - typescript
       - vitest
 
-  '@sanity-labs/groq-lsp@1.2.0(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+  '@sanity-labs/groq-lsp@1.2.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
     dependencies:
-      '@sanity-labs/groq-lint': 1.0.10(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
-      '@sanity-labs/groq-wasm': 1.2.2
-      '@sanity-labs/lint-core': 1.0.1(supports-color@8.1.1)
+      '@sanity-labs/groq-lint': 1.0.11(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+      '@sanity-labs/groq-wasm': 1.2.3
+      '@sanity-labs/lint-core': 1.0.2
       get-tsconfig: 4.14.3
       groq-js: 2.0.1
       picomatch: 4.0.7
@@ -5319,13 +5315,11 @@ snapshots:
       - typescript
       - vitest
 
-  '@sanity-labs/groq-wasm@1.2.2': {}
+  '@sanity-labs/groq-wasm@1.2.3': {}
 
-  '@sanity-labs/lint-core@1.0.1(supports-color@8.1.1)':
+  '@sanity-labs/lint-core@1.0.2':
     dependencies:
-      groq-js: 1.30.3(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
+      groq-js: 2.0.1
 
   '@sanity/client@8.16.0':
     dependencies:
@@ -6237,12 +6231,6 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.12: {}
-
-  groq-js@1.30.3(supports-color@8.1.1):
-    dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
 
   groq-js@2.0.1:
     dependencies:
