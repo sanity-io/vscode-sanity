@@ -105,7 +105,7 @@ void describe('bundled GROQ language server with groq-content-mapper settings', 
     )
   })
 
-  void it('hovers a field as its schema type and _type as the filtered document type', async () => {
+  void it('hovers a field as its schema type and _type in a filter as the document types', async () => {
     const query = '*[_type == "post"][0]{_id, title}'
     const uri = open('src/hoverTypes.groq', 'groq', query)
     await diagnosticsFor(uri, () => true)
@@ -120,7 +120,7 @@ void describe('bundled GROQ language server with groq-content-mapper settings', 
     assert.match(title?.contents.value ?? '', /title: string/, JSON.stringify(title))
 
     const typeName = await hoverAt(query.indexOf('_type') + 1)
-    assert.match(typeName?.contents.value ?? '', /_type: post/, JSON.stringify(typeName))
+    assert.match(typeName?.contents.value ?? '', /_type: "post"/, JSON.stringify(typeName))
   })
 
   void it('goes from a custom function call to its definition in another .groq file', async () => {
