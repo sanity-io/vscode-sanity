@@ -228,8 +228,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-lsp':
-        specifier: ^1.2.1
-        version: 1.2.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+        specifier: ^1.2.2
+        version: 1.2.2(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/lint-core':
         specifier: ^1.0.2
         version: 1.0.2
@@ -1680,8 +1680,8 @@ packages:
     engines: {node: '>=22.3.0'}
     hasBin: true
 
-  '@sanity-labs/groq-lsp@1.2.1':
-    resolution: {integrity: sha512-MmCN9HE7nZoI3+Xu+17HqyGrX5KcW43jEcBwA7Ulu1/Qd0/Uw9yj50m/2mgMRAPrBqybGaNBbJJXIwQsu9tScA==}
+  '@sanity-labs/groq-lsp@1.2.2':
+    resolution: {integrity: sha512-AyzIOa2/lWvwT+pLbjD+mEX6FpKhkuYu06kwdPgLqnCXbkawxOyuh8pKeytiSAkyT0Jq+9PYC1GpeupJSyzpFg==}
     engines: {node: '>=22.3.0'}
     hasBin: true
 
@@ -5297,7 +5297,7 @@ snapshots:
       - typescript
       - vitest
 
-  '@sanity-labs/groq-lsp@1.2.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+  '@sanity-labs/groq-lsp@1.2.2(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
     dependencies:
       '@sanity-labs/groq-lint': 1.0.11(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-wasm': 1.2.3

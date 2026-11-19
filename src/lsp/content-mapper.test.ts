@@ -95,4 +95,22 @@ void describe('bundled GROQ language server with groq-content-mapper settings', 
       ['invalid-type-filter'],
     )
   })
+
+  void it('hovers a field as its schema type and _type as the filtered document type', async () => {
+    const query = '*[_type == "post"][0]{_id, title}'
+    const uri = open('src/hoverTypes.groq', 'groq', query)
+    await diagnosticsFor(uri, () => true)
+
+    const hoverAt = (character: number) =>
+      connection.sendRequest<{contents: {value: string}} | null>('textDocument/hover', {
+        textDocument: {uri},
+        position: {line: 0, character},
+      })
+
+    const title = await hoverAt(query.indexOf('title') + 1)
+    assert.match(title?.contents.value ?? '', /title: string/, JSON.stringify(title))
+
+    const typeName = await hoverAt(query.indexOf('_type') + 1)
+    assert.match(typeName?.contents.value ?? '', /_type: post/, JSON.stringify(typeName))
+  })
 })
