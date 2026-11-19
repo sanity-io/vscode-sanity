@@ -1,5 +1,17 @@
 # vscode-sanity
 
+## 0.10.0
+
+### Minor Changes
+
+- [#101](https://github.com/sanity-io/vscode-sanity/pull/101) [`43ea6cc`](https://github.com/sanity-io/vscode-sanity/commit/43ea6cce4e88b3b72c235fdfe5fc2b6c387dfda2) Thanks [@stipsan](https://github.com/stipsan)! - A `.groq` file of only custom function definitions, such as a shared `image.groq`, can be formatted with Format Query, and shows no Execute Query or Copy Query lens since it has no query to run. Each definition gets a Find References lens. Execute Query and Copy Query prepend the custom functions a query calls, and those they call in turn, from groq-content-mapper's `functions` setting, so a query that calls `image::richText(body)` runs instead of failing with "Undefined namespace: image", and the copied text runs on its own. Go to definition on a custom function call opens its definition, and Find All References lists its calls in the other `.groq` files. These come from `@sanity-labs/groq-lsp` 1.3 and `@sanity-labs/groq-wasm` 1.2.4.
+
+- [#100](https://github.com/sanity-io/vscode-sanity/pull/100) [`0b86c3e`](https://github.com/sanity-io/vscode-sanity/commit/0b86c3e9c681b1e578a3b97df2920d400f4ab1e0) Thanks [@stipsan](https://github.com/stipsan)! - Suggest the known values of a query parameter when Execute GROQ query asks for it. A parameter compared with `_type` (or with any field that has a closed set of values in your schema, such as a string literal union) is offered as a pick list that still accepts any typed value. Parameters without known values keep the plain input.
+
+### Patch Changes
+
+- [#99](https://github.com/sanity-io/vscode-sanity/pull/99) [`824102f`](https://github.com/sanity-io/vscode-sanity/commit/824102f5185192b6f3ce335608dfd963a8aa4415) Thanks [@stipsan](https://github.com/stipsan)! - The language server reports when a GROQ projection writes the same key more than once, via `@sanity-labs/groq-lsp` 1.2.3 (`@sanity-labs/groq-lint` 1.1.0 `duplicate-projection-key`).
+
 ## 0.9.2
 
 ### Patch Changes
