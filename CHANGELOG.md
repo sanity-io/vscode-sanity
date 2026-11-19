@@ -1,5 +1,11 @@
 # vscode-sanity
 
+## 0.9.1
+
+### Patch Changes
+
+- [`613d4fe`](https://github.com/sanity-io/vscode-sanity/commit/613d4fe2b7a41de41e4586060192b253014c2b68) Thanks [@stipsan](https://github.com/stipsan)! - Completion lists each field once. Schemas from `sanity schema extract` declare system fields such as `_id`, `_rev` and `_createdAt`, which used to appear twice next to the built-in system field items.
+
 ## 0.9.0
 
 ### Minor Changes
