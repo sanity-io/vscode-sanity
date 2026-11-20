@@ -225,10 +225,10 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       '@nkzw/oxlint-config':
-        specifier: ^3.0.0
+        specifier: ^3.0.1
         version: 3.0.1(eslint@10.15.0(supports-color@8.1.1))(oxlint@1.94.0)(supports-color@8.1.1)(tsrs@0.25.0-ts7.1.0-beta)(typescript@7.0.2)
       '@sanity-labs/groq-content-mapper':
-        specifier: ^0.7.0
+        specifier: ^0.7.3
         version: 0.7.3(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-lsp':
         specifier: ^1.4.2
