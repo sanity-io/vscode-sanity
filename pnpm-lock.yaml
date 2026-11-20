@@ -191,8 +191,8 @@ importers:
         specifier: ^4.14.3
         version: 4.14.3
       groq-js:
-        specifier: ^2.0.2
-        version: 2.0.2
+        specifier: ^2.0.3
+        version: 2.0.3
       line-number:
         specifier: ^0.1.0
         version: 0.1.0
@@ -2740,8 +2740,8 @@ packages:
   graceful-fs@4.2.12:
     resolution: {integrity: sha512-iuyGF2E4oafQfPsRrG2wtY2ILupMhvtdrhzrxB+0VcjsPpSPttpfYdjnGFGsTi5MaJFjI1jOKHPQ6UTbTj9TAw==}
 
-  groq-js@2.0.2:
-    resolution: {integrity: sha512-XAsn6lLSWOuuuxXjNpFs5CDEvjQBYI3fId28zxPe40bgEeNzztFOlauWsUxd7f9Rt8lKb8LINGGZ1FpOxh6R2A==}
+  groq-js@2.0.3:
+    resolution: {integrity: sha512-6c85Hp8YC5YqqJAewe6y/yjZcWyyk5/LK+z5MAJwNqiHvfNuONqqOheAuyGSQvfFzPrZox22kEhITS0l+ZSINw==}
     engines: {node: '>=22.12'}
 
   groq@6.24.0:
@@ -5287,7 +5287,7 @@ snapshots:
       '@babel/types': 8.1.2
       '@sanity/codegen': 8.3.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       get-tsconfig: 4.14.3
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       picomatch: 4.0.7
       valibot: 1.5.0(typescript@7.0.2)
     transitivePeerDependencies:
@@ -5301,7 +5301,7 @@ snapshots:
       '@sanity-labs/groq-wasm': 1.2.4
       '@sanity-labs/lint-core': 1.0.3
       '@sanity/codegen': 8.3.2(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
-      groq-js: 2.0.2
+      groq-js: 2.0.3
     transitivePeerDependencies:
       - oxfmt
       - react
@@ -5315,7 +5315,7 @@ snapshots:
       '@sanity-labs/groq-wasm': 1.2.4
       '@sanity-labs/lint-core': 1.0.3
       get-tsconfig: 4.14.3
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       picomatch: 4.0.7
       vscode-languageserver: 11.0.0
       vscode-languageserver-textdocument: 1.0.16
@@ -5331,7 +5331,7 @@ snapshots:
 
   '@sanity-labs/lint-core@1.0.3':
     dependencies:
-      groq-js: 2.0.2
+      groq-js: 2.0.3
 
   '@sanity/client@8.16.0':
     dependencies:
@@ -5357,7 +5357,7 @@ snapshots:
       chokidar: 3.6.0
       globby: 11.1.0
       groq: 6.24.0
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       json5: 2.2.3
       lodash-es: 4.18.1
       obug: 3.0.0
@@ -5385,7 +5385,7 @@ snapshots:
       chokidar: 3.6.0
       globby: 11.1.0
       groq: 6.24.0
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       json5: 2.2.3
       lodash-es: 4.18.1
       obug: 3.0.0
@@ -6272,7 +6272,7 @@ snapshots:
 
   graceful-fs@4.2.12: {}
 
-  groq-js@2.0.2:
+  groq-js@2.0.3:
     dependencies:
       obug: 2.2.1
 
