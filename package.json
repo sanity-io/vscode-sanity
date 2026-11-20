@@ -232,7 +232,7 @@
   },
   "dependencies": {
     "@sanity-labs/groq-wasm": "^1.2.4",
-    "@sanity/client": "^8.16.0",
+    "@sanity/client": "^8.17.0",
     "@sanity/textmate-groq": "^1.1.2",
     "dotenv-expand": "^13.0.0",
     "get-tsconfig": "^4.14.3",
