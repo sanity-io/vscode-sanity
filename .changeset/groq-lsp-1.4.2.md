@@ -1,0 +1,5 @@
+---
+'vscode-sanity': patch
+---
+
+GROQ hovers follow `@sanity-labs/groq-lsp` 1.4.2 (`@sanity-labs/groq-lint` 1.3.2 and `@sanity-labs/lint-core` 1.0.4). `select()` at the root of a query types every alternative whose condition can be true, instead of only the fallback: `{"v": select(true => "many", "few")}` hovers as `"many"`, and `select($x == 1 => "a", "b")` as `"a" | "b"`. A `select()` with no fallback is nullable when it is not guaranteed to match an alternative, since it evaluates to `null` then: `select(views > 10 => "many")` hovers as `"many" | null`, while `select(true => "many")` stays `"many"`. Hover prints `boolean` instead of `false | true` or `true | false`, including inside larger unions such as `boolean | null` and in nested object fields. A type that is only `true` or only `false` still prints as that literal. Hovering the closing parenthesis of a function call shows what the call returns when its last argument is a number or a parameter, so the `)` in `round(views, 2)` shows `round: number` instead of `2`.

@@ -9,6 +9,8 @@ minimumReleaseAgeExclude:
   - '@sanity-labs/*'
   # 3.0.0 is the shared oxlint preset this repo extends, and it shipped within the last day.
   - '@nkzw/oxlint-config'
-  # Both shipped within the last day and carry groq-js's defined() filter narrowing.
-  - groq-js@2.0.2
+  # 2.0.2 carries defined() filter narrowing. 2.0.3 is what @sanity-labs/groq-lsp 1.4.2
+  # depends on. Both shipped within the last day.
+  - groq-js@2.0.2 || 2.0.3
+  # Shipped within the last day and carries groq-js's defined() filter narrowing.
   - '@sanity/codegen@8.3.2'
