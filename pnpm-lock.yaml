@@ -228,8 +228,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1(eslint@10.15.0(supports-color@8.1.1))(oxlint@1.94.0)(supports-color@8.1.1)(tsrs@0.25.0-ts7.1.0-beta)(typescript@7.0.2)
       '@sanity-labs/groq-content-mapper':
-        specifier: ^0.7.3
-        version: 0.7.3(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+        specifier: ^0.7.5
+        version: 0.7.5(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-lsp':
         specifier: ^1.4.2
         version: 1.4.2(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
@@ -1674,8 +1674,8 @@ packages:
   '@rolldown/pluginutils@1.1.1':
     resolution: {integrity: sha512-glFIJDvLNDtJhT9qrMFWLPbvS+skxgt4L0K8Ei2YtnhPysAJnsI7nyxSJxKj4ADeKX0OLjC4ntRkwpLOoS3rwA==}
 
-  '@sanity-labs/groq-content-mapper@0.7.3':
-    resolution: {integrity: sha512-Zy5JbADDByHYxZhZTGb6n/loOlb2cabCy6LYIkyG/3zKDJXpkWwss6ncc2Eo5RXt+jKkAGdyMkad4CGauAd96w==}
+  '@sanity-labs/groq-content-mapper@0.7.5':
+    resolution: {integrity: sha512-C0JyFCgJkR12D8UtE8lZPn0fxRSuECdaUO5XnYZIT+ZOCIe7u4EX1qGGXcALI141xER6rGpYXtLpSw5qPxD7fw==}
     engines: {node: ^22.18.0 || >=24.11.0}
 
   '@sanity-labs/groq-lint@1.3.2':
@@ -1704,15 +1704,6 @@ packages:
   '@sanity/client@8.17.0':
     resolution: {integrity: sha512-X7qnv2HdKPZUKlrLBRsjw+8yKqjCJd2i2V3cV1CRY5zq9k0wB1mhWpiwXiJhcRTBza8wdQtNSCdQCh8hBoZ71g==}
     engines: {node: '>=22.12.0'}
-
-  '@sanity/codegen@8.3.3':
-    resolution: {integrity: sha512-uZpfYZif+NZs/c2HK3m6JYaiOBzUhBDKMEZi3ieXCBpg+lmCLJdtSk4jC1s+rtS5v3Fm7V1D5HhA2gUlud0g1g==}
-    engines: {node: '>=22.12'}
-    peerDependencies:
-      oxfmt: '*'
-    peerDependenciesMeta:
-      oxfmt:
-        optional: true
 
   '@sanity/codegen@8.3.4':
     resolution: {integrity: sha512-5ejP7pf+av7Nv+BE3qGYvii6bs21YA42rTyoj7z2z/folzgWvtEOMUludpl12zaiWvmblg5+8xrV4tj2Her7ag==}
@@ -5281,11 +5272,11 @@ snapshots:
 
   '@rolldown/pluginutils@1.1.1': {}
 
-  '@sanity-labs/groq-content-mapper@0.7.3(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
+  '@sanity-labs/groq-content-mapper@0.7.5(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
     dependencies:
       '@babel/generator': 8.1.2
       '@babel/types': 8.1.2
-      '@sanity/codegen': 8.3.3(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
+      '@sanity/codegen': 8.3.4(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       get-tsconfig: 4.14.3
       groq-js: 2.0.3
       picomatch: 4.0.7
@@ -5341,34 +5332,6 @@ snapshots:
       rxjs: 7.8.2
     transitivePeerDependencies:
       - vitest
-
-  '@sanity/codegen@8.3.3(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
-    dependencies:
-      '@babel/core': 7.29.13(supports-color@8.1.1)
-      '@babel/generator': 7.29.14
-      '@babel/preset-env': 7.29.14(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1)
-      '@babel/preset-react': 7.29.7(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1)
-      '@babel/preset-typescript': 7.29.7(@babel/core@7.29.13(supports-color@8.1.1))(supports-color@8.1.1)
-      '@babel/register': 7.29.13(@babel/core@7.29.13(supports-color@8.1.1))
-      '@babel/traverse': 7.29.14(supports-color@8.1.1)
-      '@babel/types': 7.29.14
-      '@sanity/telemetry': 1.1.0(react@19.3.1)
-      '@sanity/worker-channels': 2.0.0
-      chokidar: 3.6.0
-      globby: 11.1.0
-      groq: 6.24.0
-      groq-js: 2.0.3
-      json5: 2.2.3
-      lodash-es: 4.18.1
-      obug: 3.0.0
-      prettier: 3.10.1
-      reselect: 5.3.0
-      tsconfig-paths: 4.2.0
-      valibot: 1.5.0(typescript@7.0.2)
-    transitivePeerDependencies:
-      - react
-      - supports-color
-      - typescript
 
   '@sanity/codegen@8.3.4(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)':
     dependencies:
