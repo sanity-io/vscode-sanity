@@ -4,13 +4,13 @@ allowBuilds:
   '@vscode/vsce-sign': true
 
 # pnpm's default supply-chain policy refuses versions published in the last day. These are this
-# org's own packages, and the extension cannot install without the current ones.
+# org's own packages (@sanity/* and @sanity-labs/*), and the extension cannot install without the
+# current ones.
 minimumReleaseAgeExclude:
+  - '@sanity/*'
   - '@sanity-labs/*'
   # 3.0.0 is the shared oxlint preset this repo extends, and it shipped within the last day.
   - '@nkzw/oxlint-config'
-  # 2.0.2 carries defined() filter narrowing. 2.0.3 is what @sanity-labs/groq-lsp 1.4.2
-  # depends on. Both shipped within the last day.
-  - groq-js@2.0.2 || 2.0.3
-  # Shipped within the last day and carries groq-js's defined() filter narrowing.
-  - '@sanity/codegen@8.3.2'
+  # groq-js 2.0.3 shipped within the last day. select() at the query root is typed,
+  # and select() with no fallback is nullable.
+  - groq-js@2.0.3

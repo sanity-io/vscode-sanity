@@ -185,14 +185,14 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       dotenv-expand:
-        specifier: ^12.0.3
-        version: 12.0.3
+        specifier: ^13.0.0
+        version: 13.0.0
       get-tsconfig:
         specifier: ^4.14.3
         version: 4.14.3
       groq-js:
-        specifier: ^2.0.2
-        version: 2.0.2
+        specifier: ^2.0.3
+        version: 2.0.3
       line-number:
         specifier: ^0.1.0
         version: 0.1.0
@@ -2482,12 +2482,12 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
-  dotenv-expand@12.0.3:
-    resolution: {integrity: sha512-uc47g4b+4k/M/SeaW1y4OApx+mtLWl92l5LMPP0GNXctZqELk+YGgOPIIC5elYmUH4OuoK3JLhuRUYegeySiFA==}
+  dotenv-expand@13.0.0:
+    resolution: {integrity: sha512-aBfBS8eYIeXmpHI9ThIlA7/WLq+SLt18iXUZhb52rW89QLKQFoIpPG1bPeewoPZsTyjSSO3T7234FBVUM1V2rA==}
     engines: {node: '>=12'}
 
-  dotenv@16.6.1:
-    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
   dts-resolver@3.0.0:
@@ -2739,10 +2739,6 @@ packages:
 
   graceful-fs@4.2.12:
     resolution: {integrity: sha512-iuyGF2E4oafQfPsRrG2wtY2ILupMhvtdrhzrxB+0VcjsPpSPttpfYdjnGFGsTi5MaJFjI1jOKHPQ6UTbTj9TAw==}
-
-  groq-js@2.0.2:
-    resolution: {integrity: sha512-XAsn6lLSWOuuuxXjNpFs5CDEvjQBYI3fId28zxPe40bgEeNzztFOlauWsUxd7f9Rt8lKb8LINGGZ1FpOxh6R2A==}
-    engines: {node: '>=22.12'}
 
   groq-js@2.0.3:
     resolution: {integrity: sha512-6c85Hp8YC5YqqJAewe6y/yjZcWyyk5/LK+z5MAJwNqiHvfNuONqqOheAuyGSQvfFzPrZox22kEhITS0l+ZSINw==}
@@ -5291,7 +5287,7 @@ snapshots:
       '@babel/types': 8.1.2
       '@sanity/codegen': 8.3.1(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       get-tsconfig: 4.14.3
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       picomatch: 4.0.7
       valibot: 1.5.0(typescript@7.0.2)
     transitivePeerDependencies:
@@ -5361,7 +5357,7 @@ snapshots:
       chokidar: 3.6.0
       globby: 11.1.0
       groq: 6.24.0
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       json5: 2.2.3
       lodash-es: 4.18.1
       obug: 3.0.0
@@ -5389,7 +5385,7 @@ snapshots:
       chokidar: 3.6.0
       globby: 11.1.0
       groq: 6.24.0
-      groq-js: 2.0.2
+      groq-js: 2.0.3
       json5: 2.2.3
       lodash-es: 4.18.1
       obug: 3.0.0
@@ -6012,11 +6008,11 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  dotenv-expand@12.0.3:
+  dotenv-expand@13.0.0:
     dependencies:
-      dotenv: 16.6.1
+      dotenv: 17.4.2
 
-  dotenv@16.6.1: {}
+  dotenv@17.4.2: {}
 
   dts-resolver@3.0.0: {}
 
@@ -6275,10 +6271,6 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.12: {}
-
-  groq-js@2.0.2:
-    dependencies:
-      obug: 2.2.1
 
   groq-js@2.0.3:
     dependencies:
