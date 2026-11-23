@@ -222,7 +222,7 @@ importers:
         specifier: ^3.35.1
         version: 3.35.1
       vscode-languageclient:
-        specifier: ^11.0.0
+        specifier: ^11.0.1
         version: 11.0.1
       xdg-basedir:
         specifier: ^4.0.0
@@ -292,10 +292,10 @@ importers:
         specifier: npm:typescript@7.1.0-beta
         version: typescript@7.1.0-beta
       vscode-languageserver:
-        specifier: ^11.0.0
+        specifier: ^11.0.1
         version: 11.0.1
       vscode-languageserver-protocol:
-        specifier: ^3.18.5
+        specifier: ^3.18.6
         version: 3.18.6
       vscode-languageserver-textdocument:
         specifier: ^1.0.16
