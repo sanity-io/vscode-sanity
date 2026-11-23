@@ -19,8 +19,8 @@ describe('formatGroq', () => {
         '*[_type == "post" && defined(slug.current)] {',
         '  _id,',
         '  title,',
-        '  "author": author-> { name, "avatar": avatar.asset->url },',
-        '  "categories": categories[]-> { title, "slug": slug.current }',
+        '  "author": author->{ name, "avatar": avatar.asset->url },',
+        '  "categories": categories[]->{ title, "slug": slug.current }',
         '}',
         '  | order(_createdAt desc)[0...10]',
       ].join('\n'),
@@ -33,7 +33,7 @@ describe('formatGroq', () => {
   it('wraps to a narrower width when asked', () => {
     const formatted = formatGroq(QUERY, 40)!
     assert.ok(formatted.split('\n').length > formatGroq(QUERY)!.split('\n').length)
-    assert.ok(formatted.includes('"author": author-> {\n    name,'), formatted)
+    assert.ok(formatted.includes('"author": author->{\n    name,'), formatted)
   })
 
   it('wraps hovers narrower than the editor, on GROQ boundaries', () => {
@@ -42,7 +42,10 @@ describe('formatGroq', () => {
       '*[_type == $type && defined(slug.current)] { "slug": slug.current }',
       DEFAULT_HOVER_FORMAT_WIDTH,
     )!
-    assert.equal(formatted, '*[_type == $type\n  && defined(slug.current)] {\n  "slug": slug.current\n}')
+    assert.equal(
+      formatted,
+      '*[\n  _type == $type\n  && defined(slug.current)\n] { "slug": slug.current }',
+    )
     for (const line of formatted.split('\n')) {
       assert.ok(line.length <= DEFAULT_HOVER_FORMAT_WIDTH, line)
     }
@@ -64,8 +67,12 @@ describe('formatGroq', () => {
     assert.equal(
       formatGroq(query),
       [
-        'fn image::asset($asset) = $asset-> { url, metadata };',
-        'fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };',
+        'fn image::asset($asset) = $asset->{ url, metadata };',
+        'fn image::field($image) = $image {',
+        '  crop,',
+        '  hotspot,',
+        '  "asset": image::asset(asset)',
+        '};',
         '',
         '// All published posts',
         '*[_type == "post"] { _id, "image": image::field(mainImage) }',
@@ -77,8 +84,7 @@ describe('formatGroq', () => {
     assert.equal(
       formatGroq('fn a::b($x) = $x{c}; // note\n// lead\nfn a::d($y) = $y{e};\n*[]{"d": a::b(@)}'),
       [
-        'fn a::b($x) = $x { c };',
-        '// note',
+        'fn a::b($x) = $x { c }; // note',
         '// lead',
         'fn a::d($y) = $y { e };',
         '',
@@ -118,7 +124,7 @@ describe('formatQuerySource', () => {
         '',
         '  *[_type == "post"] {',
         '    title,',
-        '    "author": author-> { name, "avatar": avatar.asset->url }',
+        '    "author": author->{ name, "avatar": avatar.asset->url }',
         '  }',
         '',
       ].join('\n'),
@@ -152,8 +158,12 @@ describe('formatQuerySource', () => {
       [
         '// Image helpers',
         '// shared by the page queries',
-        'fn image::asset($asset) = $asset-> { url, metadata { lqip, dimensions } };',
-        'fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };',
+        'fn image::asset($asset) = $asset->{ url, metadata { lqip, dimensions } };',
+        'fn image::field($image) = $image {',
+        '  crop,',
+        '  hotspot,',
+        '  "asset": image::asset(asset)',
+        '};',
         'fn image::richText($blocks) = $blocks[] {',
         '  ...,',
         '  _type == "image" => {',

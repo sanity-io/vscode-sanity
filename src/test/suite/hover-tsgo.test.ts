@@ -9,25 +9,28 @@ const project = process.env.SANITY_TEST_TSGO
 // groq-format at 80 columns, run over the whole string the mapper produces: the prepended custom
 // functions, the leading comment and the query.
 const LONG_QUERY_FORMATTED = [
-  'fn image::asset($asset) = $asset-> { url, metadata };',
-  'fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };',
+  'fn image::asset($asset) = $asset->{ url, metadata };',
+  'fn image::field($image) = $image {',
+  '  crop,',
+  '  hotspot,',
+  '  "asset": image::asset(asset)',
+  '};',
   '',
   '// All published posts with their author, categories and related posts',
   '*[_type == "post" && defined(slug.current) && publishedAt < now()]',
   '  | order(publishedAt desc)[$start...$end] {',
-  '  _id,',
-  '  title,',
-  '  slug,',
-  '  "image": image::field(mainImage),',
-  '  "author": author-> { name, "avatar": image::field(avatar) },',
-  '  "categories": categories[]-> { title, "slug": slug.current },',
-  '  "related": *[_type == "post" && _id != ^._id',
-  '    && count(categories[@._ref in ^.^.categories[]._ref]) > 0][0...3] {',
   '    _id,',
   '    title,',
-  '    "image": image::field(mainImage)',
+  '    slug,',
+  '    "image": image::field(mainImage),',
+  '    "author": author->{ name, "avatar": image::field(avatar) },',
+  '    "categories": categories[]->{ title, "slug": slug.current },',
+  '    "related": *[',
+  '      _type == "post"',
+  '      && _id != ^._id',
+  '      && count(categories[@._ref in ^.^.categories[]._ref]) > 0',
+  '    ][0...3] { _id, title, "image": image::field(mainImage) }',
   '  }',
-  '}',
 ].join('\n')
 
 function markdownOf(hovers: Array<vscode.Hover>): Array<string> {
@@ -125,12 +128,13 @@ describe('GROQ in TypeScript 7.1 hovers (tsgo + groq-content-mapper)', function 
     const block = md.find((part) => part.startsWith('```groq\n'))
     assert.ok(block, JSON.stringify(md.map((part) => part.slice(0, 80))))
     const lines = block.split('\n').slice(1, -1)
-    assert.deepStrictEqual(lines.slice(0, 3), [
-      '*[_type == "post" && defined(slug.current)] | order(publishedAt desc)[$start...$end] {',
-      '  _id,',
-      '  "field0": coalesce(title, "fallback value number 0"),',
+    assert.deepStrictEqual(lines.slice(0, 4), [
+      '*[_type == "post" && defined(slug.current)]',
+      '  | order(publishedAt desc)[$start...$end] {',
+      '    _id,',
+      '    "field0": coalesce(title, "fallback value number 0"),',
     ])
-    assert.strictEqual(lines.length, 113)
-    assert.strictEqual(lines.at(-1), '}')
+    assert.strictEqual(lines.length, 114)
+    assert.strictEqual(lines.at(-1), '  }')
   })
 })
