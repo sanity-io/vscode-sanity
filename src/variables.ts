@@ -7,7 +7,8 @@ export function findVariablesInQuery(query: string): Array<string> {
 
 function findVariables(node: unknown, found: Array<string>): Array<string> {
   if (Array.isArray(node)) {
-    return node.reduce((acc, child) => findVariables(child, acc), found)
+    const children: Array<unknown> = node
+    return children.reduce<Array<string>>((acc, child) => findVariables(child, acc), found)
   }
 
   // `null` literals in the query are `{type: 'Value', value: null}` nodes.
@@ -24,5 +25,6 @@ function findVariables(node: unknown, found: Array<string>): Array<string> {
     return found.concat(node.name)
   }
 
-  return Object.values(node).reduce((acc, child) => findVariables(child, acc), found)
+  const values: Array<unknown> = Object.values(node)
+  return values.reduce<Array<string>>((acc, child) => findVariables(child, acc), found)
 }

@@ -17,7 +17,8 @@ function markdownOf(content: HoverContent): string {
 }
 
 function fenceFor(code: string) {
-  const longestRun = Math.max(2, ...(code.match(/`+/g) ?? []).map((run) => run.length))
+  const runs: Array<string> = code.match(/`+/g) ?? []
+  const longestRun = Math.max(2, ...runs.map((run) => run.length))
   return '`'.repeat(longestRun + 1)
 }
 

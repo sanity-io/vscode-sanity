@@ -15,10 +15,12 @@ import {
   offsetToQueryPosition,
   SchemaFileCache,
   SchemaLoader,
-  type FileSpan,
-  type FunctionNavigationContext,
-  type GroqFunction,
-  type GroqQuery,
+} from '@sanity-labs/groq-lsp'
+import type {
+  FileSpan,
+  FunctionNavigationContext,
+  GroqFunction,
+  GroqQuery,
 } from '@sanity-labs/groq-lsp'
 import type {SchemaType} from 'groq-js'
 import {
@@ -29,11 +31,8 @@ import {
   ProposedFeatures,
   TextDocuments,
   TextDocumentSyncKind,
-  type InitializeResult,
-  type Location,
-  type LocationLink,
-  type Position,
 } from 'vscode-languageserver/node'
+import type {InitializeResult, Location, LocationLink, Position} from 'vscode-languageserver/node'
 import {TextDocument} from 'vscode-languageserver-textdocument'
 import {URI} from 'vscode-uri'
 import {formatGroqDocument} from './formatting'
@@ -99,8 +98,19 @@ connection.onInitialized(() => {
   connection.console.log('GROQ Language Server initialized')
 })
 
+function hasGroqSettings(value: unknown): value is {groq: ServerSettings} {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'groq' in value &&
+    typeof value.groq === 'object' &&
+    value.groq !== null
+  )
+}
+
 connection.onDidChangeConfiguration((change) => {
-  settings = change.settings?.groq ?? defaultSettings
+  const changed: unknown = change.settings
+  settings = hasGroqSettings(changed) ? changed.groq : defaultSettings
   if (settings.schemaPath) {
     schemaLoader.loadFromPath(settings.schemaPath)
   }

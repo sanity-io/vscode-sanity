@@ -2,7 +2,7 @@ import path from 'node:path'
 import vscode from 'vscode'
 import {promises as fs, constants as fsconstants} from 'node:fs'
 import {resolveApiVersion} from './apiVersion'
-import {Config} from './config/findConfig'
+import type {Config} from './config/findConfig'
 import {loadConfigFile} from './config/loadConfigFile'
 import {formatQuerySource} from './format'
 import {invalidateCustomFunctions, withCustomFunctions} from './groq-functions'
@@ -26,9 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Assigned by `readConfig()`
   let codelens: vscode.Disposable | undefined
   let codelensProvider: GROQCodeLensProvider | undefined
-  let useCodelens
-  let openJSONFile
-  let useCDN
+  let useCodelens: boolean
+  let openJSONFile: boolean
+  let useCDN: boolean
   let apiVersion: string | undefined
 
   // Read and listen for configuration updates
@@ -36,10 +36,10 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeConfiguration(() => readConfig())
 
   let resultPanel: vscode.WebviewPanel | undefined
-  const disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery) => {
+  const disposable = vscode.commands.registerCommand('sanity.executeGroq', async (groqQuery?: string) => {
     let config: Config
     let configDir: string
-    let query: string = groqQuery
+    let query = groqQuery
     let params: QueryParams = {}
     try {
       const loaded = await loadSanityConfig()
@@ -280,11 +280,15 @@ function getActiveFileName(): string {
   return vscode.window.activeTextEditor?.document.fileName || ''
 }
 
-async function checkFileExists(file) {
+async function checkFileExists(file: string) {
   return fs
     .access(file, fsconstants.F_OK)
     .then(() => true)
     .catch(() => false)
+}
+
+function isQueryParams(value: unknown): value is QueryParams {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 async function readParamsFile(): Promise<QueryParams> {
@@ -295,7 +299,11 @@ async function readParamsFile(): Promise<QueryParams> {
     if (await checkFileExists(absoluteParamFile)) {
       try {
         const content = await fs.readFile(absoluteParamFile)
-        return JSON.parse(content.toString())
+        const params: unknown = JSON.parse(content.toString())
+        if (!isQueryParams(params)) {
+          throw new Error('Expected a JSON object')
+        }
+        return params
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to read parameter file: ${getErrorMessage(error)}`)
       }

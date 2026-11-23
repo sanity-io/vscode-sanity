@@ -1,5 +1,6 @@
 import {strict as assert} from 'node:assert'
-import {spawn, type ChildProcess} from 'node:child_process'
+import {spawn} from 'node:child_process'
+import type {ChildProcess} from 'node:child_process'
 import {readFileSync} from 'node:fs'
 import path from 'node:path'
 import {pathToFileURL} from 'node:url'
@@ -8,9 +9,8 @@ import {
   createProtocolConnection,
   StreamMessageReader,
   StreamMessageWriter,
-  type Diagnostic,
-  type ProtocolConnection,
 } from 'vscode-languageserver-protocol/node'
+import type {Diagnostic, ProtocolConnection} from 'vscode-languageserver-protocol/node'
 
 const SERVER = path.join(__dirname, '..', '..', 'dist', 'server.js')
 const PROJECT = path.join(__dirname, '..', '..', 'fixtures', 'hover-project')

@@ -29,7 +29,9 @@ async function codeLensesOf(uri: vscode.Uri): Promise<Array<vscode.CodeLens>> {
     if (lenses.length > 0 || Date.now() > deadline) {
       return lenses
     }
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => {
+      setTimeout(resolve, 500)
+    })
   }
 }
 

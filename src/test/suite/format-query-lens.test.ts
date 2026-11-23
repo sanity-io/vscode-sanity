@@ -2,15 +2,8 @@ import {strict as assert} from 'node:assert'
 import {mkdtempSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import path from 'node:path'
-import {
-  commands,
-  ConfigurationTarget,
-  extensions,
-  window,
-  workspace,
-  type CodeLens,
-  type TextDocument,
-} from 'vscode'
+import {commands, ConfigurationTarget, extensions, window, workspace} from 'vscode'
+import type {CodeLens, TextDocument} from 'vscode'
 
 const TS = [
   "import groq from 'groq'",

@@ -25,7 +25,7 @@ describe('formatGroq', () => {
         '  | order(_createdAt desc)[0...10]',
       ].join('\n'),
     )
-    for (const line of formatted!.split('\n')) {
+    for (const line of formatted.split('\n')) {
       assert.ok(line.length <= 80, line)
     }
   })

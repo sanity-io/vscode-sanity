@@ -142,9 +142,11 @@ describe('withConfigEnv', () => {
       configFile,
       "module.exports = {default: {api: {projectId: process.env.VSCODE_SANITY_TEST_PROJECT_ID}}}\n"
     )
-    // oxlint-disable-next-line @typescript-eslint/no-require-imports -- loading a config by path is the point
-    const config = withConfigEnv(dir, () => require(configFile))
-    assert.equal(config.default.api.projectId, 'abc123')
+    withConfigEnv(dir, () => {
+      // oxlint-disable-next-line @typescript-eslint/no-require-imports -- loading a config by path is the point
+      const config: unknown = require(configFile)
+      assert.deepEqual(config, {default: {api: {projectId: 'abc123'}}})
+    })
     assert.equal(process.env.VSCODE_SANITY_TEST_PROJECT_ID, undefined)
   })
 })

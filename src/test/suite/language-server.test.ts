@@ -10,14 +10,16 @@ import {
   window,
   workspace,
   WorkspaceEdit,
-  type CodeLens,
-  type CompletionList,
-  type Diagnostic,
-  type Location,
-  type LocationLink,
-  type TextDocument,
-  type TextEdit,
-  type Uri,
+} from 'vscode'
+import type {
+  CodeLens,
+  CompletionList,
+  Diagnostic,
+  Location,
+  LocationLink,
+  TextDocument,
+  TextEdit,
+  Uri,
 } from 'vscode'
 
 const EXTENSION_ID = 'sanity-io.vscode-sanity'
@@ -44,7 +46,9 @@ async function eventually<T>(
     if (Date.now() > deadline) {
       assert.fail(`Timed out waiting for ${what}: ${JSON.stringify(value)}`)
     }
-    await new Promise((resolve) => setTimeout(resolve, 250))
+    await new Promise((resolve) => {
+      setTimeout(resolve, 250)
+    })
     value = await read()
   }
   return value
@@ -205,7 +209,9 @@ describe('GROQ language server', () => {
     const groqDiagnostics = () =>
       languages.getDiagnostics(query.uri).filter((d) => d.source === 'groq')
     // Diagnostics are published, empty, once the server has linted the document.
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2000)
+    })
     assert.deepEqual(groqDiagnostics(), [])
 
     const edit = new WorkspaceEdit()
@@ -407,7 +413,9 @@ describe('GROQ language server', () => {
 
     await commands.executeCommand('groq.restartServer')
     // Long enough for a restarted server to publish diagnostics, which it must not.
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1500)
+    })
     assert.equal(languages.getDiagnostics(groqDoc.uri).length, 0)
 
     await setGroq('enable', undefined)

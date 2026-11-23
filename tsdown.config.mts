@@ -1,5 +1,6 @@
 import {createRequire} from 'node:module'
-import {defineConfig, type Plugin} from 'tsdown'
+import {defineConfig} from 'tsdown'
+import type {Plugin} from 'tsdown'
 
 const require = createRequire(import.meta.url)
 

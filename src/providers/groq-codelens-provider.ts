@@ -1,19 +1,11 @@
 import {readFile, realpath} from 'node:fs/promises'
 import path from 'node:path'
-import {
-  type CodeLensProvider,
-  type TextDocument,
-  type CancellationToken,
-  type Disposable,
-  CodeLens,
-  EventEmitter,
-  Range,
-  Position,
-  workspace,
-} from 'vscode'
+import {CodeLens, EventEmitter, Range, Position, workspace} from 'vscode'
+import type {CodeLensProvider, TextDocument, CancellationToken, Disposable} from 'vscode'
 import {canFormatInSource} from '../format'
 import {invalidateCustomFunctions, withCustomFunctions} from '../groq-functions'
-import {resolveEmbeddedQueries, type FragmentHost} from '@sanity-labs/groq-lsp/fragments'
+import {resolveEmbeddedQueries} from '@sanity-labs/groq-lsp/fragments'
+import type {FragmentHost} from '@sanity-labs/groq-lsp/fragments'
 import {isDefinitionsOnly, leadingDefinitions} from '@sanity-labs/groq-lsp/functions'
 
 interface ExtractedQuery {
@@ -56,7 +48,7 @@ function extractAllTemplateLiterals(document: TextDocument): Array<ExtractedQuer
   const text = document.getText()
   const regExpGQL = new RegExp('groq\\s*`([\\s\\S]+?)`', 'mg')
 
-  let result
+  let result: RegExpExecArray | null
   while ((result = regExpGQL.exec(text)) !== null) {
     const content = result[1]
     const start = result.index + result[0].length - 1 - content.length
@@ -77,7 +69,7 @@ function extractAllDefineQuery(document: TextDocument): Array<ExtractedQuery> {
   const pattern = '(\\s*defineQuery\\((["\'`])([\\s\\S]*?)\\2\\))'
   const regexp = new RegExp(pattern, 'g')
 
-  let result
+  let result: RegExpExecArray | null
   while ((result = regexp.exec(text)) !== null) {
     const content = result[3]
     const anchor = result.index + result[0].indexOf('defineQuery')

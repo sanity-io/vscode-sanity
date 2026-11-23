@@ -1,5 +1,6 @@
 import {strict as assert} from 'node:assert'
-import {spawn, type ChildProcess} from 'node:child_process'
+import {spawn} from 'node:child_process'
+import type {ChildProcess} from 'node:child_process'
 import path from 'node:path'
 import {after, before, describe, it} from 'node:test'
 import {format as groqWasmFormat} from '@sanity-labs/groq-wasm'
@@ -7,10 +8,12 @@ import {
   createProtocolConnection,
   StreamMessageReader,
   StreamMessageWriter,
-  type Diagnostic,
-  type FormattingOptions,
-  type ProtocolConnection,
-  type TextEdit,
+} from 'vscode-languageserver-protocol/node'
+import type {
+  Diagnostic,
+  FormattingOptions,
+  ProtocolConnection,
+  TextEdit,
 } from 'vscode-languageserver-protocol/node'
 import type {ServerSettings} from './settings'
 

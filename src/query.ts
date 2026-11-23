@@ -14,11 +14,13 @@ export async function executeGroq(options: {
   const {query, params, ...clientOptions} = options
   const {token: _token, ...noTokenClientOptions} = clientOptions
   return createQueryClient(clientOptions)
-    .fetch(query, params, {filterResponse: false})
-    .catch((error) => {
-      if (error.statusCode === 401) {
+    .fetch<unknown>(query, params, {filterResponse: false})
+    .catch((error: unknown) => {
+      if (error instanceof Error && 'statusCode' in error && error.statusCode === 401) {
         vscode.window.showInformationMessage(error.message + '. Falling back to public dataset.')
-        return createQueryClient(noTokenClientOptions).fetch(query, params, {filterResponse: false})
+        return createQueryClient(noTokenClientOptions).fetch<unknown>(query, params, {
+          filterResponse: false,
+        })
       }
 
       throw error

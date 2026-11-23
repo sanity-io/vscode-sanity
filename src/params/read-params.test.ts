@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import {describe, it} from 'node:test'
 import type {KnownParamValues} from './known-values'
-import {AskParam, ParamAnswer, readMissingParams} from './read-params'
+import type {AskParam, ParamAnswer} from './read-params'
+import {readMissingParams} from './read-params'
 
 function recorder(answers: Record<string, ParamAnswer | undefined>) {
   const asked: Array<[string, Array<unknown>]> = []
