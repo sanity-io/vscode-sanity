@@ -9,7 +9,7 @@ const FORMATTED = [
   '  _id,',
   '  title,',
   '  "author": author->name,',
-  '  "cats": categories[]-> { title }',
+  '  "cats": categories[]->{ title }',
   '}',
   '  | order(_createdAt desc)[0...10]',
 ].join('\n')
