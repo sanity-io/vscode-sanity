@@ -1,5 +1,11 @@
 # vscode-sanity
 
+## 0.10.5
+
+### Patch Changes
+
+- [#131](https://github.com/sanity-io/vscode-sanity/pull/131) [`575a005`](https://github.com/sanity-io/vscode-sanity/commit/575a005e861588c23d0f3a8f46db7608d03612af) Thanks [@stipsan](https://github.com/stipsan)! - GROQ formatting follows `@sanity-labs/groq-wasm` 1.2.7 (`@sanity-labs/groq-lsp` 1.4.5). A `|` pipeline stays on one line when it fits, and otherwise each stage goes on its own line with a leading `|`. There is no space between `->` and a projection, a projection that does not fit breaks one member per line, and a trailing `//` comment stays on the line it follows.
+
 ## 0.10.4
 
 ### Patch Changes
