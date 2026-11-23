@@ -238,7 +238,7 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(eslint-plugin-perfectionist@5.14.0(eslint@10.15.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@7.0.2))(eslint@10.15.0(supports-color@8.1.1))(oxlint@1.94.0)(tsrs@0.25.0-ts7.1.0-beta)
       '@sanity-labs/groq-content-mapper':
-        specifier: ^0.7.5
+        specifier: ^0.7.6
         version: 0.7.6(react@19.3.1)(supports-color@8.1.1)(typescript@7.0.2)
       '@sanity-labs/groq-lsp':
         specifier: ^1.4.2
