@@ -20,11 +20,29 @@ export async function loadConfigFile(configFilePath: string): Promise<Config> {
   const {registerTS} = await import('sucrase/dist/register')
   const revertTsHook = registerTS()
   try {
-    // sanity.cli.ts is a file the user wrote. It is loaded by path, so it cannot be a static import.
-    // oxlint-disable-next-line @typescript-eslint/no-require-imports
-    const config = withConfigEnv(path.dirname(configFilePath), () => require(configFilePath))
-    return config.default
+    const loaded = withConfigEnv(path.dirname(configFilePath), () =>
+      requireConfigModule(configFilePath),
+    )
+    if (!loaded) {
+      throw new Error(`${configFilePath} has no default export`)
+    }
+    return loaded.default
   } finally {
     revertTsHook()
   }
+}
+
+interface ConfigModule {
+  default: Config
+}
+
+function requireConfigModule(configFilePath: string): ConfigModule | undefined {
+  // sanity.cli.ts is a file the user wrote. It is loaded by path, so it cannot be a static import.
+  // oxlint-disable-next-line @typescript-eslint/no-require-imports
+  const loaded: unknown = require(configFilePath)
+  return hasDefaultExport(loaded) ? loaded : undefined
+}
+
+function hasDefaultExport(value: unknown): value is ConfigModule {
+  return typeof value === 'object' && value !== null && 'default' in value
 }

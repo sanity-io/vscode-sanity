@@ -1,7 +1,7 @@
 import assert from 'node:assert'
 import {rmSync, writeFileSync} from 'node:fs'
-import {createServer, type Server} from 'node:http'
-import type {AddressInfo} from 'node:net'
+import {createServer} from 'node:http'
+import type {Server} from 'node:http'
 import path from 'node:path'
 import vscode from 'vscode'
 
@@ -26,8 +26,12 @@ suite('sanity.cli.ts with values from .env files', () => {
       res.setHeader('content-type', 'application/json')
       res.end(JSON.stringify({ms: 1, query: '*', result: []}))
     })
-    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
-    const apiHost = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', resolve)
+    })
+    const address = server.address()
+    assert.ok(address && typeof address === 'object', 'server is listening on a port')
+    const apiHost = `http://127.0.0.1:${address.port}`
 
     // The API host comes from .env too, and expands the project id so the request shows it.
     write(
@@ -42,7 +46,9 @@ suite('sanity.cli.ts with values from .env files', () => {
     for (const file of files) {
       rmSync(path.join(project!, file), {force: true})
     }
-    await new Promise((resolve) => server.close(resolve))
+    await new Promise((resolve) => {
+      server.close(resolve)
+    })
   })
 
   it('queries the project and dataset from .env, .env.local and .env.development', async () => {

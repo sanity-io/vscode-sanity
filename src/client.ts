@@ -1,4 +1,5 @@
-import {createClient, type SanityClient} from '@sanity/client'
+import {createClient} from '@sanity/client'
+import type {SanityClient} from '@sanity/client'
 import {resolveApiVersion} from './apiVersion'
 
 export interface QueryClientOptions {

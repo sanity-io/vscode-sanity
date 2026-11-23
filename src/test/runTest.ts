@@ -181,7 +181,7 @@ async function main() {
 
 // This file is compiled to CommonJS and run directly, so it cannot use top-level await.
 // oxlint-disable-next-line unicorn/prefer-top-level-await
-main().catch((error) => {
+main().catch((error: unknown) => {
   // oxlint-disable-next-line no-console -- the integration runner has no other logger
   console.error(error)
   process.exit(1)

@@ -14,7 +14,12 @@ export interface Config {
   schemaExtraction?: {path?: string}
 }
 
-export async function loadConfig(basePath: string): Promise<Config | false> {
+interface ParsedJson {
+  api?: Config['api']
+  authToken?: string
+}
+
+export async function loadConfig(basePath: string): Promise<Config['api'] | false> {
   let dir = basePath
   while (!(await hasConfig(dir))) {
     const parent = path.dirname(dir)
@@ -49,9 +54,14 @@ async function hasConfig(dir: string): Promise<boolean> {
     .catch(() => false)
 }
 
-function parseJson(content: string) {
+function isParsedJson(value: unknown): value is ParsedJson {
+  return typeof value === 'object' && value !== null
+}
+
+function parseJson(content: string): ParsedJson | false {
   try {
-    return JSON.parse(content)
+    const parsed: unknown = JSON.parse(content)
+    return isParsedJson(parsed) ? parsed : false
   } catch {
     return false
   }

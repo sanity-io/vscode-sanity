@@ -4,7 +4,25 @@ import path from 'node:path'
 import {describe, it} from 'node:test'
 import {EMBEDDED_GROQ_LANGUAGES} from './languages'
 
-const manifest = JSON.parse(readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
+interface Manifest {
+  activationEvents: Array<string>
+  contributes: {grammars: Array<{scopeName?: string; injectTo?: Array<string>}>}
+}
+
+function isManifest(value: unknown): value is Manifest {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'activationEvents' in value &&
+    'contributes' in value
+  )
+}
+
+const parsedManifest: unknown = JSON.parse(
+  readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'),
+)
+assert.ok(isManifest(parsedManifest), 'package.json is a manifest')
+const manifest = parsedManifest
 
 describe('EMBEDDED_GROQ_LANGUAGES', () => {
   it('has an activation event for every language', () => {
@@ -20,6 +38,6 @@ describe('EMBEDDED_GROQ_LANGUAGES', () => {
     const injection = manifest.contributes.grammars.find(
       (grammar) => grammar.scopeName === 'groq-injection.js',
     )
-    assert.ok(injection.injectTo.includes('source.astro'))
+    assert.ok(injection?.injectTo?.includes('source.astro'))
   })
 })

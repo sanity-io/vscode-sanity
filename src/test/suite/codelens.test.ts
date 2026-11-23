@@ -61,9 +61,13 @@ const EXPECTED = [
 ]
 
 function queriesOf(lenses: Array<vscode.CodeLens>, command = 'sanity.executeGroq') {
-  return lenses.flatMap((lens) =>
-    lens.command?.command === command ? [lens.command.arguments?.[0]] : [],
-  )
+  return lenses.flatMap((lens): Array<unknown> => {
+    if (lens.command?.command !== command) {
+      return []
+    }
+    const args: Array<unknown> = lens.command.arguments ?? []
+    return [args[0]]
+  })
 }
 
 const IMAGE_FUNCTIONS = `// Image helpers
@@ -222,7 +226,9 @@ describe('GROQ codelens', () => {
           'vscode.executeCodeLensProvider',
           document.uri,
         )) ?? []
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500)
+      })
     }
 
     for (const command of ['sanity.executeGroq', 'sanity.copyGroq']) {

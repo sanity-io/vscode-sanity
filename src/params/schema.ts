@@ -113,7 +113,7 @@ export function findMapperSchemaPath(file: string): string | undefined {
     return undefined
   }
   const {contentMappers} = parsed
-  const entry = Array.isArray(contentMappers)
+  const entry: unknown = Array.isArray(contentMappers)
     ? contentMappers.find((each) => isJson(each) && each.package === CONTENT_MAPPER_PACKAGE)
     : undefined
   const options = isJson(entry) && isJson(entry.options) ? entry.options : undefined

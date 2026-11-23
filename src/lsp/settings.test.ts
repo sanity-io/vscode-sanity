@@ -13,6 +13,7 @@ interface Values {
 function config(values: Values): Pick<WorkspaceConfiguration, 'get'> {
   return {
     get: <T>(key: string, fallback?: T) =>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a test double for the generic `get`
       key in values ? (values[key as keyof Values] as T) : fallback,
   }
 }

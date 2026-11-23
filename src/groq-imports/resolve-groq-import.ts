@@ -1,5 +1,6 @@
 import path from 'node:path'
-import {pathCandidates, readPathMapping, type FragmentHost} from '@sanity-labs/groq-lsp/fragments'
+import {pathCandidates, readPathMapping} from '@sanity-labs/groq-lsp/fragments'
+import type {FragmentHost} from '@sanity-labs/groq-lsp/fragments'
 
 export interface GroqImportHost extends FragmentHost {
   directoryExists(dir: string): Promise<boolean>

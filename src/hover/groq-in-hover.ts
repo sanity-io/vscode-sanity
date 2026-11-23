@@ -70,22 +70,31 @@ const PARAMETER = /\$[A-Za-z_]\w*/g
  * (e.g. quick info prints `"*[_type == \"post\"]{\n  title\n}"`).
  */
 export function decodeEscapes(raw: string): string {
-  return raw.replaceAll(ESCAPE, (_match, codePoint, unicode, hex, char) => {
-    if (codePoint !== undefined) {
-      const value = Number.parseInt(codePoint, 16)
-      return value <= 0x10_ff_ff ? String.fromCodePoint(value) : ''
-    }
-    if (unicode !== undefined) {
-      return String.fromCharCode(Number.parseInt(unicode, 16))
-    }
-    if (hex !== undefined) {
-      return String.fromCharCode(Number.parseInt(hex, 16))
-    }
-    if (char === undefined || char === '\n' || char === '\r') {
-      return ''
-    }
-    return simpleEscape(char) ?? char
-  })
+  return raw.replaceAll(
+    ESCAPE,
+    (
+      _match: string,
+      codePoint: string | undefined,
+      unicode: string | undefined,
+      hex: string | undefined,
+      char: string | undefined,
+    ) => {
+      if (codePoint !== undefined) {
+        const value = Number.parseInt(codePoint, 16)
+        return value <= 0x10_ff_ff ? String.fromCodePoint(value) : ''
+      }
+      if (unicode !== undefined) {
+        return String.fromCharCode(Number.parseInt(unicode, 16))
+      }
+      if (hex !== undefined) {
+        return String.fromCharCode(Number.parseInt(hex, 16))
+      }
+      if (char === undefined || char === '\n' || char === '\r') {
+        return ''
+      }
+      return simpleEscape(char) ?? char
+    },
+  )
 }
 
 function looksLikeGroq(query: string, hasGroqMarker: boolean): boolean {
@@ -97,9 +106,8 @@ export function isGroqQuery(candidate: string, hasGroqMarker = false): boolean {
   if (!query || !looksLikeGroq(query, hasGroqMarker)) {return false}
 
   // groq-js evaluates constant slices while parsing, so give `[$start...$end]` numbers to chew on.
-  const params = Object.fromEntries(
-    (query.match(PARAMETER) ?? []).map((name) => [name.slice(1), 0])
-  )
+  const names: Array<string> = query.match(PARAMETER) ?? []
+  const params = Object.fromEntries(names.map((name): [string, number] => [name.slice(1), 0]))
   try {
     parse(query, {params})
     return true

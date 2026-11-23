@@ -1,7 +1,8 @@
 import {readFile, stat} from 'node:fs/promises'
 import vscode from 'vscode'
 import {findGroqSpecifiers} from '../groq-imports/find-specifiers'
-import {resolveGroqImport, type GroqImportHost} from '../groq-imports/resolve-groq-import'
+import {resolveGroqImport} from '../groq-imports/resolve-groq-import'
+import type {GroqImportHost} from '../groq-imports/resolve-groq-import'
 import {EMBEDDED_GROQ_LANGUAGES} from '../languages'
 
 export const GROQ_IMPORT_LANGUAGES = EMBEDDED_GROQ_LANGUAGES

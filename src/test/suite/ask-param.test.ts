@@ -2,7 +2,10 @@ import assert from 'node:assert'
 import vscode from 'vscode'
 import {askParam} from '../../params/ask-param'
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const wait = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
 
 async function whenPickerReady() {
   await wait(300)

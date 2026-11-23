@@ -1,21 +1,13 @@
 import path from 'node:path'
-import {
-  commands,
-  Uri,
-  window,
-  workspace,
-  WorkspaceEdit,
-  type ExtensionContext,
-  type LogOutputChannel,
-} from 'vscode'
+import {commands, Uri, window, workspace, WorkspaceEdit} from 'vscode'
+import type {ExtensionContext, LogOutputChannel} from 'vscode'
 import {
   DidChangeConfigurationNotification,
   DocumentFormattingRequest,
   LanguageClient,
   TransportKind,
-  type LanguageClientOptions,
-  type ServerOptions,
 } from 'vscode-languageclient/node'
+import type {LanguageClientOptions, ServerOptions} from 'vscode-languageclient/node'
 import type {LSPAny} from 'vscode-languageserver-protocol'
 import {readServerSettings} from './settings'
 
@@ -174,9 +166,12 @@ async function startClient(context: ExtensionContext): Promise<boolean> {
           if (!Array.isArray(values)) {
             return values
           }
+          const pulled: Array<LSPAny> = values
+          /* oxlint-disable typescript/no-unsafe-return -- LSPAny is `any`, as is the middleware's result */
           return params.items.map((item, index) =>
-            resolvePulledSetting(item.scopeUri, item.section, values[index]),
+            resolvePulledSetting(item.scopeUri, item.section, pulled[index]),
           )
+          /* oxlint-enable typescript/no-unsafe-return */
         },
       },
     },

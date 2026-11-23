@@ -1,6 +1,6 @@
 import assert from 'node:assert'
-import {createServer, type Server} from 'node:http'
-import type {AddressInfo} from 'node:net'
+import {createServer} from 'node:http'
+import type {Server} from 'node:http'
 import vscode from 'vscode'
 
 const tsgo = process.env.SANITY_TEST_TSGO
@@ -19,13 +19,19 @@ suite('Execute GROQ query', () => {
       res.setHeader('content-type', 'application/json')
       res.end(JSON.stringify({ms: 1, query: '*', result: []}))
     })
-    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
-    process.env.SANITY_TEST_API_HOST = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', resolve)
+    })
+    const address = server.address()
+    assert.ok(address && typeof address === 'object', 'server is listening on a port')
+    process.env.SANITY_TEST_API_HOST = `http://127.0.0.1:${address.port}`
   })
 
   after(async () => {
     delete process.env.SANITY_TEST_API_HOST
-    await new Promise((resolve) => server.close(resolve))
+    await new Promise((resolve) => {
+      server.close(resolve)
+    })
   })
 
   beforeEach(async () => {

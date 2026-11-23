@@ -50,7 +50,7 @@ describe('findMapperSchemaPath', () => {
     })
     const found = findMapperSchemaPath(path.join(root, 'studio/src/a/b/posts.ts'))
     assert.equal(found, path.join(root, 'schemas/main.json'))
-    assert.deepEqual(await loadSchemaFrom([found!]), SCHEMA)
+    assert.deepEqual(await loadSchemaFrom([found]), SCHEMA)
   })
 
   it('reads a tsconfig with comments and the mapper entry it inherits through extends', async () => {

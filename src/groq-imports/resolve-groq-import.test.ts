@@ -1,7 +1,8 @@
 import assert from 'node:assert'
 import path from 'node:path'
 import {describe, it} from 'node:test'
-import {resolveGroqImport, type GroqImportHost} from './resolve-groq-import'
+import {resolveGroqImport} from './resolve-groq-import'
+import type {GroqImportHost} from './resolve-groq-import'
 
 const p = (...parts: Array<string>) => path.resolve('/app', ...parts)
 
