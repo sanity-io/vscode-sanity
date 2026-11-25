@@ -10,8 +10,7 @@ const FORMATTED = [
   '  title,',
   '  "author": author->name,',
   '  "cats": categories[]->{ title }',
-  '}',
-  '  | order(_createdAt desc)[0...10]',
+  '} | order(_createdAt desc)[0...10]',
 ].join('\n')
 
 // What groq-content-mapper emits for a `.groq` import, minified.

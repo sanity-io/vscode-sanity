@@ -9,6 +9,9 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@sanity/*'
   - '@sanity-labs/*'
+  # The shared Renovate preset (sanity-io/renovate-config:min-age-exceptions) opens @types/* updates
+  # with no minimum release age, so pnpm has to accept them too or every fresh bump fails install.
+  - '@types/*'
   # 0.2.0 is the shared oxlint preset this repo extends, and it shipped within the last day.
   - '@cloudflare/oxlint-config@0.2.0'
   # groq-js 2.0.3 shipped within the last day. select() at the query root is typed,

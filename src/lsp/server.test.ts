@@ -19,7 +19,7 @@ import type {ServerSettings} from './settings'
 
 const SERVER = path.join(__dirname, '..', '..', 'dist', 'server.js')
 
-const GROQ = '*[_type == "post" && author->name == "x"]{title,"n": count(*[references(^._id)])}'
+const GROQ = '*[_type == "post" && author->name == "x"]{title,"n": count(*[^._id in tags])}'
 const TS = 'const ok = groq`*[_type == "post"]{  title,body}`\nconst bad = groq`*[_type == ]`\n'
 
 void describe('bundled GROQ language server (dist/server.js)', () => {
@@ -122,7 +122,7 @@ void describe('bundled GROQ language server (dist/server.js)', () => {
     const [groqEdit] = await format('file:///q.groq')
     assert.equal(
       groqEdit.newText,
-      '*[_type == "post" && author->name == "x"] {\n  title,\n  "n": count(*[references(^._id)])\n}',
+      '*[_type == "post" && author->name == "x"] {\n  title,\n  "n": count(*[^._id in tags])\n}',
     )
 
     const tsEdits = await format('file:///q.ts')

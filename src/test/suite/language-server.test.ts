@@ -23,9 +23,9 @@ import type {
 } from 'vscode'
 
 const EXTENSION_ID = 'sanity-io.vscode-sanity'
-const GROQ = '*[_type == "post" && author->name == "x"]{title,"n": count(*[references(^._id)])}\n'
+const GROQ = '*[_type == "post" && author->name == "x"]{title,"n": count(*[^._id in tags])}\n'
 const GROQ_FORMATTED =
-  '*[_type == "post" && author->name == "x"] {\n  title,\n  "n": count(*[references(^._id)])\n}\n'
+  '*[_type == "post" && author->name == "x"] {\n  title,\n  "n": count(*[^._id in tags])\n}\n'
 const TS = [
   "import groq from 'groq'",
   '',
