@@ -21,8 +21,7 @@ describe('formatGroq', () => {
         '  title,',
         '  "author": author->{ name, "avatar": avatar.asset->url },',
         '  "categories": categories[]->{ title, "slug": slug.current }',
-        '}',
-        '  | order(_createdAt desc)[0...10]',
+        '} | order(_createdAt desc)[0...10]',
       ].join('\n'),
     )
     for (const line of formatted.split('\n')) {

@@ -141,7 +141,7 @@ describe('GROQ codelens', () => {
       )
       assert.match(
         document.getText(),
-        /^\/\/ Image helpers\n\/\/ shared by the page queries\nfn image::asset\(\$asset\) = \$asset-> \{ url, metadata \{ lqip, dimensions \} \};\n/,
+        /^\/\/ Image helpers\n\/\/ shared by the page queries\nfn image::asset\(\$asset\) = \$asset->\{ url, metadata \{ lqip, dimensions \} \};\n/,
       )
       assert.ok(document.getText().endsWith('};\n'), document.getText())
     } finally {
